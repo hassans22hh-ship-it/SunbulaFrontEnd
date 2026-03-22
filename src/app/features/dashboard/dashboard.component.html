@@ -1,0 +1,51 @@
+<div class="dashboard-page" sbPage>
+
+  <!-- Greeting Header -->
+  <div class="greeting-header" sbAnimate="slideLeft">
+    <div class="greeting-text">
+      <h1 class="greeting-title">
+        {{ getGreeting() }}, {{ auth.user()?.firstName || 'Archivist' }}.
+      </h1>
+      <p class="greeting-sub">
+        Today is {{ today | date:'EEEE, MMMM d' }}.
+        You have
+        <strong class="priority-count">{{ tasksStore.todoTasks().length }} high-priority tasks</strong>
+        requiring meticulous documentation.
+      </p>
+    </div>
+    <div class="greeting-actions">
+      <button class="btn-secondary-dash">🗂 Catalog New Entry</button>
+      <button class="btn-outline-dash">📅 View Schedule</button>
+    </div>
+  </div>
+
+  <!-- Stats & Score Row -->
+  <div class="stats-score-row" sbAnimate="fadeUp">
+    <sb-stats-bar
+      class="stats-bar-wrap"
+      [tasksCompleted]="tasksStore.doneTasks().length"
+      [focusTimeSecs]="timerStore.todaysTotalSecs()"
+      [streakDays]="auth.streakDays()"
+      [coinsEarnedToday]="todaysCoinsEarned()"
+    />
+  </div>
+
+  <!-- Main Grid -->
+  <div class="dashboard-grid" sbAnimate="fadeUp" style="animation-delay:0.1s">
+
+    <!-- Left: Active Timer -->
+    <div class="grid-timer">
+      <sb-active-timer-card />
+    </div>
+
+    <!-- Right: Daily Summary -->
+    <div class="grid-summary">
+      <sb-daily-summary
+        [tasks]="tasksStore.allTasks()"
+        [sessions]="timerStore.todaysSessions()"
+      />
+    </div>
+
+  </div>
+
+</div>

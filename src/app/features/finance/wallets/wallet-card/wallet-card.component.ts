@@ -1,3 +1,4 @@
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { WalletType, WALLET_META } from '@shared/models/enums';
 import { WalletDto } from '@features/finance/models/finance.models';
 

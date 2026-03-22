@@ -5,7 +5,6 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { FoldersStore } from '../../store/folders.store';
 import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
 import { FolderCardComponent } from '../folder-card/folder-card.component';
@@ -23,7 +22,6 @@ import { AnimateDirective } from '@shared/directives/animate.directive';
   selector: 'sb-folder-list',
   standalone: true,
   imports: [
-    RouterLink,
     SbButtonComponent,
     FolderCardComponent,
     FolderFormComponent,

@@ -1,8 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { ProfileSettingsComponent } from './profile-settings/profile-settings.component';
-import { ThemeSettingsComponent } from './theme-settings/theme-settings.component';
-import { CoinSettingsComponent } from './coin-settings/coin-settings.component';
+import { ProfileSettingsComponent } from './components/profile-settings/profile-settings.component';
+import { ThemeSettingsComponent } from './components/theme-settings/theme-settings.component';
+import { CoinSettingsComponent } from './components/coin-settings/coin-settings.component';
 import { AnimateDirective } from '@shared/directives/animate.directive';
 
 @Component({

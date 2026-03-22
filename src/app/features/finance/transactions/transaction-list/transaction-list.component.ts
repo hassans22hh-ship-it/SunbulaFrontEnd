@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { FinanceStore } from '@features/finance/store/finance.store';
 import { TransactionFormComponent } from '../transaction-form/transaction-form.component';
 import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
@@ -10,7 +10,7 @@ import { TransactionType } from '@shared/models/enums';
 @Component({
   selector: 'sb-transaction-list',
   standalone: true,
-  imports: [DatePipe, TransactionFormComponent, SbButtonComponent, SbEmptyStateComponent],
+  imports: [DatePipe, CurrencyPipe, TransactionFormComponent, SbButtonComponent, SbEmptyStateComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="bg-surface border border-border rounded-2xl p-6 shadow-sm flex flex-col h-full">

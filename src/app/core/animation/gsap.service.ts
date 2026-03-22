@@ -2,10 +2,9 @@
 import { Injectable, inject, NgZone } from '@angular/core';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Flip } from 'gsap/Flip';
 import { TextPlugin } from 'gsap/TextPlugin';
 
-gsap.registerPlugin(ScrollTrigger, Flip, TextPlugin);
+gsap.registerPlugin(ScrollTrigger, TextPlugin);
 
 @Injectable({ providedIn: 'root' })
 export class GsapService {
@@ -67,5 +66,12 @@ export class GsapService {
 
   pageEnter(el: Element) {
     return this.run(() => gsap.from(el, { opacity: 0, y: 14, duration: 0.38, ease: 'power3.out' }));
+  }
+
+  killAll() {
+    this.run(() => {
+      gsap.killTweensOf('*');
+      ScrollTrigger.getAll().forEach(t => t.kill());
+    });
   }
 }

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, OnChanges } from '@angular/core';
 import { BaseChartDirective } from 'ng2-charts';
-import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
+import { ChartData, ChartOptions } from 'chart.js';
 import { TimeDistributionDto } from '../../models/reports.models';
 
 @Component({
@@ -30,14 +30,14 @@ import { TimeDistributionDto } from '../../models/reports.models';
 export class TimePieChartComponent implements OnChanges {
   data = input<TimeDistributionDto[]>([]);
 
-  public pieChartType: ChartType = 'doughnut';
+  public pieChartType: 'doughnut' = 'doughnut';
   
   public chartData: ChartData<'doughnut', number[], string | string[]> = {
     labels: [],
     datasets: [{ data: [] }]
   };
 
-  public chartOptions: ChartConfiguration['options'] = {
+  public chartOptions: ChartOptions<'doughnut'> = {
     responsive: true,
     maintainAspectRatio: false,
     cutout: '65%',

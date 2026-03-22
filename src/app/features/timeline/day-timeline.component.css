@@ -1,0 +1,61 @@
+/* ══════════════════════════════════════
+   Day Timeline Page
+   ══════════════════════════════════════ */
+
+.timeline-page {
+  padding: 2rem;
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.timeline-header {
+  text-align: center;
+}
+
+.timeline-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-text);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+
+.timeline-sub {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  margin: 0.3rem 0 0;
+}
+
+.timeline-events {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* Endcap */
+.endcap {
+  display: flex;
+  gap: 1rem;
+}
+
+.endcap-spacer {
+  width: 64px;
+  flex-shrink: 0;
+}
+
+.endcap-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.endcap-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--color-border);
+  margin-top: 4px;
+}

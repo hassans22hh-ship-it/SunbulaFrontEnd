@@ -1,0 +1,283 @@
+/* ══════════════════════════════════════
+   Register Component Styles
+   ══════════════════════════════════════ */
+
+.register-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: #f0fdf4; /* Very light green background */
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Background Decorations */
+.bg-shape {
+  position: absolute;
+  z-index: 0;
+  fill: #dcfce7; /* Subtle pale green */
+}
+.shape-tr {
+  top: 40px;
+  right: 40px;
+  width: 140px;
+  height: 140px;
+}
+.shape-bl {
+  bottom: 20px;
+  left: 60px;
+  width: 160px;
+  height: 160px;
+}
+
+/* Card Container */
+.register-card {
+  position: relative;
+  z-index: 10;
+  width: 100%;
+  max-width: 480px;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 2.5rem 3rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+}
+
+/* Header */
+.register-header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+.brand-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+.logo-icon {
+  font-size: 1.25rem;
+}
+.logo-text {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #064e3b; /* Very dark green */
+}
+.register-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #111827;
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+}
+.register-subtitle {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Form Styles */
+.form-row.two-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.form-group {
+  margin-bottom: 1.125rem;
+}
+
+label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #374151;
+  margin-bottom: 0.4rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.req { color: #10b981; } /* asterisk color */
+.opt { text-transform: lowercase; font-weight: 400; color: #9ca3af; margin-left: 0.2rem; }
+
+input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background-color: #f3f4f6; /* light gray bg */
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  color: #1f2937;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+input::placeholder {
+  color: #9ca3af;
+}
+input:focus {
+  outline: none;
+  border-color: #10b981;
+  background-color: #ffffff;
+}
+
+.input-with-icon {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.toggle-pw {
+  position: absolute;
+  right: 0.75rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #6b7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  width: 20px;
+  height: 20px;
+}
+.toggle-pw svg { width: 16px; height: 16px; }
+.toggle-pw:hover { color: #111827; }
+
+/* Password Strength Meter */
+.pw-strength-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+.strength-text {
+  font-size: 0.7rem;
+  font-weight: 600;
+  min-width: 65px;
+}
+.min-chars {
+  font-size: 0.7rem;
+  color: #9ca3af;
+  margin-left: auto;
+}
+
+.strength-bars {
+  display: flex;
+  flex: 1;
+  gap: 4px;
+}
+.bar {
+  flex: 1;
+  height: 4px;
+  background: #e5e7eb;
+  border-radius: 2px;
+  transition: background-color 0.3s;
+}
+
+/* Strength Colors */
+.strength-weak { color: #ef4444; }
+.bar.active.strength-weak { background-color: #ef4444; }
+
+.strength-fair { color: #f97316; } /* Orange */
+.bar.active.strength-fair { background-color: #f97316; }
+
+.strength-strong { color: #10b981; }
+.bar.active.strength-strong { background-color: #10b981; }
+
+
+.error-text {
+  color: #ef4444;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+.error-banner {
+  background: #fef2f2;
+  color: #b91c1c;
+  padding: 0.75rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  text-align: center;
+  margin-top: 1rem;
+}
+
+/* Submit Button */
+.submit-btn {
+  width: 100%;
+  padding: 0.875rem;
+  background-color: #166534; /* Dark green */
+  color: white;
+  font-weight: 700;
+  font-size: 0.9rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.1s;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+}
+.submit-btn:hover:not(:disabled) {
+  background-color: #14532d;
+}
+.submit-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.spinner-inline {
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid white;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  animation: rotation 1s linear infinite;
+}
+@keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+/* Terms */
+.terms-text {
+  font-size: 0.65rem;
+  color: #6b7280;
+  text-align: center;
+  margin: 1rem 0 0;
+  line-height: 1.5;
+}
+.terms-text a {
+  color: #166534;
+  text-decoration: none;
+  font-weight: 600;
+}
+.terms-text a:hover {
+  text-decoration: underline;
+}
+
+/* Footer Below Card */
+.register-footer {
+  margin-top: 2rem;
+  font-size: 0.875rem;
+  color: #4b5563;
+  z-index: 10;
+}
+.register-footer a {
+  color: #166534;
+  font-weight: 700;
+  text-decoration: none;
+  margin-left: 0.2rem;
+}
+.register-footer a:hover {
+  text-decoration: underline;
+}
+
+/* Animation */
+.animate-scale-in {
+  animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes scaleIn {
+  0% { transform: scale(0.95); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}

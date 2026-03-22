@@ -49,7 +49,7 @@ import { SbBehaviorBadgeComponent } from '../../../../shared/ui/behavior-badge/s
         @if (isSession(event())) {
            <div class="flex items-center gap-4 text-xs mt-2">
              <div class="bg-primary/10 text-primary px-2 py-1 rounded-md font-medium">
-               Duration: {{ asSession(event()).durationSecs | duration:'text' }}
+               Duration: {{ asSession(event()).durationSecs | duration:'words' }}
              </div>
              <div class="text-warning font-medium">
                +{{ asSession(event()).coinsEarned | coins:false }} 🪙

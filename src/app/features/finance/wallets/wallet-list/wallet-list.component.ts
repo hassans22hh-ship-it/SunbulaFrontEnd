@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { Title } from '@angular/platform-browser';
 import { FinanceStore } from '@features/finance/store/finance.store';
 import { WalletDto, CreateWalletDto, UpdateWalletDto } from '@features/finance/models/finance.models';
-import { WalletCardComponent } from './wallet-card/wallet-card.component';
-import { WalletFormComponent } from './wallet-form/wallet-form.component';
+import { WalletCardComponent } from '../wallet-card/wallet-card.component';
+import { WalletFormComponent } from '../wallet-form/wallet-form.component';
 import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
 import { SbSpinnerComponent } from '@shared/ui/spinner/sb-spinner.component';
 import { SbEmptyStateComponent } from '@shared/ui/empty-state/sb-empty-state.component';

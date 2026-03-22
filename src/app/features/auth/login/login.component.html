@@ -1,0 +1,122 @@
+<div class="login-wrapper">
+
+  <!-- Left Panel: Branding -->
+  <div class="brand-panel">
+    <div class="brand-top">
+      <div class="brand-logo">
+        <span class="brand-logo-icon">🌿</span>
+        <span class="brand-logo-text">Sunbula</span>
+      </div>
+    </div>
+
+    <div class="brand-center">
+      <div class="brand-leaf-circle">
+        <span class="brand-leaf-icon">🌿</span>
+      </div>
+      <h2 class="brand-tagline">Track your time.<br>Grow your mind.</h2>
+    </div>
+
+    <div class="brand-bottom-bar">
+      <div class="brand-stat-icon">
+        <span>⏱</span>
+        <span class="brand-stat-label">Time Tracked</span>
+      </div>
+      <div class="brand-stat-icon">
+        <span>🌱</span>
+        <span class="brand-stat-label">Flora Growth</span>
+      </div>
+      <div class="brand-stat-icon">
+        <span>🏅</span>
+        <span class="brand-stat-label">Always Growing</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right Panel: Form -->
+  <div class="form-panel">
+    <div class="form-inner">
+
+      <div class="form-logo">
+        <span class="form-logo-icon">🌿</span>
+        <span class="form-logo-text">Sunbula</span>
+      </div>
+
+      <div class="form-header">
+        <h1 class="form-title">Welcome back</h1>
+        <p class="form-subtitle">Sign in to your account</p>
+      </div>
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form" autocomplete="on">
+
+        <div class="field-group">
+          <label for="email" class="field-label">EMAIL ADDRESS</label>
+          <div class="field-input-wrap">
+            <span class="field-icon">✉️</span>
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              class="field-input"
+              placeholder="archivist@sunbula.com"
+              autocomplete="email"
+            />
+          </div>
+          <p *ngIf="email?.touched && email?.errors?.['required']" class="field-error">Email is required</p>
+          <p *ngIf="email?.touched && email?.errors?.['email']" class="field-error">Invalid email format</p>
+        </div>
+
+        <div class="field-group">
+          <label for="password" class="field-label">PASSWORD</label>
+          <div class="field-input-wrap">
+            <span class="field-icon">🔒</span>
+            <input
+              id="password"
+              [type]="showPassword ? 'text' : 'password'"
+              formControlName="password"
+              class="field-input"
+              placeholder="••••••••"
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              class="toggle-password"
+              (click)="showPassword = !showPassword"
+              [title]="showPassword ? 'Hide password' : 'Show password'"
+            >
+              {{ showPassword ? '🙈' : '👁' }}
+            </button>
+          </div>
+          <p *ngIf="password?.touched && password?.errors?.['required']" class="field-error">Password is required</p>
+        </div>
+
+        <div class="form-options">
+          <a routerLink="/auth/forgot-password" class="forgot-link">Forgot password?</a>
+        </div>
+
+        <p *ngIf="errorMsg()" class="error-banner">{{ errorMsg() }}</p>
+
+        <button
+          type="submit"
+          class="btn-signin"
+          [disabled]="loginForm.invalid || isLoading()"
+        >
+          {{ isLoading() ? 'Signing in…' : 'Sign In' }}
+        </button>
+
+        <div class="divider">
+          <span class="divider-line"></span>
+          <span class="divider-text">or</span>
+          <span class="divider-line"></span>
+        </div>
+
+        <p class="signup-prompt">
+          Don't have an account?
+          <a routerLink="/auth/register" class="signup-link">Sign up</a>
+        </p>
+      </form>
+
+      <footer class="form-footer">© 2025 Sunbula. All rights reserved.</footer>
+    </div>
+  </div>
+
+</div>

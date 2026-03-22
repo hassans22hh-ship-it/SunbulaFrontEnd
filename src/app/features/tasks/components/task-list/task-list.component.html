@@ -1,0 +1,127 @@
+<div class="tasks-page" sbPage>
+
+  <!-- Header -->
+  <div class="tasks-header" sbAnimate="slideLeft">
+    <div>
+      <h1 class="tasks-title">Tasks</h1>
+      <p class="tasks-sub">Manage your workflow and productivity.</p>
+    </div>
+    <input type="hidden" [value]="foldersStore.allFolders().length">
+    <sb-button (clicked)="openForm()">
+      <span class="btn-icon">+</span> Create Task
+    </sb-button>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="tasks-filters" sbAnimate="fadeUp">
+    <sb-task-filter-bar
+      [folders]="foldersStore.allFolders()"
+      (filtersChanged)="onFiltersChanged($event)"
+    />
+  </div>
+
+  <!-- Board -->
+  @if (store.isLoading() && store.allTasks().length === 0) {
+    <div class="board-loading"><sb-spinner /></div>
+  } @else if (store.error()) {
+    <div class="board-error">
+      <sb-empty-state icon="⚠️" title="Failed to load tasks" [message]="store.error()!" [showRetry]="true" (retry)="store.loadAll()" />
+    </div>
+  } @else {
+    <div class="kanban-board" cdkDropListGroup sbAnimate="fadeUp">
+
+      <!-- Todo Column -->
+      <div class="kanban-col">
+        <div class="col-header">
+          <div class="col-header-left">
+            <span class="col-dot col-dot-todo"></span>
+            <h3 class="col-title">To Do</h3>
+          </div>
+          <span class="col-count">{{ store.todoTasks().length }}</span>
+        </div>
+        <div
+          class="drop-list"
+          id="col-0"
+          cdkDropList
+          [cdkDropListData]="store.todoTasks()"
+          (cdkDropListDropped)="drop($event, TaskStatus.Todo)"
+        >
+          @for (task of store.todoTasks(); track task.id) {
+            <sb-task-card [task]="task" cdkDrag (cardClicked)="openForm(task)" (menuClicked)="confirmDelete(task)" />
+          }
+          @if (store.todoTasks().length === 0) {
+            <div class="col-empty">No tasks yet</div>
+          }
+        </div>
+      </div>
+
+      <!-- In Progress Column -->
+      <div class="kanban-col">
+        <div class="col-header">
+          <div class="col-header-left">
+            <span class="col-dot col-dot-progress"></span>
+            <h3 class="col-title">In Progress</h3>
+          </div>
+          <span class="col-count">{{ store.inProgressTasks().length }}</span>
+        </div>
+        <div
+          class="drop-list"
+          id="col-1"
+          cdkDropList
+          [cdkDropListData]="store.inProgressTasks()"
+          (cdkDropListDropped)="drop($event, TaskStatus.InProgress)"
+        >
+          @for (task of store.inProgressTasks(); track task.id) {
+            <sb-task-card [task]="task" cdkDrag (cardClicked)="openForm(task)" (menuClicked)="confirmDelete(task)" />
+          }
+        </div>
+      </div>
+
+      <!-- Done Column -->
+      <div class="kanban-col kanban-col-done">
+        <div class="col-header">
+          <div class="col-header-left">
+            <span class="col-dot col-dot-done"></span>
+            <h3 class="col-title">Done</h3>
+          </div>
+          <span class="col-count">{{ store.doneTasks().length }}</span>
+        </div>
+        <div
+          class="drop-list"
+          id="col-2"
+          cdkDropList
+          [cdkDropListData]="store.doneTasks()"
+          (cdkDropListDropped)="drop($event, TaskStatus.Done)"
+        >
+          @for (task of store.doneTasks(); track task.id) {
+            <sb-task-card [task]="task" cdkDrag (cardClicked)="openForm(task)" (menuClicked)="confirmDelete(task)" />
+          }
+        </div>
+      </div>
+
+    </div>
+  }
+
+  <!-- Task Form Modal -->
+  @if (showForm()) {
+    <sb-task-form
+      [task]="selectedTask()"
+      [folders]="foldersStore.allFolders()"
+      (saved)="onFormSave($event)"
+      (cancelled)="closeForm()"
+    />
+  }
+
+  <!-- Delete Confirm Dialog -->
+  @if (taskToDelete()) {
+    <sb-confirm-dialog
+      title="Delete Task"
+      [message]="'Are you sure you want to delete \'' + taskToDelete()?.title + '\'?'"
+      confirmLabel="Delete"
+      [destructive]="true"
+      (confirmed)="onDelete()"
+      (cancelled)="taskToDelete.set(null)"
+    />
+  }
+
+</div>

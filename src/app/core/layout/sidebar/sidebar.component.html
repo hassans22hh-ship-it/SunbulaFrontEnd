@@ -1,0 +1,55 @@
+<aside [class.collapsed]="collapsed()" class="sb-sidebar">
+  <!-- Logo -->
+  <div class="sb-sidebar-logo">
+    <span class="logo-icon">🌻</span>
+    @if (!collapsed()) {
+      <span class="logo-text">Sunbula</span>
+    }
+  </div>
+
+  <!-- Coin balance -->
+  @if (!collapsed()) {
+    <div class="coin-badge mx-3 mb-4 justify-center">
+      <span>🪙</span>
+      <span>{{ auth.coinBalance() | coins:false }}</span>
+      <span style="font-size:0.7rem; font-weight:500; opacity:0.7;">coins</span>
+    </div>
+  }
+
+  <!-- Navigation -->
+  <nav class="sb-nav">
+    @for (item of navItems; track item.path) {
+      <a
+        [routerLink]="item.path"
+        routerLinkActive="active"
+        class="sb-nav-item"
+        [title]="collapsed() ? item.label : ''"
+      >
+        <span class="nav-icon">{{ item.icon }}</span>
+        @if (!collapsed()) {
+          <span class="nav-label">{{ item.label }}</span>
+        }
+      </a>
+    }
+  </nav>
+
+  <!-- Collapse Toggle -->
+  <button class="collapse-btn" (click)="toggleCollapse()">
+    {{ collapsed() ? '→' : '←' }}
+  </button>
+
+  <!-- User -->
+  @if (!collapsed()) {
+    <div class="sb-sidebar-user">
+      <div class="user-avatar">{{ userInitials() }}</div>
+      <div>
+        <div style="font-weight: 600; font-size: 0.875rem; color: var(--color-text);">
+          {{ auth.user()?.fullName }}
+        </div>
+        <div style="font-size: 0.75rem; color: var(--color-text-muted);">
+          🔥 {{ auth.streakDays() }} day streak
+        </div>
+      </div>
+    </div>
+  }
+</aside>

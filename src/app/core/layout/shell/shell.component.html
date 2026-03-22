@@ -1,0 +1,18 @@
+<div class="flex h-screen bg-bg text-text">
+  <sb-sidebar class="hidden md:block" />
+
+  <!-- Main Content -->
+  <main class="flex-1 flex flex-col min-w-0 overflow-hidden">
+    <sb-topbar>
+      <div class="md:hidden">
+         <h1 class="text-xl font-display font-bold text-primary">Sunbula</h1>
+      </div>
+    </sb-topbar>
+
+    <!-- Route Content -->
+    <div class="flex-1 overflow-y-auto p-6 md:p-8">
+      <router-outlet />
+    </div>
+  </main>
+</div>
+<sb-toast />

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, input, OnChanges } from '@angular/c
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
 import { BehaviorStatsDto } from '../../models/reports.models';
-import { BEHAVIOR_META } from '../../../../shared/models/enums';
+import { BehaviorCategory, BEHAVIOR_META } from '../../../../shared/models/enums';
 
 @Component({
   selector: 'sb-behavior-bar-chart',
@@ -60,10 +60,10 @@ export class BehaviorBarChartComponent implements OnChanges {
     if (d && d.length > 0) {
       // Sort by some arbitrary order or use as is
       this.chartData = {
-        labels: d.map(x => BEHAVIOR_META[x.behaviorType]?.label || 'Unknown'),
+        labels: d.map(x => BEHAVIOR_META[x.behaviorType as BehaviorCategory]?.label || 'Unknown'),
         datasets: [{
           data: d.map(x => x.count),
-          backgroundColor: d.map(x => BEHAVIOR_META[x.behaviorType]?.color || '#cbd5e1'),
+          backgroundColor: d.map(x => BEHAVIOR_META[x.behaviorType as BehaviorCategory]?.color || '#cbd5e1'),
           borderRadius: 6
         }]
       };

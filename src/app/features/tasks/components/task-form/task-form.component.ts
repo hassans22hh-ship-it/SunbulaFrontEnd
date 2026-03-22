@@ -14,14 +14,13 @@ import { TaskDto, CreateTaskDto, UpdateTaskDto } from '../../models/task.models'
 import { FolderDto } from '@features/folders/models/folder.models';
 import { TaskStatus, BehaviorCategory, BEHAVIOR_META } from '@shared/models/enums';
 import { FolderSelectorComponent } from '../folder-selector/folder-selector.component';
-import { SbBehaviorBadgeComponent } from '@shared/ui/behavior-badge/sb-behavior-badge.component';
 
 const TASK_COLORS = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#6366F1'];
 
 @Component({
   selector: 'sb-task-form',
   standalone: true,
-  imports: [ReactiveFormsModule, SbModalComponent, SbButtonComponent, FolderSelectorComponent, SbBehaviorBadgeComponent],
+  imports: [ReactiveFormsModule, SbModalComponent, SbButtonComponent, FolderSelectorComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <sb-modal

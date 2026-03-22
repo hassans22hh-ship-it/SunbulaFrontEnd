@@ -1,0 +1,61 @@
+<div class="live-timer-card" id="live-timer-card">
+
+  <!-- Timer Clock Display -->
+  <div class="timer-display" [class.is-running]="store.activeTimer().isRunning">
+    <div class="timer-ring-wrap">
+      <!-- SVG ring -->
+      <svg class="ring-svg" viewBox="0 0 200 200">
+        <circle class="ring-track" cx="100" cy="100" r="88" />
+        <circle
+          class="ring-fill"
+          cx="100" cy="100" r="88"
+          [style.stroke-dashoffset]="ringDashoffset()"
+        />
+      </svg>
+      <span class="timer-digits">{{ store.activeTimer().elapsedSecs | duration:'clock' }}</span>
+    </div>
+
+    @if (store.activeTimer().isRunning) {
+      <div class="earning-badge">
+        <span class="earning-dot"></span>
+        +{{ projectedCoins() }} earning
+      </div>
+    }
+  </div>
+
+  <!-- Behavior Tags -->
+  <div class="behavior-row">
+    @for (b of behaviorOptions; track b.value) {
+      <button
+        class="behavior-pill"
+        [class.active]="store.activeTimer().behaviorType === b.value"
+        [style.--pill-color]="b.meta.color"
+        (click)="setBehavior(b.value)"
+        [disabled]="store.activeTimer().isRunning"
+      >
+        {{ b.meta.emoji }} {{ b.meta.label }}
+      </button>
+    }
+  </div>
+
+  <!-- Controls -->
+  <div class="controls-row">
+    @if (!store.activeTimer().isRunning && store.activeTimer().elapsedSecs === 0) {
+      <button class="ctrl-btn ctrl-start" (click)="start()">▶ Start</button>
+    } @else if (store.activeTimer().isRunning) {
+      <button class="ctrl-btn ctrl-pause" (click)="pause()">⏸ Pause</button>
+      <button class="ctrl-btn ctrl-stop"  (click)="stop()">⏹ Stop & Save</button>
+    } @else {
+      <button class="ctrl-btn ctrl-start" (click)="start()">▶ Resume</button>
+      <button class="ctrl-btn ctrl-stop"  (click)="stop()">⏹ Stop & Save</button>
+      <button class="ctrl-btn ctrl-discard" (click)="discard()">✕</button>
+    }
+  </div>
+
+  <!-- Projected Reward -->
+  <div class="reward-row">
+    <span class="reward-label">Est. Reward:</span>
+    <span class="reward-value">🪙 {{ projectedCoins() }}</span>
+  </div>
+
+</div>

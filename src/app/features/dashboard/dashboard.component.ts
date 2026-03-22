@@ -17,54 +17,8 @@ import { TaskStatus } from '@shared/models/enums';
   standalone: true,
   imports: [StatsBarComponent, ActiveTimerCardComponent, DailySummaryComponent, AnimateDirective, DatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div class="page-container flex flex-col pt-6 pb-6" sbPage>
-      
-      <!-- Greeting Header -->
-      <div class="mb-8" sbAnimate="slideLeft">
-        <h1 class="text-3xl font-display font-bold tracking-tight text-text">
-          {{ getGreeting() }}, {{ auth.user()?.firstName || 'Friend' }} 👋
-        </h1>
-        <p class="text-subtle mt-1 text-sm">
-          Today is {{ today | date:'EEEE, MMMM d' }}. Let's make it a great day.
-        </p>
-      </div>
-
-      <!-- Stats Bar -->
-      <div sbAnimate="fadeUp">
-        <sb-stats-bar
-          [tasksCompleted]="tasksStore.doneTasks().length"
-          [focusTimeSecs]="timerStore.todaysTotalSecs()"
-          [streakDays]="auth.streakDays()"
-          [coinsEarnedToday]="todaysCoinsEarned()"
-        />
-      </div>
-
-      <!-- Main Dashboard Grid -->
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 flex-1 min-h-0" sbAnimate="fadeUp" style="animation-delay: 0.1s;">
-        
-        <!-- Left Column: Active Timer -->
-        <div class="lg:col-span-1 h-[300px] lg:h-auto">
-          <sb-active-timer-card />
-        </div>
-
-        <!-- Right Column: Daily Summary -->
-        <div class="lg:col-span-2 h-[400px] lg:h-auto">
-          <sb-daily-summary 
-            [tasks]="tasksStore.allTasks()"
-            [sessions]="timerStore.todaysSessions()"
-          />
-        </div>
-
-      </div>
-
-    </div>
-  `,
-  styles: [`
-    .font-display { font-family: var(--font-display); }
-    .text-text { color: var(--color-text); }
-    .text-subtle { color: var(--color-text-muted); }
-  `]
+  templateUrl: './dashboard.component.html',
+  styleUrl: './dashboard.component.css',
 })
 export class DashboardComponent implements OnInit {
   protected readonly auth       = inject(AuthService);

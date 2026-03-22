@@ -11,7 +11,7 @@ export class TasksApiService {
   private readonly base = `${environment.apiUrl}/api/v1/Tasks`;
 
   getAll(queryParams?: TaskQueryParams): Observable<TaskDto[]> {
-    const params = toHttpParams(queryParams);
+    const params = queryParams ? toHttpParams(queryParams as Record<string, unknown>) : new HttpParams();
     return this.http.get<TaskDto[]>(this.base, { params });
   }
 

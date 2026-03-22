@@ -1,0 +1,101 @@
+/* ══════════════════════════════════════
+   Task Card Component
+   ══════════════════════════════════════ */
+
+.task-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left-width: 4px;
+  border-radius: var(--radius-lg);
+  padding: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  cursor: pointer;
+  min-height: 100px;
+  transition: box-shadow 0.2s, transform 0.2s, border-color 0.2s;
+}
+
+.task-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  border-top-color: var(--color-primary);
+  border-right-color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.card-title {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.card-emoji {
+  margin-right: 0.2rem;
+}
+
+.menu-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0 4px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+  transition: background 0.15s, color 0.15s;
+  flex-shrink: 0;
+}
+
+.menu-btn:hover {
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  margin-top: auto;
+}
+
+.card-meta-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.folder-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--color-text-muted);
+}
+
+.folder-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.folder-name {
+  max-width: 70px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.card-date {
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}

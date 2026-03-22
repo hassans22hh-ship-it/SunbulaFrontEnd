@@ -1,0 +1,32 @@
+<div class="session-list-wrap">
+  <h3 class="session-list-title">Today's Sessions</h3>
+
+  @if (store.todaysSessions().length === 0) {
+    <div class="session-empty">
+      No sessions recorded today yet.<br>Start focusing to earn coins!
+    </div>
+  } @else {
+    <div class="sessions">
+      @for (session of store.todaysSessions(); track session.id) {
+        <div class="session-item">
+          <div class="session-left">
+            <sb-behavior-badge [behavior]="session.behaviorType" />
+            <div class="session-meta">
+              <div class="session-duration">{{ session.duration | duration:'words' }}</div>
+              <div class="session-time">
+                {{ session.startTime | date:'shortTime' }}
+                @if (session.notes) {
+                  <span class="session-note">— {{ session.notes }}</span>
+                }
+              </div>
+            </div>
+          </div>
+          <div class="session-right">
+            <span class="session-coins">+{{ session.coinsEarned | coins:false }} 🪙</span>
+            <button class="delete-btn" (click)="deleteSession(session.id)" title="Delete">✕</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

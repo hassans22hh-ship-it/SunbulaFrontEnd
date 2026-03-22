@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { AuthService } from '../../../core/auth/auth.service';
-import { SettingsApiService, UpdateProfileDto } from '../services/settings.api.service';
-import { ToastService } from '../../../shared/ui/toast/toast.service';
-import { SbButtonComponent } from '../../../shared/ui/button/sb-button.component';
+import { AuthService } from '../../../../core/auth/auth.service';
+import { SettingsApiService, UpdateProfileDto } from '../../services/settings.api.service';
+import { ToastService } from '../../../../shared/ui/toast/toast.service';
+import { SbButtonComponent } from '../../../../shared/ui/button/sb-button.component';
 
 @Component({
   selector: 'sb-profile-settings',
@@ -22,8 +22,8 @@ import { SbButtonComponent } from '../../../shared/ui/button/sb-button.component
            </button>
         </div>
         <div>
-          <div class="font-medium text-text">{{ auth.currentUser()?.username }}</div>
-          <div class="text-sm text-subtle">{{ auth.currentUser()?.email }}</div>
+          <div class="font-medium text-text">{{ auth.user()?.fullName }}</div>
+          <div class="text-sm text-subtle">{{ auth.user()?.email }}</div>
         </div>
       </div>
 
@@ -75,16 +75,20 @@ export class ProfileSettingsComponent {
 
   saving = signal(false);
 
+  private get profileName(): string {
+    return this.auth.user()?.fullName ?? '';
+  }
+
   form = this.fb.group({
-    username: [this.auth.user()?.username || '', Validators.required],
+    username: [this.profileName, Validators.required],
     email:    [this.auth.user()?.email || '', [Validators.required, Validators.email]],
     password: ['']
   });
 
   getInitial(): string {
-    const user = this.auth.user();
-    if (!user || !user.username) return 'U';
-    return user.username.charAt(0).toUpperCase();
+    const name = this.profileName.trim();
+    if (!name) return 'U';
+    return name.charAt(0).toUpperCase();
   }
 
   onSubmit(): void {
@@ -94,7 +98,7 @@ export class ProfileSettingsComponent {
     const v = this.form.value;
     
     const dto: UpdateProfileDto = {};
-    if (v.username !== this.auth.user()?.username) dto.username = v.username!;
+    if (v.username !== this.profileName) dto.username = v.username!;
     if (v.email !== this.auth.user()?.email) dto.email = v.email!;
     if (v.password) dto.password = v.password!;
 
@@ -108,7 +112,7 @@ export class ProfileSettingsComponent {
           this.form.patchValue({ password: '' }); 
         }
       },
-      error: (err) => {
+      error: (_err: unknown) => {
         this.saving.set(false);
         // Error intercepted by global interceptor, so toast already shown.
       }

@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { DatePipe } from '@angular/common';
 import { PlantStore } from '../../store/plant-store.store';
 import { UserPlantDto } from '../../models/plant-store.models';
 import { PlantLevel, GrowthStage, PLANT_LEVEL_META, GROWTH_STAGE_META } from '../../../../shared/models/enums';
@@ -11,7 +10,7 @@ import { AnimateDirective } from '../../../../shared/directives/animate.directiv
 @Component({
   selector: 'sb-my-garden',
   standalone: true,
-  imports: [DatePipe, SbButtonComponent, SbEmptyStateComponent, AnimateDirective],
+  imports: [SbButtonComponent, SbEmptyStateComponent, AnimateDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="h-full flex flex-col pt-6 pb-2" sbPage>
@@ -37,7 +36,7 @@ import { AnimateDirective } from '../../../../shared/directives/animate.directiv
                  <div class="flex-1">
                    <div class="font-semibold text-sm truncate" [title]="seed.plantName">{{ seed.plantName }}</div>
                    <div class="text-[10px] text-subtle mb-2">{{ getLevelMeta(seed).label }}</div>
-                   <sb-button size="sm" fullWidth="true" (clicked)="store.plantSeed(seed.id)">Plant</sb-button>
+                   <sb-button size="sm" [fullWidth]="true" (clicked)="store.plantSeed(seed.id)">Plant</sb-button>
                  </div>
                </div>
              }
@@ -82,7 +81,7 @@ import { AnimateDirective } from '../../../../shared/directives/animate.directiv
                    
                    <div class="mt-3">
                       <!-- Basic Growth Logic Mockup (Watering needed to advance stage typically calculated backend, but UI driven action here) -->
-                      <sb-button variant="secondary" size="sm" fullWidth="true" (clicked)="store.waterPlant(plant.id)">Water 💧</sb-button>
+                      <sb-button variant="secondary" size="sm" [fullWidth]="true" (clicked)="store.waterPlant(plant.id)">Water 💧</sb-button>
                    </div>
                 </div>
 
@@ -127,7 +126,7 @@ export class MyGardenComponent implements OnInit {
   }
 
   getLevelMeta(p: UserPlantDto) {
-    return PLANT_LEVEL_META[p.plantLevel as PlantLevel] || PLANT_LEVEL_META[PlantLevel.Seed];
+    return PLANT_LEVEL_META[p.plantLevel as PlantLevel] || PLANT_LEVEL_META[PlantLevel.Beginner];
   }
 
   getStageMeta(p: UserPlantDto) {

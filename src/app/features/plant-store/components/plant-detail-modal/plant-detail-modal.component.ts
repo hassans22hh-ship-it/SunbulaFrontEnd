@@ -48,7 +48,7 @@ import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
 
           <div class="w-full">
             <sb-button 
-              fullWidth="true" 
+              [fullWidth]="true" 
               (clicked)="purchase.emit(plant()!)"
               [disabled]="purchasing()">
               {{ purchasing() ? 'Purchasing...' : 'Buy Seed' }}

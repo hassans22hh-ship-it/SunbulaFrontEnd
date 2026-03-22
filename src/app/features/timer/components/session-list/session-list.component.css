@@ -1,0 +1,102 @@
+/* ══════════════════════════════════════
+   Session List Component
+   ══════════════════════════════════════ */
+
+.session-list-wrap {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: 1.25rem;
+}
+
+.session-list-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0 0 1rem;
+}
+
+.session-empty {
+  text-align: center;
+  padding: 1.5rem 0;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.sessions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.session-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem 0.75rem;
+  border-radius: var(--radius-md);
+  transition: background 0.15s;
+  gap: 0.5rem;
+}
+
+.session-item:hover {
+  background: var(--color-surface-2);
+}
+
+.session-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.session-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.session-duration {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.session-time {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+}
+
+.session-note {
+  opacity: 0.7;
+}
+
+.session-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.session-coins {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-warning);
+}
+
+.delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: var(--color-danger);
+  opacity: 0.5;
+  padding: 0.2rem 0.4rem;
+  border-radius: var(--radius-sm);
+  transition: opacity 0.2s;
+}
+
+.delete-btn:hover {
+  opacity: 1;
+  background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+}

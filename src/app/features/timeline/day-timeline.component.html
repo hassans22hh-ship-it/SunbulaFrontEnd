@@ -1,0 +1,40 @@
+<div class="timeline-page" sbPage>
+
+  <!-- Page Header -->
+  <div class="timeline-header" sbAnimate="fadeUp">
+    <h1 class="timeline-title">Your Timeline</h1>
+    <p class="timeline-sub">A chronological view of your day's productivity.</p>
+  </div>
+
+  <!-- Day Navigator -->
+  <div sbAnimate="fadeUp" style="animation-delay:0.1s">
+    <sb-day-navigator
+      [date]="currentDate()"
+      (previous)="changeDay(-1)"
+      (next)="changeDay(1)"
+    />
+  </div>
+
+  <!-- Events -->
+  <div class="timeline-events" sbAnimate="fadeUp" style="animation-delay:0.2s">
+    @if (eventsForDay().length === 0) {
+      <sb-empty-state
+        icon="📅"
+        title="No activity recorded"
+        message="You haven't completed any tasks or focus sessions on this day."
+      />
+    } @else {
+      @for (evt of eventsForDay(); track evt.id) {
+        <sb-timeline-block [event]="evt" />
+      }
+      <!-- Endcap -->
+      <div class="endcap">
+        <div class="endcap-spacer"></div>
+        <div class="endcap-col">
+          <div class="endcap-dot"></div>
+        </div>
+      </div>
+    }
+  </div>
+
+</div>

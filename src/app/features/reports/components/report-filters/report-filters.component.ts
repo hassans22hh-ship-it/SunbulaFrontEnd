@@ -1,12 +1,11 @@
 import { ChangeDetectionStrategy, Component, output, signal } from '@angular/core';
-import { SbButtonComponent } from '../../../../shared/ui/button/sb-button.component';
 
 export type ReportPeriod = '7d' | '30d' | '90d';
 
 @Component({
   selector: 'sb-report-filters',
   standalone: true,
-  imports: [SbButtonComponent],
+  imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="flex gap-2 p-1 bg-surface-2 rounded-lg border border-border inline-flex">

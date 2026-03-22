@@ -15,50 +15,8 @@ import { TaskStatus } from '@shared/models/enums';
   standalone: true,
   imports: [DayNavigatorComponent, TimelineBlockComponent, SbEmptyStateComponent, AnimateDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div class="page-container max-w-3xl mx-auto py-6" sbPage>
-      
-      <div class="mb-8" sbAnimate="fadeUp">
-        <h1 class="section-title text-center">Your Timeline</h1>
-        <p class="text-subtle mt-1 text-sm text-center">A chronological view of your day's productivity.</p>
-      </div>
-
-      <div sbAnimate="fadeUp" style="animation-delay: 0.1s;">
-        <sb-day-navigator 
-          [date]="currentDate()" 
-          (previous)="changeDay(-1)"
-          (next)="changeDay(1)"
-        />
-      </div>
-
-      <div class="timeline-container mt-8" sbAnimate="fadeUp" style="animation-delay: 0.2s;">
-        @if (eventsForDay().length === 0) {
-          <sb-empty-state 
-            icon="📅"
-            title="No activity recorded"
-            message="You haven't completed any tasks or focus sessions on this day."
-          />
-        } @else {
-          <!-- We skip rendering gaps for V1 complexity, just listing events -->
-          @for (evt of eventsForDay(); track evt.id) {
-            <sb-timeline-block [event]="evt" />
-          }
-          
-          <!-- Endcap dot -->
-          <div class="flex gap-4">
-            <div class="w-16 flex-shrink-0"></div>
-            <div class="relative flex flex-col items-center">
-              <div class="w-3 h-3 rounded-full bg-border mt-1"></div>
-            </div>
-          </div>
-        }
-      </div>
-    </div>
-  `,
-  styles: [`
-    .text-subtle { color: var(--color-text-muted); }
-    .bg-border { background: var(--color-border); }
-  `]
+  templateUrl: './day-timeline.component.html',
+  styleUrl: './day-timeline.component.css',
 })
 export class DayTimelineComponent {
   private readonly tasksStore   = inject(TasksStore);
@@ -70,10 +28,9 @@ export class DayTimelineComponent {
 
   constructor() {
     this.titleService.setTitle('Timeline | Sunbula');
-    // Ensure data exists
-    if(this.tasksStore.allTasks().length === 0) this.tasksStore.loadAll();
-    if(this.timerStore.allSessions().length === 0) this.timerStore.loadAll();
-    if(this.foldersStore.allFolders().length === 0) this.foldersStore.loadAll();
+    if (this.tasksStore.allTasks().length === 0) this.tasksStore.loadAll();
+    if (this.timerStore.allSessions().length === 0) this.timerStore.loadAll();
+    if (this.foldersStore.allFolders().length === 0) this.foldersStore.loadAll();
   }
 
   changeDay(delta: number): void {
@@ -84,8 +41,7 @@ export class DayTimelineComponent {
 
   eventsForDay = computed<TimelineEvent[]>(() => {
     const targetDateStr = this.currentDate().toDateString();
-    
-    // Process Tasks
+
     const taskEvents: TaskTimelineEvent[] = this.tasksStore.allTasks()
       .filter(t => t.status === TaskStatus.Done)
       .filter(t => new Date(t.updatedAt || t.createdAt).toDateString() === targetDateStr)
@@ -102,21 +58,19 @@ export class DayTimelineComponent {
         };
       });
 
-    // Process Sessions
     const sessionEvents: SessionTimelineEvent[] = this.timerStore.allSessions()
       .filter(s => new Date(s.startTime).toDateString() === targetDateStr)
       .map(s => ({
         id: `s_${s.id}`,
         type: 'session',
         title: s.notes || 'Focus Session',
-        time: new Date(s.endTime || s.startTime), // Use endTime to place it in timeline where it finished
+        time: new Date(s.endTime || s.startTime),
         behaviorType: s.behaviorType,
-        color: '#8B5CF6', // Purple for sessions
+        color: '#8B5CF6',
         durationSecs: s.duration,
         coinsEarned: s.coinsEarned
       }));
 
-    // Merge & Sort Chronologically (oldest first, reading downwards)
     return [...taskEvents, ...sessionEvents].sort((a, b) => a.time.getTime() - b.time.getTime());
   });
 }

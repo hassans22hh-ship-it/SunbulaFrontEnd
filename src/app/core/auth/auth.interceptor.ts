@@ -13,6 +13,11 @@ let isRefreshing = false;
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
+  const isAuthEndpoint =
+    req.url.includes('/api/Authentication/login') ||
+    req.url.includes('/api/Authentication/register') ||
+    req.url.includes('/api/Authentication/refresh');
+  const hasRefreshToken = !!sessionStorage.getItem('sb_refresh');
 
   // Attach token if available
   const token = auth.accessToken();
@@ -20,7 +25,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   return next(authReq).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (error.status === 401 && !req.url.includes('/refresh') && !isRefreshing) {
+      if (error.status === 401 && !isAuthEndpoint && hasRefreshToken && !isRefreshing) {
         isRefreshing = true;
         return from(auth.performRefresh()).pipe(
           switchMap(newToken => {

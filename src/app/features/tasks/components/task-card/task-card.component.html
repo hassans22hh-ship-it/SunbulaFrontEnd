@@ -1,0 +1,32 @@
+<div
+  class="task-card"
+  [style.border-left-color]="task().color"
+  (click)="cardClicked.emit(task())"
+>
+  <!-- Header: Title & Menu -->
+  <div class="card-top">
+    <h4 class="card-title">
+      @if (task().emoji) {
+        <span class="card-emoji">{{ task().emoji }}</span>
+      }
+      {{ task().title }}
+    </h4>
+    <button class="menu-btn" (click)="onIconClick($event)" title="Options">•••</button>
+  </div>
+
+  <!-- Footer: Metadata -->
+  <div class="card-footer">
+    <div class="card-meta-left">
+      <sb-behavior-badge [behavior]="task().behaviorType" />
+      @if (task().folder) {
+        <div class="folder-tag" [title]="task().folder!.name">
+          <span class="folder-dot" [style.background]="task().folder!.color"></span>
+          <span class="folder-name">{{ task().folder!.name }}</span>
+        </div>
+      }
+    </div>
+    <div class="card-date" [title]="'Created ' + (task().createdAt | relativeDate)">
+      {{ task().createdAt | relativeDate }}
+    </div>
+  </div>
+</div>
