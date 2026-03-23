@@ -1,0 +1,89 @@
+<div class="page" sbPageTransition>
+  <h1 class="section-title">⏱️ Timer</h1>
+
+  <!-- Live Timer Display -->
+  <div class="timer-hero">
+    @if (timer.isRunning()) {
+      <div class="timer-active-card animate-scaleIn">
+        <div class="timer-ring animate-timerPulse"></div>
+        <div class="timer-display">{{ formatElapsed(elapsed()) }}</div>
+        <div class="timer-task">
+          <span class="timer-task-color" [style.background]="timer.activeSession()?.taskColor"></span>
+          <span class="timer-task-title">{{ timer.activeSession()?.taskTitle }}</span>
+          <sb-behavior-badge [behavior]="timer.activeSession()!.taskBehavior" />
+        </div>
+        <sb-button variant="danger" (click)="stopTimer()" [loading]="timer.isLoading()">
+          ⏹️ Stop Timer
+        </sb-button>
+      </div>
+    } @else {
+      <div class="timer-idle">
+        <div class="timer-display timer-display--idle">00:00:00</div>
+        <p class="timer-idle-text">Select a task to start tracking</p>
+      </div>
+    }
+  </div>
+
+  <!-- Quick Task Select -->
+  <div class="task-select-section">
+    <h2 class="subsection-title">Start Timer</h2>
+    @if (tasks.activeTasks().length === 0) {
+      <sb-empty-state icon="✅" heading="No active tasks" message="Create a task first to start tracking time" />
+    } @else {
+      <div class="task-grid">
+        @for (task of tasks.activeTasks(); track task.id) {
+          <sb-card [hoverable]="true" (click)="startTimer(task.id)">
+            <div class="quick-task">
+              <span class="quick-task-color" [style.background]="task.color"></span>
+              <div class="quick-task-info">
+                @if (task.emoji) { <span>{{ task.emoji }}</span> }
+                <span class="quick-task-title">{{ task.title }}</span>
+              </div>
+              <sb-behavior-badge [behavior]="task.behaviorType" />
+            </div>
+          </sb-card>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Session History -->
+  <div class="history-section">
+    <h2 class="subsection-title">Session History</h2>
+    @if (timer.isLoading()) {
+      <sb-spinner size="md" />
+    } @else if (timer.sessions().length === 0) {
+      <sb-empty-state icon="📊" heading="No sessions yet" message="Start your first timer to see history here" />
+    } @else {
+      <div class="session-list">
+        @for (session of timer.sessions(); track session.id) {
+          <sb-card padding="sm">
+            <div class="session-row">
+              <span class="session-color" [style.background]="session.taskColor"></span>
+              <div class="session-info">
+                <span class="session-title">{{ session.taskTitle }}</span>
+                <span class="session-date">{{ session.startTime | relativeDate }}</span>
+              </div>
+              <span class="session-duration">{{ session.durationSeconds | duration }}</span>
+              @if (session.coinsEarned !== null) {
+                <span class="coin-badge">{{ session.coinsEarned | coins }}</span>
+              }
+            </div>
+          </sb-card>
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (timer.pagedResult(); as paged) {
+        @if (paged.totalPages > 1) {
+          <div class="pagination">
+            @for (p of [].constructor(paged.totalPages); track $index) {
+              <button class="page-btn" [class.page-btn--active]="$index + 1 === paged.page"
+                      (click)="timer.loadPaged($index + 1)">{{ $index + 1 }}</button>
+            }
+          </div>
+        }
+      }
+    }
+  </div>
+</div>

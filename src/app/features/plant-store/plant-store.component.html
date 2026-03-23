@@ -1,0 +1,57 @@
+<div class="page" sbPageTransition>
+  <div class="page-header"><h1 class="section-title">🌱 Plant Store</h1><span class="coin-display">{{ auth.coinBalance() | coins }}</span></div>
+  <div class="tabs">
+    <button class="tab" [class.tab--active]="tab() === 'store'" (click)="tab.set('store')">Store</button>
+    <button class="tab" [class.tab--active]="tab() === 'garden'" (click)="tab.set('garden')">My Garden ({{ store.gardenCount() }})</button>
+  </div>
+  @if (store.isLoading()) { <sb-spinner size="lg" /> } @else {
+    @if (tab() === 'store') {
+      @if (store.available().length === 0) { <sb-empty-state icon="🌱" heading="No plants available" /> } @else {
+        <div class="plant-grid">
+          @for (plant of store.available(); track plant.id) {
+            <sb-card><div class="plant-card">
+              <div class="plant-image">
+                @if (plant.imageUrl) {
+                  <img [src]="plant.imageUrl" [alt]="plant.name" class="w-full h-full object-contain" />
+                } @else {
+                  <div class="plant-emoji">🪴</div>
+                }
+              </div>
+              <h3 class="plant-name">{{ plant.name }}</h3>
+              <p class="plant-desc">{{ plant.description }}</p>
+              <div class="plant-meta">
+                <sb-badge [variant]="levelMeta[plant.level]?.variant ?? 'default'">{{ levelMeta[plant.level]?.label ?? 'Unknown' }}</sb-badge>
+                <span class="plant-price">{{ plant.price | coins }}</span>
+              </div>
+              <sb-button variant="primary" [fullWidth]="true" [disabled]="!canAfford(plant.price)" (click)="store.purchase(plant.id)">
+                {{ canAfford(plant.price) ? 'Buy' : 'Not enough coins' }}
+              </sb-button>
+            </div></sb-card>
+          }
+        </div>
+      }
+    }
+    @if (tab() === 'garden') {
+      @if (store.garden().length === 0) { <sb-empty-state icon="🪴" heading="Empty garden" message="Buy a plant from the store!" /> } @else {
+        <div class="plant-grid">
+          @for (plant of store.garden(); track plant.id) {
+            <sb-card><div class="garden-card">
+              <div class="plant-image">
+                @if (plant.plantImageUrl) {
+                  <img [src]="plant.plantImageUrl" [alt]="plant.plantName" class="w-full h-full object-contain" />
+                } @else {
+                  <div class="plant-emoji">🪴</div>
+                }
+              </div>
+              <h3 class="plant-name">{{ plant.plantName }}</h3>
+              <sb-badge [variant]="getStageVariant(plant.currentStage)">{{ getStageLabel(plant.currentStage) }}</sb-badge>
+              @let progress = plant.coinsToNextStage > 0 ? (plant.stageCoinsAccumulated / plant.coinsToNextStage) * 100 : 100;
+              <div class="growth-bar"><div class="growth-fill" [style.width.%]="progress"></div></div>
+              <span class="growth-pct">{{ progress | number:'1.0-0' }}% grown</span>
+            </div></sb-card>
+          }
+        </div>
+      }
+    }
+  }
+</div>

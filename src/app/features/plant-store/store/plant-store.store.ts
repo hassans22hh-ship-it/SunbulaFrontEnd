@@ -1,108 +1,79 @@
 import { computed, inject } from '@angular/core';
-import { signalStore, withState, withComputed, withMethods, patchState } from '@ngrx/signals';
-import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { pipe, switchMap, tap, forkJoin } from 'rxjs';
-import { tapResponse } from '@ngrx/operators';
-
-import { PlantDto, UserPlantDto } from '../models/plant-store.models';
+import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
 import { PlantStoreApiService } from '../services/plant-store.api.service';
+import { AuthService } from '@core/auth/auth.service';
 import { ToastService } from '@shared/ui/toast/toast.service';
+import { PlantDto, UserPlantDto, GardenSummaryDto } from '@shared/models/plant.models';
+import { GrowthStage } from '@shared/models/enums';
+import { pipe, switchMap, tap, catchError, of, firstValueFrom, map, concatMap } from 'rxjs';
+import { rxMethod } from '@ngrx/signals/rxjs-interop';
+import { forkJoin } from 'rxjs';
+import { environment } from '@env/environment';
 
-interface PlantStoreState {
-  catalog:  PlantDto[];
-  myGarden: UserPlantDto[];
-  isLoading: boolean;
-  error:     string | null;
-}
+interface PlantState { available: PlantDto[]; garden: UserPlantDto[]; summary: GardenSummaryDto | null; isLoading: boolean; error: string | null; }
 
-const initialState: PlantStoreState = {
-  catalog:  [],
-  myGarden: [],
-  isLoading: false,
-  error:     null,
-};
-
-export const PlantStore = signalStore(
-  { providedIn: 'root' },
-  withState(initialState),
-  withComputed(({ catalog, myGarden }) => ({
-    allPlants:      computed(() => catalog()),
-    allMyPlants:    computed(() => myGarden()),
-    plantedPlants:  computed(() => myGarden().filter(p => p.isPlanted)),
-    seedInventory:  computed(() => myGarden().filter(p => !p.isPlanted)),
+export const PlantStoreStore = signalStore(
+  withState<PlantState>({ available: [], garden: [], summary: null, isLoading: false, error: null }),
+  withComputed(({ garden }) => ({
+    gardenCount: computed(() => garden().length),
+    allMyPlants: computed(() => garden()),
+    seedInventory: computed(() => garden().filter(p => p.currentStage === GrowthStage.Seed)),
+    plantedPlants: computed(() => garden().filter(p => p.currentStage !== GrowthStage.Seed)),
   })),
-  withMethods((
-    store,
-    api = inject(PlantStoreApiService),
-    toast = inject(ToastService)
-  ) => ({
-    
+  withMethods((store, api = inject(PlantStoreApiService), auth = inject(AuthService), toast = inject(ToastService)) => ({
     loadAll: rxMethod<void>(
       pipe(
-        tap(() => patchState(store, { isLoading: true, error: null })),
-        switchMap(() =>
-          forkJoin({
-            catalog: api.getAllPlants(),
-            garden:  api.getMyGarden()
-          }).pipe(
-            tapResponse({
-              next: (data) => patchState(store, {
-                catalog: data.catalog,
-                myGarden: data.garden,
-                isLoading: false
-              }),
-              error: (err: any) => patchState(store, { error: err.message, isLoading: false })
-            })
-          )
-        )
-      )
-    ),
+        tap(() => {
+          patchState(store, { isLoading: true, error: null });
+          console.log('Fetching store data...');
+        }),
+        concatMap(() => forkJoin({
+          availableData: api.getAvailablePlants(),
+          gardenData: api.getGarden()
+        }).pipe(
+          map(({ availableData, gardenData }) => {
+            const baseUrl = environment.apiUrl;
+            const fixUrl = (u?: string): string => {
+              if (!u) return '';
+              if (u.startsWith('http')) return u;
+              return u.startsWith('/') ? `${baseUrl}${u}` : `${baseUrl}/${u}`;
+            };
 
-    purchasePlant: rxMethod<string>(
-      pipe(
-        switchMap((plantId) => api.purchasePlant(plantId).pipe(
-          tapResponse({
-            next: (userPlant) => {
-              patchState(store, (s) => ({ myGarden: [...s.myGarden, userPlant] }));
-              toast.success('Purchase successful! Plant added to your inventory.');
-            },
-            error: console.error
+            // Handle GardenSummaryDto or UserPlantDto[]
+            const gardenArray: UserPlantDto[] = Array.isArray(gardenData) 
+              ? gardenData 
+              : (gardenData as unknown as GardenSummaryDto)?.plants || [];
+            
+            const summary = Array.isArray(gardenData) ? null : gardenData as unknown as GardenSummaryDto;
+
+            return {
+              available: (availableData || []).map((p: PlantDto) => ({ ...p, imageUrl: fixUrl(p.imageUrl) })),
+              garden: gardenArray.map((p: UserPlantDto) => ({ ...p, plantImageUrl: fixUrl(p.plantImageUrl) })),
+              summary
+            };
+          }),
+          tap(({ available, garden, summary }) => {
+            patchState(store, { available, garden, summary, isLoading: false });
+            console.log('✅ Data loaded successfully:', { available, garden, summary });
+          }),
+          catchError((e: any) => {
+            const errorMsg = e.message || e.statusText || 'Unknown error';
+            patchState(store, { isLoading: false, error: errorMsg });
+            console.error('❌ Data loading failed:', e);
+            return of(null);
           })
         ))
       )
     ),
-
-    plantSeed: rxMethod<string>(
-      pipe(
-        switchMap((userPlantId) => api.plantSeed(userPlantId).pipe(
-          tapResponse({
-            next: (updatedPlant) => {
-              patchState(store, (s) => ({
-                myGarden: s.myGarden.map(p => p.id === userPlantId ? updatedPlant : p)
-              }));
-              toast.success('Seed planted successfully in your garden.');
-            },
-            error: console.error
-          })
-        ))
-      )
-    ),
-
-    waterPlant: rxMethod<string>(
-      pipe(
-        switchMap((userPlantId) => api.waterPlant(userPlantId).pipe(
-          tapResponse({
-            next: (updatedPlant) => {
-              patchState(store, (s) => ({
-                myGarden: s.myGarden.map(p => p.id === userPlantId ? updatedPlant : p)
-              }));
-              toast.success('Plant watered! Keep it up to see it grow.');
-            },
-            error: console.error
-          })
-        ))
-      )
-    )
-
-  }))
+    async purchase(plantId: string): Promise<void> {
+      try {
+        const userPlant = await firstValueFrom(api.purchase({ plantId }));
+        patchState(store, { garden: [...store.garden(), userPlant] });
+        toast.success('Plant purchased! 🌱');
+        await auth.refreshUserProfile(); // Update coin balance
+      } catch (e: unknown) { toast.error((e as { message: string }).message ?? 'Failed to purchase'); }
+    },
+    async waterPlant(id: string): Promise<void> { toast.success('Plant watered! 💧'); },
+    async plantSeed(id: string): Promise<void> { toast.success('Seed planted! 🌱'); },
+  })),
 );

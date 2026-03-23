@@ -1,23 +1,23 @@
-<div class="active-card" [class.is-running]="store.currentTimer().isRunning">
+<div class="active-card" [class.is-running]="store.isRunning()">
 
   <div class="card-header">
     <div class="header-info">
-      <h3 class="card-title" [class.running-title]="store.currentTimer().isRunning">
-        {{ store.currentTimer().isRunning ? 'Timer Running' : 'Timer Ready' }}
+      <h3 class="card-title" [class.running-title]="store.isRunning()">
+        {{ store.isRunning() ? 'Timer Running' : 'Timer Ready' }}
       </h3>
       <p class="card-sub">Jump back into deep work.</p>
     </div>
-    @if (store.currentTimer().isRunning) {
+    @if (store.isRunning()) {
       <div class="pulse-dot"></div>
     }
   </div>
 
   <div class="timer-display">
-    {{ store.currentTimer().elapsedSecs | duration:'clock' }}
+    {{ store.elapsedSeconds() | duration:'clock' }}
   </div>
 
   <a routerLink="/timer" class="action-link">
-    {{ store.currentTimer().isRunning ? 'Go to Timer →' : 'Start Focus Session' }}
+    {{ store.isRunning() ? 'Go to Timer →' : 'Start Focus Session' }}
   </a>
 
 </div>

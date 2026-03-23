@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { FolderDto } from '../../models/folder.models';
+import { FolderDto } from '@shared/models/task.models';
 
 @Component({
   selector: 'sb-folder-card',

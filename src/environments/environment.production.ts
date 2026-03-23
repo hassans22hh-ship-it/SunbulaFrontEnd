@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://localhost:5142',
+  apiUrl: '',  // Set to production API URL before deployment
 };

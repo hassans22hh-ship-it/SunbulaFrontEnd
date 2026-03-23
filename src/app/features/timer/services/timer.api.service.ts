@@ -1,30 +1,52 @@
+// src/app/features/timer/services/timer.api.service.ts
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '../../../../environments/environment';
-import { Observable } from 'rxjs';
-import { TimerSessionDto, CreateTimerSessionDto, UpdateTimerSessionDto } from '../models/timer.models';
+import { Observable, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+import { TimeSessionDto, StartSessionDto, PagedResult } from '@shared/models/timer.models';
+import { environment } from '@env/environment';
 
 @Injectable({ providedIn: 'root' })
-export class TimerApiService {
+export class TimeSessionApiService {
   private readonly http = inject(HttpClient);
-  // Backend contract mentions endpoints gap, assuming a standard REST structure if it existed
-  // but for V1 we will store this via the API if the endpoint exists, or mock it in the store if it doesn't.
-  // We'll wire the API calls, but the actual save logic might need to handle 404s gracefully if the backend isn't ready.
-  private readonly base = `${environment.apiUrl}/api/v1/TimerSessions`;
+  private readonly BASE = `${environment.apiUrl}/api/TimeSession`;
 
-  getAll(): Observable<TimerSessionDto[]> {
-    return this.http.get<TimerSessionDto[]>(this.base);
+  getAll(): Observable<TimeSessionDto[]> {
+    return this.http.get<TimeSessionDto[]>(this.BASE);
   }
 
-  create(dto: CreateTimerSessionDto): Observable<TimerSessionDto> {
-    return this.http.post<TimerSessionDto>(this.base, dto);
+  getPaged(page = 1, pageSize = 20): Observable<PagedResult<TimeSessionDto>> {
+    return this.http.get<PagedResult<TimeSessionDto>>(`${this.BASE}/paged`, {
+      params: { page: page.toString(), pageSize: pageSize.toString() }
+    });
   }
 
-  update(id: string, dto: UpdateTimerSessionDto): Observable<TimerSessionDto> {
-    return this.http.put<TimerSessionDto>(`${this.base}/${id}`, dto);
+  /** Returns null when server responds 204 (no active session) */
+  getActive(): Observable<TimeSessionDto | null> {
+    return this.http.get<TimeSessionDto>(`${this.BASE}/active`).pipe(
+      catchError(err => {
+        if (err.status === 204) return of(null);
+        throw err;
+      })
+    );
   }
 
-  delete(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.base}/${id}`);
+  /** 409 = another session already running */
+  start(dto: StartSessionDto): Observable<TimeSessionDto> {
+    return this.http.post<TimeSessionDto>(`${this.BASE}/start`, dto);
+  }
+
+  stop(id: string): Observable<TimeSessionDto> {
+    return this.http.post<TimeSessionDto>(`${this.BASE}/${id}/stop`, null);
+  }
+
+  /** Returns null when server responds 204 (nothing was active) */
+  stopActive(): Observable<TimeSessionDto | null> {
+    return this.http.post<TimeSessionDto>(`${this.BASE}/stop-active`, null).pipe(
+      catchError(err => {
+        if (err.status === 204) return of(null);
+        throw err;
+      })
+    );
   }
 }

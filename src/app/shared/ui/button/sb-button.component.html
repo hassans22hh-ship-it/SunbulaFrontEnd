@@ -1,0 +1,11 @@
+<button
+  [type]="type()"
+  [disabled]="disabled() || loading()"
+  [class]="'sb-btn sb-btn--' + variant() + ' sb-btn--' + size()"
+  [class.sb-btn--full]="fullWidth()"
+  [class.sb-btn--loading]="loading()">
+  @if (loading()) {
+    <span class="sb-btn__spinner"></span>
+  }
+  <ng-content />
+</button>

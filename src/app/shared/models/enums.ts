@@ -4,61 +4,48 @@ export enum BehaviorCategory {
   Neutral  = 1,
   Negative = 2,
   Rest     = 3,
-  // Aliases for convenience
-  Good     = 0,
 }
 
 export const BEHAVIOR_COIN_RATES: Record<BehaviorCategory, number> = {
-  [BehaviorCategory.Positive]: 2,
-  [BehaviorCategory.Neutral]:  1,
+  [BehaviorCategory.Positive]:  2,
+  [BehaviorCategory.Neutral]:   1,
   [BehaviorCategory.Negative]: -1,
-  [BehaviorCategory.Rest]:     1,
+  [BehaviorCategory.Rest]:      1,
 };
 
-export const BEHAVIOR_META: Record<BehaviorCategory, { label: string; emoji: string; color: string }> = {
-  [BehaviorCategory.Positive]: { label: 'Positive', emoji: '🟢', color: '#52B788' },
-  [BehaviorCategory.Neutral]:  { label: 'Neutral',  emoji: '🔵', color: '#74B3CE' },
-  [BehaviorCategory.Negative]: { label: 'Negative', emoji: '🔴', color: '#E63946' },
-  [BehaviorCategory.Rest]:     { label: 'Rest',     emoji: '🟡', color: '#F4D35E' },
+export const BEHAVIOR_META: Record<BehaviorCategory, {
+  label: string; emoji: string; colorVar: string; cssClass: string;
+}> = {
+  [BehaviorCategory.Positive]: { label: 'Positive', emoji: '🟢', colorVar: '--color-positive', cssClass: 'behavior-positive' },
+  [BehaviorCategory.Neutral]:  { label: 'Neutral',  emoji: '🔵', colorVar: '--color-neutral',  cssClass: 'behavior-neutral'  },
+  [BehaviorCategory.Negative]: { label: 'Negative', emoji: '🔴', colorVar: '--color-negative', cssClass: 'behavior-negative' },
+  [BehaviorCategory.Rest]:     { label: 'Rest',     emoji: '🟡', colorVar: '--color-rest',     cssClass: 'behavior-rest'     },
 };
 
 // ─── Task Status ──────────────────────────────────────────────────────────────
 export enum TaskStatus {
-  Todo       = 0,
-  InProgress = 3,
-  Done       = 1,
-  Archived   = 2,
-  Active     = 0,
-  Completed  = 1,
+  Active    = 0,
+  Completed = 1,
+  Archived  = 2,
 }
+
+export const TASK_STATUS_META: Record<TaskStatus, { label: string; icon: string }> = {
+  [TaskStatus.Active]:    { label: 'Active',    icon: '📋' },
+  [TaskStatus.Completed]: { label: 'Completed', icon: '✅' },
+  [TaskStatus.Archived]:  { label: 'Archived',  icon: '📦' },
+};
 
 // ─── Wallet Type ──────────────────────────────────────────────────────────────
 export enum WalletType {
   Cash = 0,
   Bank = 1,
-  CreditCard = 2,
-  EWallet = 3,
+  Card = 2,
 }
 
-export const WALLET_META: Record<WalletType, { label: string; emoji: string }> = {
-  [WalletType.Cash]:       { label: 'Cash',        emoji: '💵' },
-  [WalletType.Bank]:       { label: 'Bank',        emoji: '🏦' },
-  [WalletType.CreditCard]: { label: 'Credit Card', emoji: '💳' },
-  [WalletType.EWallet]:    { label: 'E-Wallet',    emoji: '📱' },
-};
-
-export const WALLET_TYPE_LABELS: Record<WalletType, string> = {
-  [WalletType.Cash]: 'Cash',
-  [WalletType.Bank]: 'Bank Account',
-  [WalletType.CreditCard]: 'Credit Card',
-  [WalletType.EWallet]: 'E-Wallet',
-};
-
-export const WALLET_TYPE_ICONS: Record<WalletType, string> = {
-  [WalletType.Cash]: '💵',
-  [WalletType.Bank]: '🏦',
-  [WalletType.CreditCard]: '💳',
-  [WalletType.EWallet]: '📱',
+export const WALLET_TYPE_META: Record<WalletType, { label: string; icon: string }> = {
+  [WalletType.Cash]: { label: 'Cash',         icon: '💵' },
+  [WalletType.Bank]: { label: 'Bank Account', icon: '🏦' },
+  [WalletType.Card]: { label: 'Card',         icon: '💳' },
 };
 
 // ─── Transaction Type ─────────────────────────────────────────────────────────
@@ -68,16 +55,12 @@ export enum TransactionType {
   Transfer = 2,
 }
 
-export const TRANSACTION_TYPE_LABELS: Record<TransactionType, string> = {
-  [TransactionType.Income]:   'Income',
-  [TransactionType.Expense]:  'Expense',
-  [TransactionType.Transfer]: 'Transfer',
-};
-
-export const TRANSACTION_TYPE_COLORS: Record<TransactionType, string> = {
-  [TransactionType.Income]:   '#52B788',
-  [TransactionType.Expense]:  '#E63946',
-  [TransactionType.Transfer]: '#74B3CE',
+export const TRANSACTION_TYPE_META: Record<TransactionType, {
+  label: string; colorClass: string; sign: string;
+}> = {
+  [TransactionType.Income]:   { label: 'Income',   colorClass: 'text-success', sign: '+' },
+  [TransactionType.Expense]:  { label: 'Expense',  colorClass: 'text-danger',  sign: '-' },
+  [TransactionType.Transfer]: { label: 'Transfer', colorClass: 'text-info',    sign: '→' },
 };
 
 // ─── Growth Stage ─────────────────────────────────────────────────────────────
@@ -89,24 +72,17 @@ export enum GrowthStage {
 }
 
 export const GROWTH_STAGE_LABELS: Record<GrowthStage, string> = {
-  [GrowthStage.Seed]:     'Seed',
-  [GrowthStage.Seedling]: 'Seedling',
-  [GrowthStage.Small]:    'Small Plant',
-  [GrowthStage.Large]:    'Full Grown',
+  [GrowthStage.Seed]:     '🌱 Seed',
+  [GrowthStage.Seedling]: '🌿 Seedling',
+  [GrowthStage.Small]:    '🪴 Small Plant',
+  [GrowthStage.Large]:    '🌳 Full Grown',
 };
 
-export const GROWTH_STAGE_EMOJIS: Record<GrowthStage, string> = {
-  [GrowthStage.Seed]:     '🌰',
-  [GrowthStage.Seedling]: '🌱',
-  [GrowthStage.Small]:    '🌿',
-  [GrowthStage.Large]:    '🌳',
-};
-
-export const GROWTH_STAGE_META: Record<GrowthStage, { label: string; emoji: string }> = {
-  [GrowthStage.Seed]:     { label: 'Seed',        emoji: '🌰' },
-  [GrowthStage.Seedling]: { label: 'Seedling',    emoji: '🌱' },
-  [GrowthStage.Small]:    { label: 'Small Plant', emoji: '🌿' },
-  [GrowthStage.Large]:    { label: 'Full Grown',  emoji: '🌳' },
+export const GROWTH_STAGE_META: Record<GrowthStage, { label: string; emoji: string; variant: 'default' | 'success' | 'warning' | 'info' }> = {
+  [GrowthStage.Seed]:     { label: 'Seed',        emoji: '🌱', variant: 'default' },
+  [GrowthStage.Seedling]: { label: 'Seedling',    emoji: '🌿', variant: 'info'    },
+  [GrowthStage.Small]:    { label: 'Small Plant', emoji: '🪴', variant: 'warning' },
+  [GrowthStage.Large]:    { label: 'Full Grown',  emoji: '🌳', variant: 'success' },
 };
 
 // ─── Plant Level ──────────────────────────────────────────────────────────────
@@ -117,9 +93,44 @@ export enum PlantLevel {
   Rare         = 4,
 }
 
-export const PLANT_LEVEL_META: Record<PlantLevel, { label: string; priceRange: string; emoji: string; color: string }> = {
-  [PlantLevel.Beginner]:     { label: 'Beginner',     priceRange: '20–50',     emoji: '🌱', color: '#52B788' },
-  [PlantLevel.Intermediate]: { label: 'Intermediate', priceRange: '50–300',    emoji: '🌿', color: '#4895EF' },
-  [PlantLevel.Advanced]:     { label: 'Advanced',     priceRange: '1000–2000', emoji: '🌳', color: '#F72585' },
-  [PlantLevel.Rare]:         { label: 'Rare',         priceRange: '5000+',     emoji: '🏆', color: '#7209B7' },
+export const PLANT_LEVEL_META: Record<PlantLevel, {
+  label: string; emoji: string; priceRange: string; variant: 'default' | 'success' | 'warning' | 'info' | 'danger';
+}> = {
+  [PlantLevel.Beginner]:     { label: 'Beginner',     emoji: '🌱', priceRange: '20–50',     variant: 'default' },
+  [PlantLevel.Intermediate]: { label: 'Intermediate', emoji: '🌿', priceRange: '50–300',    variant: 'info'    },
+  [PlantLevel.Advanced]:     { label: 'Advanced',     emoji: '🌳', priceRange: '1000–2000', variant: 'warning' },
+  [PlantLevel.Rare]:         { label: 'Rare',         emoji: '🏆', priceRange: '5000+',     variant: 'danger'  },
 };
+
+// ─── Debt Type ────────────────────────────────────────────────────────────────
+export enum DebtType {
+  Owed  = 0,
+  Owing = 1,
+}
+
+export const DEBT_TYPE_META: Record<DebtType, { label: string; variant: 'danger' | 'success' }> = {
+  [DebtType.Owed]:  { label: 'I Owe',      variant: 'danger'  },
+  [DebtType.Owing]: { label: 'Owed To Me', variant: 'success' },
+};
+
+// ─── Debt Status ──────────────────────────────────────────────────────────────
+export enum DebtStatus {
+  Active  = 0,
+  Settled = 1,
+}
+
+// ─── Streak Milestones ────────────────────────────────────────────────────────
+export const STREAK_MILESTONES = [
+  { days:  3, bonus:  50 },
+  { days:  7, bonus: 150 },
+  { days: 30, bonus: 700 },
+];
+
+// ─── Paged Result ─────────────────────────────────────────────────────────────
+export interface PagedResult<T> {
+  data:       T[];
+  page:       number;
+  pageSize:   number;
+  totalCount: number;
+  totalPages: number;
+}

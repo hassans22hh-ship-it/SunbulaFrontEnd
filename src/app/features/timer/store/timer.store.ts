@@ -1,184 +1,128 @@
-import { computed, effect, inject } from '@angular/core';
-import {
-  signalStore,
-  withState,
-  withComputed,
-  withMethods,
-  patchState,
-} from '@ngrx/signals';
-import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { pipe, switchMap, tap } from 'rxjs';
-import { tapResponse } from '@ngrx/operators';
-import { TimerSessionDto, ActiveTimerState, CreateTimerSessionDto } from '../models/timer.models';
-import { TimerApiService } from '../services/timer.api.service';
-import { BehaviorCategory } from '@shared/models/enums';
-import { calculateCoins } from '@shared/utils/coins.util';
+import { computed, inject } from '@angular/core';
+import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { TimeSessionApiService } from '../services/time-session.api.service';
 import { AuthService } from '@core/auth/auth.service';
+import { ToastService } from '@shared/ui/toast/toast.service';
+import { TimeSessionDto, StartSessionDto } from '@shared/models/timer.models';
+import { PagedResult } from '@shared/models/enums';
+import { firstValueFrom } from 'rxjs';
 
-interface TimerStoreState {
-  sessions:     TimerSessionDto[];
-  activeTimer:  ActiveTimerState;
-  isLoading:    boolean;
-  error:        string | null;
+interface TimerState {
+  activeSession:  TimeSessionDto | null;
+  sessions:       TimeSessionDto[];
+  pagedResult:    PagedResult<TimeSessionDto> | null;
+  isLoading:      boolean;
+  error:          string | null;
 }
 
-const STORAGE_KEY = 'sb_active_timer';
-
-function loadInitialActiveTimer(): ActiveTimerState {
-  const saved = sessionStorage.getItem(STORAGE_KEY);
-  if (saved) {
-    try {
-      const parsed = JSON.parse(saved);
-      // Validate structure roughly
-      if (typeof parsed.isRunning === 'boolean') {
-        return parsed as ActiveTimerState;
-      }
-    } catch {}
-  }
-  return {
-    isRunning: false,
-    startTime: null,
-    elapsedSecs: 0,
-    behaviorType: BehaviorCategory.Good, // Default to studying/focusing
-  };
-}
-
-const initialState: TimerStoreState = {
-  sessions:     [],
-  activeTimer:  loadInitialActiveTimer(),
-  isLoading:    false,
-  error:        null,
+const initialState: TimerState = {
+  activeSession:  null,
+  sessions:       [],
+  pagedResult:    null,
+  isLoading:      false,
+  error:          null,
 };
 
 export const TimerStore = signalStore(
-  { providedIn: 'root' }, // Important: Root scope so timer runs in background
+  { providedIn: 'root' },
   withState(initialState),
-  withComputed(({ sessions, activeTimer }) => ({
-    allSessions: computed(() => sessions()),
-    currentTimer: computed(() => activeTimer()),
-    todaysSessions: computed(() => {
-      const today = new Date().toDateString();
-      return sessions().filter(s => new Date(s.startTime).toDateString() === today);
-    }),
-    todaysTotalSecs: computed(() => {
-      const today = new Date().toDateString();
-      return sessions()
-        .filter(s => new Date(s.startTime).toDateString() === today)
-        .reduce((sum, s) => sum + s.duration, 0);
+  withComputed(({ activeSession }) => ({
+    isRunning: computed(() => activeSession() !== null),
+    /** Drift-safe elapsed calculation from server startTime */
+    elapsedSeconds: computed(() => {
+      const session = activeSession();
+      if (!session?.startTime) return 0;
+      return Math.floor((Date.now() - new Date(session.startTime).getTime()) / 1000);
     }),
   })),
-  withMethods((store, api = inject(TimerApiService), auth = inject(AuthService)) => {
-    
-    // Auto-save active timer to sessionStorage whenever it changes
-    effect(() => {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(store.activeTimer()));
-    });
-
-    return {
-      loadAll: rxMethod<void>(
-        pipe(
-          tap(() => patchState(store, { isLoading: true, error: null })),
-          switchMap(() =>
-            api.getAll().pipe(
-              tapResponse({
-                next: (sessions) => patchState(store, { sessions, isLoading: false }),
-                error: (err: any) => patchState(store, { error: err.message, isLoading: false }),
-              }),
-            ),
-          ),
-        ),
-      ),
-
-      setBehavior: (behaviorType: number) => {
-        patchState(store, (state) => ({
-          activeTimer: { ...state.activeTimer, behaviorType }
-        }));
-      },
-
-      startTimer: () => {
-        const state = store.activeTimer();
-        if (state.isRunning) return;
-
-        patchState(store, {
-          activeTimer: {
-            ...state,
-            isRunning: true,
-            startTime: state.startTime || new Date().toISOString(),
-          }
-        });
-      },
-
-      pauseTimer: () => {
-        patchState(store, (state) => ({
-          activeTimer: { ...state.activeTimer, isRunning: false }
-        }));
-      },
-
-      tick: () => {
-        const state = store.activeTimer();
-        if (!state.isRunning) return;
-        
-        patchState(store, {
-          activeTimer: { ...state, elapsedSecs: state.elapsedSecs + 1 }
-        });
-      },
-
-      stopAndSave: rxMethod<void>(
-        pipe(
-          switchMap(() => {
-            const state = store.activeTimer();
-             // Prevent saving if less than 1 minute, as it's trivial
-            if (state.elapsedSecs < 60) {
-               patchState(store, {
-                 activeTimer: { isRunning: false, startTime: null, elapsedSecs: 0, behaviorType: BehaviorCategory.Good }
-               });
-               // Return empty observable to short circuit
-               return [];
-            }
-
-            const endTime = new Date().toISOString();
-            const coinsEarned = calculateCoins(state.elapsedSecs, state.behaviorType);
-            
-            const dto: CreateTimerSessionDto = {
-              startTime: state.startTime!,
-              endTime,
-              duration: state.elapsedSecs,
-              behaviorType: state.behaviorType,
-              coinsEarned
-            };
-
-            // Reset UI immediately
-            patchState(store, {
-               activeTimer: { isRunning: false, startTime: null, elapsedSecs: 0, behaviorType: BehaviorCategory.Good }
-            });
-
-            // Optimistically update wallet if needed (simplified here, auth store handles global balance)
-            const newBalance = auth.coinBalance() + coinsEarned;
-            auth.updateCoinBalance(newBalance);
-
-            // Persist to backend
-            return api.create(dto).pipe(
-              tapResponse({
-                next: (session) => patchState(store, (s) => ({ sessions: [session, ...s.sessions] })),
-                error: () => { /* Handle rollback if necessary */ }
-              })
-            );
-          })
-        )
-      ),
-
-      discardTimer: () => {
-        patchState(store, {
-          activeTimer: { isRunning: false, startTime: null, elapsedSecs: 0, behaviorType: BehaviorCategory.Good }
-        });
-      },
-
-      removeSession: (id: string) => {
-        patchState(store, (state) => ({
-          sessions: state.sessions.filter(s => s.id !== id)
-        }));
-        api.delete(id).subscribe();
+  withMethods((
+    store,
+    api   = inject(TimeSessionApiService),
+    auth  = inject(AuthService),
+    toast = inject(ToastService),
+  ) => ({
+    /** On app init: check for active session from server */
+    async initialize(): Promise<void> {
+      try {
+        const active = await firstValueFrom(api.getActive());
+        patchState(store, { activeSession: active });
+      } catch {
+        // No active session or error — ignore
       }
-    };
-  })
+    },
+
+    /** Start a timer for a task */
+    async start(taskId: string): Promise<void> {
+      patchState(store, { isLoading: true });
+      try {
+        const session = await firstValueFrom(api.start({ taskId } as StartSessionDto));
+        patchState(store, { activeSession: session, isLoading: false });
+        toast.success(`Timer started for ${session.taskTitle}`);
+      } catch (e: unknown) {
+        patchState(store, { isLoading: false });
+        const err = e as { status?: number; message?: string };
+        if (err.status === 409) {
+          toast.warning('Another session is running. Stopping it first...');
+          await this.switchTask(taskId);
+        } else {
+          toast.error(err.message ?? 'Failed to start timer');
+        }
+      }
+    },
+
+    /** Stop the current active session */
+    async stop(): Promise<void> {
+      const session = store.activeSession();
+      if (!session) return;
+
+      patchState(store, { isLoading: true });
+      try {
+        const stopped = await firstValueFrom(api.stop(session.id));
+        patchState(store, { activeSession: null, isLoading: false });
+        toast.success(`Timer stopped — earned ${stopped.coinsEarned?.toFixed(1) ?? 0} 🪙`);
+        // Refresh user profile to get updated coinBalance
+        await auth.refreshUserProfile();
+      } catch (e: unknown) {
+        patchState(store, { isLoading: false });
+        toast.error((e as { message: string }).message ?? 'Failed to stop timer');
+      }
+    },
+
+    /** Switch tasks: stop active → start new */
+    async switchTask(taskId: string): Promise<void> {
+      patchState(store, { isLoading: true });
+      try {
+        await firstValueFrom(api.stopActive());
+        const session = await firstValueFrom(api.start({ taskId } as StartSessionDto));
+        patchState(store, { activeSession: session, isLoading: false });
+        toast.success(`Switched to ${session.taskTitle}`);
+        await auth.refreshUserProfile();
+      } catch (e: unknown) {
+        patchState(store, { isLoading: false });
+        toast.error((e as { message: string }).message ?? 'Failed to switch task');
+      }
+    },
+
+    /** Load all sessions history */
+    async loadAll(): Promise<void> {
+      patchState(store, { isLoading: true });
+      try {
+        const result = await firstValueFrom(api.getAll());
+        patchState(store, { sessions: result, isLoading: false });
+      } catch (e: unknown) {
+        patchState(store, { isLoading: false, error: (e as { message: string }).message });
+      }
+    },
+
+    /** Load paged session history */
+    async loadPaged(page = 1, pageSize = 20): Promise<void> {
+      patchState(store, { isLoading: true });
+      try {
+        const result = await firstValueFrom(api.getPaged(page, pageSize));
+        patchState(store, { pagedResult: result, sessions: result.data, isLoading: false });
+      } catch (e: unknown) {
+        patchState(store, { isLoading: false, error: (e as { message: string }).message });
+      }
+    },
+  })),
 );

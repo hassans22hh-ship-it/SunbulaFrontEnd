@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@a
 import { Title } from '@angular/platform-browser';
 import { DayNavigatorComponent } from './components/day-navigator/day-navigator.component';
 import { TimelineBlockComponent } from './components/timeline-block/timeline-block.component';
-import { TimelineEvent, SessionTimelineEvent, TaskTimelineEvent } from './models/timeline.models';
+import { LocalTimelineEvent } from './components/timeline-block/timeline-block.component';
 import { TasksStore } from '@features/tasks/store/tasks.store';
 import { TimerStore } from '@features/timer/store/timer.store';
 import { FoldersStore } from '@features/folders/store/folders.store';
@@ -19,8 +19,8 @@ import { TaskStatus } from '@shared/models/enums';
   styleUrl: './day-timeline.component.css',
 })
 export class DayTimelineComponent {
-  private readonly tasksStore   = inject(TasksStore);
-  private readonly timerStore   = inject(TimerStore);
+  private readonly tasksStore = inject(TasksStore);
+  private readonly timerStore = inject(TimerStore);
   private readonly foldersStore = inject(FoldersStore);
   private readonly titleService = inject(Title);
 
@@ -28,9 +28,9 @@ export class DayTimelineComponent {
 
   constructor() {
     this.titleService.setTitle('Timeline | Sunbula');
-    if (this.tasksStore.allTasks().length === 0) this.tasksStore.loadAll();
-    if (this.timerStore.allSessions().length === 0) this.timerStore.loadAll();
-    if (this.foldersStore.allFolders().length === 0) this.foldersStore.loadAll();
+    if (this.tasksStore.tasks().length === 0) this.tasksStore.load();
+    if (this.timerStore.sessions().length === 0) this.timerStore.loadAll();
+    if (this.foldersStore.folders().length === 0) this.foldersStore.load();
   }
 
   changeDay(delta: number): void {
@@ -39,14 +39,14 @@ export class DayTimelineComponent {
     this.currentDate.set(d);
   }
 
-  eventsForDay = computed<TimelineEvent[]>(() => {
+  eventsForDay = computed<LocalTimelineEvent[]>(() => {
     const targetDateStr = this.currentDate().toDateString();
 
-    const taskEvents: TaskTimelineEvent[] = this.tasksStore.allTasks()
-      .filter(t => t.status === TaskStatus.Done)
+    const taskEvents: LocalTimelineEvent[] = this.tasksStore.tasks()
+      .filter(t => t.status === TaskStatus.Completed)
       .filter(t => new Date(t.updatedAt || t.createdAt).toDateString() === targetDateStr)
       .map(t => {
-        const folder = t.folderId ? this.foldersStore.allFolders().find(f => f.id === t.folderId) : undefined;
+        const folder = t.folderId ? this.foldersStore.folders().find(f => f.id === t.folderId) : undefined;
         return {
           id: `t_${t.id}`,
           type: 'task',
@@ -58,17 +58,17 @@ export class DayTimelineComponent {
         };
       });
 
-    const sessionEvents: SessionTimelineEvent[] = this.timerStore.allSessions()
+    const sessionEvents: LocalTimelineEvent[] = this.timerStore.sessions()
       .filter(s => new Date(s.startTime).toDateString() === targetDateStr)
       .map(s => ({
         id: `s_${s.id}`,
         type: 'session',
-        title: s.notes || 'Focus Session',
+        title: s.taskTitle || 'Focus Session',
         time: new Date(s.endTime || s.startTime),
-        behaviorType: s.behaviorType,
-        color: '#8B5CF6',
-        durationSecs: s.duration,
-        coinsEarned: s.coinsEarned
+        behaviorType: s.taskBehavior,
+        color: s.taskColor || '#8B5CF6',
+        durationSecs: s.durationSeconds ?? 0,
+        coinsEarned: s.coinsEarned ?? 0
       }));
 
     return [...taskEvents, ...sessionEvents].sort((a, b) => a.time.getTime() - b.time.getTime());

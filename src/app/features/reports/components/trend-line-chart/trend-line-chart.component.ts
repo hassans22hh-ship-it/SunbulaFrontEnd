@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, OnChanges } from '@angular/core';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartConfiguration, ChartData, ChartType } from 'chart.js';
-import { DailyTrendDto } from '../../models/reports.models';
+import { DailyTrendDto } from '@shared/models/reports.models';
 import { DatePipe } from '@angular/common';
 
 @Component({
@@ -81,7 +81,7 @@ export class TrendLineChartComponent implements OnChanges {
         labels: d.map(x => this.datePipe.transform(x.date, 'MMM d')),
         datasets: [
           {
-            data: d.map(x => x.focusTimeSecs / 3600), // Convert to hours
+            data: d.map(x => x.totalSeconds / 3600), // Convert to hours
             label: 'Focus Hours',
             backgroundColor: 'rgba(59, 130, 246, 0.1)', // primary with opacity
             borderColor: '#3B82F6',
@@ -92,8 +92,8 @@ export class TrendLineChartComponent implements OnChanges {
             tension: 0.3 // Smooth curves
           },
           {
-            data: d.map(x => x.tasksDone),
-            label: 'Tasks Completed',
+            data: d.map(x => x.coinsEarned),
+            label: 'Coins Earned',
             backgroundColor: 'rgba(16, 185, 129, 0)',
             borderColor: '#10B981', // success
             pointBackgroundColor: '#10B981',

@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { PlantDto } from '@features/plant-store/models/plant-store.models';
+import { PlantDto } from '@shared/models/plant.models';
 import { PlantLevel, GrowthStage, PLANT_LEVEL_META, GROWTH_STAGE_META } from '@shared/models/enums';
 import { SbModalComponent } from '@shared/ui/modal/sb-modal.component';
 import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
@@ -24,7 +24,7 @@ import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
             }
             
             <div class="absolute -bottom-3 text-[10px] uppercase font-bold px-3 py-1 rounded-full shadow-sm"
-                 [style.background]="levelMeta.color"
+                 [style.background]="'var(--color-' + levelMeta.variant + ')'"
                  [style.color]="'#fff'">
               {{ levelMeta.label }}
             </div>
@@ -38,7 +38,7 @@ import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
           <div class="bg-surface-2 rounded-xl p-4 w-full mb-6 flex justify-between items-center border border-border">
              <div class="text-left">
                <div class="text-[10px] uppercase tracking-wider text-subtle font-medium mb-1">Price</div>
-               <div class="text-xl font-bold coin-badge px-3 py-1 inline-block">{{ plant()!.basePrice }} 🪙</div>
+               <div class="text-xl font-bold coin-badge px-3 py-1 inline-block">{{ plant()!.price }} 🪙</div>
              </div>
              <div class="text-right">
                <div class="text-[10px] uppercase tracking-wider text-subtle font-medium mb-1">Growth Stage</div>
@@ -77,12 +77,10 @@ export class PlantDetailModalComponent {
   get levelMeta() {
     const p = this.plant();
     if (!p) return PLANT_LEVEL_META[PlantLevel.Beginner];
-    return PLANT_LEVEL_META[p.plantLevel as PlantLevel] || PLANT_LEVEL_META[PlantLevel.Beginner];
+    return PLANT_LEVEL_META[p.level as PlantLevel] || PLANT_LEVEL_META[PlantLevel.Beginner];
   }
 
   get stageMeta() {
-    const p = this.plant();
-    if (!p) return GROWTH_STAGE_META[GrowthStage.Seedling];
-    return GROWTH_STAGE_META[p.growthStage as GrowthStage] || GROWTH_STAGE_META[GrowthStage.Seedling];
+    return GROWTH_STAGE_META[GrowthStage.Seed];
   }
 }

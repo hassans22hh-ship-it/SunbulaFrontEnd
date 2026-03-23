@@ -1,0 +1,85 @@
+<div class="page" sbPageTransition>
+  <div class="page-header"><h1 class="section-title">💰 Finance</h1></div>
+  <div class="tabs">
+    <button class="tab" [class.tab--active]="tab() === 'wallets'" (click)="tab.set('wallets')">Wallets</button>
+    <button class="tab" [class.tab--active]="tab() === 'transactions'" (click)="tab.set('transactions')">Transactions</button>
+    <button class="tab" [class.tab--active]="tab() === 'categories'" (click)="tab.set('categories')">Categories</button>
+  </div>
+  @if (store.isLoading()) { <sb-spinner size="lg" /> } @else {
+    @if (tab() === 'wallets') {
+      <div class="page-actions"><sb-button (click)="showWalletForm.set(true)">+ New Wallet</sb-button></div>
+      @if (store.wallets().length === 0) { <sb-empty-state icon="💵" heading="No wallets" /> } @else {
+        <div class="wallet-grid">
+          @for (w of store.wallets(); track w.id) {
+            <sb-card [hoverable]="true"><div class="wallet-card">
+              <span class="wallet-icon">{{ walletMeta[w.type].icon }}</span>
+              <div class="wallet-info"><h3 class="wallet-name">{{ w.name }}</h3><span class="wallet-type">{{ walletMeta[w.type].label }}</span></div>
+              <span class="wallet-balance">{{ w.balance | number:'1.2-2' }} {{ w.currency }}</span>
+              <button class="action-btn action-btn--danger" (click)="store.deleteWallet(w.id)">🗑️</button>
+            </div></sb-card>
+          }
+        </div>
+      }
+    }
+    @if (tab() === 'transactions') {
+      <div class="page-actions"><sb-button (click)="showTxForm.set(true)">+ New Transaction</sb-button></div>
+      @if (store.transactions().length === 0) { <sb-empty-state icon="💸" heading="No transactions" /> } @else {
+        <div class="tx-list">
+          @for (t of store.transactions(); track t.id) {
+            <sb-card padding="sm"><div class="tx-row">
+              <span [class]="'tx-sign ' + txMeta[t.type].colorClass">{{ txMeta[t.type].sign }}</span>
+              <div class="tx-info"><span class="tx-desc">{{ t.description || txMeta[t.type].label }}</span><span class="tx-date">{{ t.transactionDate | relativeDate }}</span></div>
+              <span class="tx-amount" [class]="txMeta[t.type].colorClass">{{ t.amount | number:'1.2-2' }} {{ t.currency }}</span>
+              <button class="action-btn action-btn--danger" (click)="store.removeTransaction(t.id)">🗑️</button>
+            </div></sb-card>
+          }
+        </div>
+      }
+    }
+    @if (tab() === 'categories') {
+      <div class="page-actions"><sb-button (click)="showCatForm.set(true)">+ New Category</sb-button></div>
+      @if (store.categories().length === 0) { <sb-empty-state icon="🏷️" heading="No categories" /> } @else {
+        <div class="cat-list">
+          @for (c of store.categories(); track c.id) {
+            <sb-card padding="sm"><div class="cat-row">
+              <span class="cat-name">{{ c.name }}</span>
+              <button class="action-btn action-btn--danger" (click)="store.deleteCategory(c.id)">🗑️</button>
+            </div></sb-card>
+          }
+        </div>
+      }
+    }
+  }
+</div>
+
+@if (showWalletForm()) {
+  <sb-modal title="New Wallet" (close)="showWalletForm.set(false)">
+    <form [formGroup]="walletForm" (ngSubmit)="createWallet()" class="modal-form">
+      <div class="form-group"><label class="form-label">Name</label><input formControlName="name" class="input-field" placeholder="My Wallet"></div>
+      <div class="form-group"><label class="form-label">Type</label><select formControlName="type" class="input-field">@for (t of walletTypes; track t) { <option [value]="t">{{ walletMeta[t].icon }} {{ walletMeta[t].label }}</option> }</select></div>
+      <div class="form-group"><label class="form-label">Currency</label><input formControlName="currency" class="input-field" value="SAR"></div>
+      <div class="form-group"><label class="form-label">Opening Balance</label><input type="number" formControlName="openingBalance" class="input-field"></div>
+      <div modal-footer><sb-button variant="ghost" (click)="showWalletForm.set(false)">Cancel</sb-button><sb-button type="submit" [disabled]="walletForm.invalid">Create</sb-button></div>
+    </form>
+  </sb-modal>
+}
+@if (showTxForm()) {
+  <sb-modal title="New Transaction" (close)="showTxForm.set(false)">
+    <form [formGroup]="txForm" (ngSubmit)="createTx()" class="modal-form">
+      <div class="form-group"><label class="form-label">Wallet</label><select formControlName="walletId" class="input-field">@for (w of store.wallets(); track w.id) { <option [value]="w.id">{{ w.name }}</option> }</select></div>
+      <div class="form-group"><label class="form-label">Type</label><select formControlName="type" class="input-field">@for (t of txTypes; track t) { <option [value]="t">{{ txMeta[t].label }}</option> }</select></div>
+      <div class="form-group"><label class="form-label">Amount</label><input type="number" formControlName="amount" class="input-field" step="0.01"></div>
+      <div class="form-group"><label class="form-label">Description</label><input formControlName="description" class="input-field"></div>
+      <div class="form-group"><label class="form-label">Category</label><select formControlName="financialCategoryId" class="input-field"><option value="">None</option>@for (c of store.categories(); track c.id) { <option [value]="c.id">{{ c.name }}</option> }</select></div>
+      <div modal-footer><sb-button variant="ghost" (click)="showTxForm.set(false)">Cancel</sb-button><sb-button type="submit" [disabled]="txForm.invalid">Create</sb-button></div>
+    </form>
+  </sb-modal>
+}
+@if (showCatForm()) {
+  <sb-modal title="New Category" size="sm" (close)="showCatForm.set(false)">
+    <form [formGroup]="catForm" (ngSubmit)="createCat()" class="modal-form">
+      <div class="form-group"><label class="form-label">Name</label><input formControlName="name" class="input-field" placeholder="Food"></div>
+      <div modal-footer><sb-button variant="ghost" (click)="showCatForm.set(false)">Cancel</sb-button><sb-button type="submit" [disabled]="catForm.invalid">Create</sb-button></div>
+    </form>
+  </sb-modal>
+}

@@ -10,7 +10,7 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SbModalComponent } from '@shared/ui/modal/sb-modal.component';
 import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
-import { FolderDto, CreateFolderDto, UpdateFolderDto } from '../../models/folder.models';
+import { FolderDto, CreateFolderDto, UpdateFolderDto } from '@shared/models/task.models';
 import { ToastService } from '@shared/ui/toast/toast.service';
 
 const PRESET_COLORS = [

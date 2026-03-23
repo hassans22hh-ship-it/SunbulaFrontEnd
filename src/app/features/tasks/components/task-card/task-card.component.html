@@ -19,9 +19,8 @@
     <div class="card-meta-left">
       <sb-behavior-badge [behavior]="task().behaviorType" />
       @if (task().folder) {
-        <div class="folder-tag" [title]="task().folder!.name">
-          <span class="folder-dot" [style.background]="task().folder!.color"></span>
-          <span class="folder-name">{{ task().folder!.name }}</span>
+        <div class="folder-tag" [title]="task().folder">
+          <span class="folder-name">{{ task().folder }}</span>
         </div>
       }
     </div>

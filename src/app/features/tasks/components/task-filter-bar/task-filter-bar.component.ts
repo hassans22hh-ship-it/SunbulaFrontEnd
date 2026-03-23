@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { TaskQueryParams } from '../../models/task.models';
-import { FolderDto } from '../../../folders/models/folder.models';
+import { TaskQueryParams, FolderDto } from '@shared/models/task.models';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({

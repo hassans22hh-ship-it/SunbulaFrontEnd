@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, OnChanges } from '@angular/core';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
-import { TimeDistributionDto } from '../../models/reports.models';
+import { TimeDistributionDto } from '@shared/models/reports.models';
 
 @Component({
   selector: 'sb-time-pie-chart',
@@ -67,9 +67,9 @@ export class TimePieChartComponent implements OnChanges {
     const d = this.data();
     if (d && d.length > 0) {
       this.chartData = {
-        labels: d.map(x => x.label),
+        labels: d.map(x => x.taskTitle),
         datasets: [{
-          data: d.map(x => x.durationSecs),
+          data: d.map(x => x.totalSeconds),
           backgroundColor: [
             '#3B82F6', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#6366F1'
           ],

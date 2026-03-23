@@ -1,0 +1,15 @@
+<div class="sb-modal-backdrop animate-fadeIn" (click)="onBackdropClick()">
+  <div [class]="'sb-modal-content sb-modal--' + size() + ' animate-scaleIn'"
+       (click)="onContentClick($event)">
+    <div class="sb-modal-header">
+      <h2 class="sb-modal-title">{{ title() }}</h2>
+      <button class="sb-modal-close" (click)="close.emit()">✕</button>
+    </div>
+    <div class="sb-modal-body">
+      <ng-content />
+    </div>
+    <div class="sb-modal-footer">
+      <ng-content select="[modal-footer]" />
+    </div>
+  </div>
+</div>

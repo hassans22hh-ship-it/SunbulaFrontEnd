@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { PlantStore } from '../../store/plant-store.store';
-import { UserPlantDto } from '../../models/plant-store.models';
+import { PlantStoreStore } from '../../store/plant-store.store';
+import { UserPlantDto } from '@shared/models/plant.models';
 import { PlantLevel, GrowthStage, PLANT_LEVEL_META, GROWTH_STAGE_META } from '../../../../shared/models/enums';
 import { SbButtonComponent } from '../../../../shared/ui/button/sb-button.component';
 import { SbEmptyStateComponent } from '../../../../shared/ui/empty-state/sb-empty-state.component';
@@ -15,14 +15,14 @@ import { AnimateDirective } from '../../../../shared/directives/animate.directiv
   template: `
     <div class="h-full flex flex-col pt-6 pb-2" sbPage>
       
-      <div class="mb-8" sbAnimate="slideLeft">
+      <div class="mb-8" sbAnimate="slideIn">
         <h2 class="section-title">My Garden</h2>
         <p class="text-subtle mt-1 text-sm">Plant your seeds and water them to grow your virtual garden.</p>
       </div>
 
       <!-- Seed Inventory -->
       @if (store.seedInventory().length > 0) {
-        <div class="mb-10" sbAnimate="fadeUp">
+        <div class="mb-10" sbAnimate="fadeInUp">
           <div class="flex items-center gap-2 mb-4">
              <h3 class="font-semibold text-lg text-text">Seed Inventory</h3>
              <span class="bg-primary/10 text-primary text-xs font-bold px-2 py-0.5 rounded-full">{{ store.seedInventory().length }}</span>
@@ -45,7 +45,7 @@ import { AnimateDirective } from '../../../../shared/directives/animate.directiv
       }
 
       <!-- Garden Grid -->
-      <div class="flex-1" sbAnimate="fadeUp" style="animation-delay: 0.1s;">
+      <div class="flex-1" sbAnimate="fadeInUp" style="animation-delay: 0.1s;">
         <h3 class="font-semibold text-lg text-text mb-4">Planted Garden</h3>
         
         @if (store.plantedPlants().length === 0) {
@@ -65,8 +65,8 @@ import { AnimateDirective } from '../../../../shared/directives/animate.directiv
 
                 <!-- Plant Visual -->
                 <div class="relative z-10 w-24 h-24 mb-4 flex items-end justify-center group-hover:-translate-y-2 transition-transform duration-300">
-                  @if (plant.imageUrl) {
-                    <img [src]="plant.imageUrl" [alt]="plant.plantName" class="max-w-full max-h-full object-contain drop-shadow-lg" />
+                  @if (plant.plantImageUrl) {
+                    <img [src]="plant.plantImageUrl" [alt]="plant.plantName" class="max-w-full max-h-full object-contain drop-shadow-lg" />
                   } @else {
                     <div class="text-6xl drop-shadow-md pb-2">{{ getStageMeta(plant).emoji }}</div>
                   }
@@ -76,12 +76,12 @@ import { AnimateDirective } from '../../../../shared/directives/animate.directiv
                    <h4 class="font-semibold text-sm text-text truncate w-full" [title]="plant.plantName">{{ plant.plantName }}</h4>
                    <div class="flex justify-between items-center mt-2 px-1">
                      <span class="text-[10px] uppercase font-bold text-primary">{{ getStageMeta(plant).label }}</span>
-                     <span class="text-xs font-medium text-subtle flex items-center gap-1">💧 {{ plant.totalWatered }}</span>
+                     <span class="text-xs font-medium text-subtle flex items-center gap-1">💧 {{ plant.stageCoinsAccumulated }}</span>
                    </div>
                    
                    <div class="mt-3">
                       <!-- Basic Growth Logic Mockup (Watering needed to advance stage typically calculated backend, but UI driven action here) -->
-                      <sb-button variant="secondary" size="sm" [fullWidth]="true" (clicked)="store.waterPlant(plant.id)">Water 💧</sb-button>
+                      <sb-button variant="outline" size="sm" [fullWidth]="true" (clicked)="store.waterPlant(plant.id)">Water 💧</sb-button>
                    </div>
                 </div>
 
@@ -115,7 +115,7 @@ import { AnimateDirective } from '../../../../shared/directives/animate.directiv
   `]
 })
 export class MyGardenComponent implements OnInit {
-  protected readonly store = inject(PlantStore);
+  protected readonly store = inject(PlantStoreStore);
   private readonly titleService = inject(Title);
 
   ngOnInit(): void {
@@ -126,10 +126,10 @@ export class MyGardenComponent implements OnInit {
   }
 
   getLevelMeta(p: UserPlantDto) {
-    return PLANT_LEVEL_META[p.plantLevel as PlantLevel] || PLANT_LEVEL_META[PlantLevel.Beginner];
+    return PLANT_LEVEL_META[PlantLevel.Beginner];
   }
 
   getStageMeta(p: UserPlantDto) {
-    return GROWTH_STAGE_META[p.growthStage as GrowthStage] || GROWTH_STAGE_META[GrowthStage.Seedling];
+    return GROWTH_STAGE_META[p.currentStage as GrowthStage] || GROWTH_STAGE_META[GrowthStage.Seedling];
   }
 }

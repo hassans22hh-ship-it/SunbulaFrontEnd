@@ -1,9 +1,22 @@
 import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { TimelineEvent, TaskTimelineEvent, SessionTimelineEvent } from '../../models/timeline.models';
-import { DurationPipe } from '../../../../shared/pipes/duration.pipe';
 import { CoinsPipe } from '../../../../shared/pipes/coins.pipe';
+import { DurationPipe } from '../../../../shared/pipes/duration.pipe';
 import { SbBehaviorBadgeComponent } from '../../../../shared/ui/behavior-badge/sb-behavior-badge.component';
+
+import { BehaviorCategory } from '@shared/models/enums';
+
+export interface LocalTimelineEvent {
+  id: string;
+  type: 'task' | 'session';
+  title: string;
+  time: Date;
+  behaviorType: BehaviorCategory;
+  color: string;
+  folderName?: string;
+  durationSecs?: number;
+  coinsEarned?: number;
+}
 
 @Component({
   selector: 'sb-timeline-block',
@@ -49,10 +62,10 @@ import { SbBehaviorBadgeComponent } from '../../../../shared/ui/behavior-badge/s
         @if (isSession(event())) {
            <div class="flex items-center gap-4 text-xs mt-2">
              <div class="bg-primary/10 text-primary px-2 py-1 rounded-md font-medium">
-               Duration: {{ asSession(event()).durationSecs | duration:'words' }}
+               Duration: {{ asSession(event()).durationSecs | duration }}
              </div>
              <div class="text-warning font-medium">
-               +{{ asSession(event()).coinsEarned | coins:false }} 🪙
+               +{{ asSession(event()).coinsEarned | coins }}
              </div>
            </div>
         } @else {
@@ -88,9 +101,9 @@ import { SbBehaviorBadgeComponent } from '../../../../shared/ui/behavior-badge/s
   `]
 })
 export class TimelineBlockComponent {
-  event = input.required<TimelineEvent>();
+  event = input.required<LocalTimelineEvent>();
 
-  isSession(e: TimelineEvent): boolean { return e.type === 'session'; }
-  asSession(e: TimelineEvent): SessionTimelineEvent { return e as SessionTimelineEvent; }
-  asTask(e: TimelineEvent): TaskTimelineEvent { return e as TaskTimelineEvent; }
+  isSession(e: LocalTimelineEvent): boolean { return e.type === 'session'; }
+  asSession(e: LocalTimelineEvent): LocalTimelineEvent { return e; }
+  asTask(e: LocalTimelineEvent): LocalTimelineEvent { return e; }
 }

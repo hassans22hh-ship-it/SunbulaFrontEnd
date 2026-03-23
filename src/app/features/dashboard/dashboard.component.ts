@@ -1,54 +1,62 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit } from '@angular/core';
-import { Title } from '@angular/platform-browser';
-import { DatePipe } from '@angular/common';
-
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { AuthService } from '@core/auth/auth.service';
-import { TasksStore } from '@features/tasks/store/tasks.store';
-import { TimerStore } from '@features/timer/store/timer.store';
-
-import { StatsBarComponent } from './components/stats-bar/stats-bar.component';
-import { ActiveTimerCardComponent } from './components/active-timer-card/active-timer-card.component';
-import { DailySummaryComponent } from './components/daily-summary/daily-summary.component';
-import { AnimateDirective } from '@shared/directives/animate.directive';
-import { TaskStatus } from '@shared/models/enums';
+import { TimerStore } from '../timer/store/timer.store';
+import { TasksStore } from '../tasks/store/tasks.store';
+import { DailyTransactionApiService } from '../timer/services/daily-transaction.api.service';
+import { DailySummaryDto } from '@shared/models/timer.models';
+import { SbCardComponent } from '@shared/ui/card/sb-card.component';
+import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
+import { SbSpinnerComponent } from '@shared/ui/spinner/sb-spinner.component';
+import { SbBehaviorBadgeComponent } from '@shared/ui/behavior-badge/sb-behavior-badge.component';
+import { DurationPipe } from '@shared/pipes/duration.pipe';
+import { CoinsPipe } from '@shared/pipes/coins.pipe';
+import { BEHAVIOR_META, BehaviorCategory } from '@shared/models/enums';
+import { PageTransitionDirective } from '@core/animation/page-transition.directive';
+import { DecimalPipe } from '@angular/common';
 
 @Component({
   selector: 'sb-dashboard',
   standalone: true,
-  imports: [StatsBarComponent, ActiveTimerCardComponent, DailySummaryComponent, AnimateDirective, DatePipe],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    SbCardComponent, SbButtonComponent, SbSpinnerComponent,
+    SbBehaviorBadgeComponent, DurationPipe, CoinsPipe, DecimalPipe, PageTransitionDirective,
+  ],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css',
+  styleUrl: './dashboard.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardComponent implements OnInit {
-  protected readonly auth       = inject(AuthService);
-  protected readonly tasksStore = inject(TasksStore);
-  protected readonly timerStore = inject(TimerStore);
-  private   readonly titleService = inject(Title);
+  protected readonly auth  = inject(AuthService);
+  protected readonly timer = inject(TimerStore);
+  protected readonly tasks = inject(TasksStore);
+  private readonly dailyApi = inject(DailyTransactionApiService);
 
-  readonly today = new Date();
+  readonly dailySummary = signal<DailySummaryDto | null>(null);
+  readonly streak       = signal(0);
+  readonly loading      = signal(true);
+
+  protected readonly behaviorMeta = BEHAVIOR_META;
 
   ngOnInit(): void {
-    this.titleService.setTitle('Dashboard | Sunbula');
-    
-    // Ensure vital data is loaded for the dashboard
-    if (this.tasksStore.allTasks().length === 0) {
-      this.tasksStore.loadAll();
-    }
-    if (this.timerStore.allSessions().length === 0) {
-      this.timerStore.loadAll();
-    }
+    this.timer.initialize();
+    this.tasks.load();
+    this.loadDailyData();
   }
 
-  getGreeting(): string {
-    const hour = this.today.getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 17) return 'Good afternoon';
+  private loadDailyData(): void {
+    this.dailyApi.getTodaySummary().subscribe({
+      next: s => { this.dailySummary.set(s); this.loading.set(false); },
+      error: () => this.loading.set(false),
+    });
+    this.dailyApi.getStreak().subscribe({
+      next: s => this.streak.set(s),
+    });
+  }
+
+  get greeting(): string {
+    const h = new Date().getHours();
+    if (h < 12) return 'Good morning';
+    if (h < 17) return 'Good afternoon';
     return 'Good evening';
-  }
-
-  todaysCoinsEarned(): number {
-    // A rough calculation for display: sum of coins from today's sessions
-    return this.timerStore.todaysSessions().reduce((sum, s) => sum + s.coinsEarned, 0);
   }
 }

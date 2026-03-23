@@ -1,0 +1,35 @@
+<div class="page" sbPageTransition>
+  <h1 class="section-title">📅 Timeline</h1>
+
+  @if (loading()) {
+    <sb-spinner size="lg" />
+  } @else if (days().length === 0) {
+    <sb-empty-state icon="📅" heading="No activity yet" message="Start a timer to see your activity timeline" />
+  } @else {
+    <div class="timeline">
+      @for (day of days(); track day.date) {
+        <div class="timeline-day">
+          <div class="timeline-day-header">
+            <span class="timeline-date">{{ day.date | date:'fullDate' }}</span>
+            <span class="timeline-total">{{ day.totalSeconds | duration }}</span>
+          </div>
+          <div class="timeline-blocks">
+            @for (session of day.sessions; track session.id) {
+              <sb-card padding="sm">
+                <div class="timeline-block">
+                  <span class="block-color" [style.background]="session.taskColor"></span>
+                  <div class="block-info">
+                    <span class="block-title">{{ session.taskTitle }}</span>
+                    <span class="block-time">{{ session.startTime | date:'shortTime' }} — {{ session.endTime ? (session.endTime | date:'shortTime') : 'Running' }}</span>
+                  </div>
+                  <sb-behavior-badge [behavior]="session.taskBehavior" />
+                  <span class="block-duration">{{ session.durationSeconds | duration }}</span>
+                </div>
+              </sb-card>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

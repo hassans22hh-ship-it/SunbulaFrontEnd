@@ -1,182 +1,103 @@
 import { computed, inject } from '@angular/core';
-import { signalStore, withState, withComputed, withMethods, patchState } from '@ngrx/signals';
-import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { pipe, switchMap, tap, forkJoin } from 'rxjs';
-import { tapResponse } from '@ngrx/operators';
-
-import {
-  WalletDto,
-  FinancialCategoryDto,
-  TransactionDto,
-  CreateWalletDto,
-  UpdateWalletDto,
-  CreateTransactionDto,
-  CreateFinancialCategoryDto
-} from '@features/finance/models/finance.models';
-
-import { WalletsApiService } from '@features/finance/services/wallets.api.service';
-import { TransactionsApiService } from '@features/finance/services/transactions.api.service';
-import { FinancialCategoriesApiService } from '@features/finance/services/financial-categories.api.service';
+import { patchState, signalStore, withComputed, withMethods, withState } from '@ngrx/signals';
+import { WalletsApiService } from '../services/wallets.api.service';
+import { TransactionsApiService } from '../services/transactions.api.service';
+import { FinancialCategoriesApiService } from '../services/financial-categories.api.service';
+import { ToastService } from '@shared/ui/toast/toast.service';
+import { WalletDto, FinancialTransactionDto, FinancialCategoryDto, FinanceSummaryDto, CreateWalletDto, UpdateWalletDto, CreateFinancialTransactionDto, CreateFinancialCategoryDto } from '@shared/models/finance.models';
+import { firstValueFrom, forkJoin } from 'rxjs';
 
 interface FinanceState {
   wallets:      WalletDto[];
+  transactions: FinancialTransactionDto[];
   categories:   FinancialCategoryDto[];
-  transactions: TransactionDto[];
-  currentWalletId: string | null;
+  summary:      FinanceSummaryDto | null;
+  selectedWalletId: string | null;
   isLoading:    boolean;
   error:        string | null;
 }
 
-const initialState: FinanceState = {
-  wallets:      [],
-  categories:   [],
-  transactions: [],
-  currentWalletId: null,
-  isLoading:    false,
-  error:        null,
-};
-
 export const FinanceStore = signalStore(
-  { providedIn: 'root' },
-  withState<FinanceState>(initialState),
-  withComputed(({ wallets, categories, transactions, currentWalletId }) => ({
-    allWallets:      computed(() => wallets()),
-    allCategories:   computed(() => categories()),
-    allTransactions: computed(() => transactions()),
-    selectedWalletId: computed(() => currentWalletId()),
-    
-    selectedWallet: computed(() => {
-      const id = currentWalletId();
-      return id ? wallets().find(w => w.id === id) || null : null;
-    }),
-    
-    totalBalance: computed(() => {
-      return wallets().reduce((sum, w) => sum + w.balance, 0);
-    })
+  withState<FinanceState>({ wallets: [], transactions: [], categories: [], summary: null, selectedWalletId: null, isLoading: false, error: null }),
+  withComputed(({ wallets, transactions }) => ({
+    totalBalance: computed(() => wallets().reduce((sum, w) => sum + w.balance, 0)),
+    walletCount:  computed(() => wallets().length),
+    txCount:      computed(() => transactions().length),
   })),
-  withMethods((
-    store,
-    walletApi = inject(WalletsApiService),
-    transactionApi = inject(TransactionsApiService),
-    categoryApi = inject(FinancialCategoriesApiService)
-  ) => ({
-    
-    loadAll: rxMethod<void>(
-      pipe(
-        tap(() => patchState(store, { isLoading: true, error: null })),
-        switchMap(() =>
-          forkJoin({
-            wallets: walletApi.getAll(),
-            categories: categoryApi.getAll(),
-            transactions: transactionApi.getAll()
-          }).pipe(
-            tapResponse({
-              next: (data) => patchState(store, {
-                wallets: data.wallets,
-                categories: data.categories,
-                transactions: data.transactions,
-                isLoading: false
-              }),
-              error: (err: any) => patchState(store, { error: err.message, isLoading: false })
-            })
-          )
-        )
-      )
-    ),
-
-    selectWallet: (id: string | null) => {
-      patchState(store, { currentWalletId: id });
+  withMethods((store, wApi = inject(WalletsApiService), tApi = inject(TransactionsApiService), cApi = inject(FinancialCategoriesApiService), toast = inject(ToastService)) => ({
+    setSelectedWallet(id: string | null) {
+      patchState(store, { selectedWalletId: id });
     },
-
-    // --- Wallets ---
-    addWallet: rxMethod<CreateWalletDto>(
-      pipe(
-        switchMap((dto) => walletApi.create(dto).pipe(
-          tapResponse({
-            next: (w) => patchState(store, (s) => ({ wallets: [...s.wallets, w] })),
-            error: console.error
-          })
-        ))
-      )
-    ),
-    editWallet: rxMethod<{id: string, dto: UpdateWalletDto}>(
-      pipe(
-        switchMap(({id, dto}) => walletApi.update(id, dto).pipe(
-          tapResponse({
-            next: (w) => patchState(store, (s) => ({
-              wallets: s.wallets.map(x => x.id === id ? w : x)
-            })),
-            error: console.error
-          })
-        ))
-      )
-    ),
-    deleteWallet: rxMethod<string>(
-      pipe(
-        switchMap((id) => walletApi.delete(id).pipe(
-          tapResponse({
-            next: () => patchState(store, (s) => ({
-              wallets: s.wallets.filter(x => x.id !== id),
-              currentWalletId: s.currentWalletId === id ? null : s.currentWalletId
-            })),
-            error: console.error
-          })
-        ))
-      )
-    ),
-
-    // --- Transactions ---
-    addTransaction: rxMethod<CreateTransactionDto>(
-      pipe(
-        switchMap((dto) => transactionApi.create(dto).pipe(
-          tapResponse({
-            next: (t) => {
-               // Update local wallet balance optimistically based on transaction created
-               // Real architecture usually fetches wallet again or relies on backend triggers, 
-               // but we can locally patch for snappiness.
-               patchState(store, (s) => {
-                 const amount = t.type === 1 ? -t.amount : t.amount; // 1 = Expense, 0 = Income
-                 return {
-                   transactions: [t, ...s.transactions],
-                   wallets: s.wallets.map(w => w.id === t.walletId ? { ...w, balance: w.balance + amount } : w)
-                 };
-               });
-            },
-            error: console.error
-          })
-        ))
-      )
-    ),
-    deleteTransaction: rxMethod<{id: string, walletId: string, amount: number, type: number}>(
-      pipe(
-        switchMap(({id, walletId, amount, type}) => transactionApi.delete(id).pipe(
-          tapResponse({
-            next: () => {
-              patchState(store, (s) => {
-                const reverseAmount = type === 1 ? amount : -amount;
-                return {
-                  transactions: s.transactions.filter(x => x.id !== id),
-                  wallets: s.wallets.map(w => w.id === walletId ? { ...w, balance: w.balance + reverseAmount } : w)
-                };
-              });
-            },
-            error: console.error
-          })
-        ))
-      )
-    ),
-
-    // --- Categories ---
-    addCategory: rxMethod<CreateFinancialCategoryDto>(
-      pipe(
-        switchMap((dto) => categoryApi.create(dto).pipe(
-          tapResponse({
-            next: (c) => patchState(store, (s) => ({ categories: [...s.categories, c] })),
-            error: console.error
-          })
-        ))
-      )
-    )
-
-  }))
+    async loadAll(): Promise<void> {
+      patchState(store, { isLoading: true, error: null });
+      try {
+        const [wallets, transactions, categories, summary] = await firstValueFrom(
+          forkJoin([wApi.getAll(), tApi.getAll(), cApi.getAll(), wApi.getSummary()])
+        );
+        patchState(store, { wallets, transactions, categories, summary, isLoading: false });
+      } catch (e: unknown) { patchState(store, { isLoading: false, error: (e as { message: string }).message }); }
+    },
+    async createWallet(dto: CreateWalletDto): Promise<void> {
+      try {
+        const w = await firstValueFrom(wApi.create(dto));
+        patchState(store, { wallets: [...store.wallets(), w] });
+        toast.success('Wallet created');
+      } catch { toast.error('Failed to create wallet'); }
+    },
+    async updateWallet(id: string, dto: UpdateWalletDto): Promise<void> {
+      try {
+        const w = await firstValueFrom(wApi.update(id, dto));
+        patchState(store, { wallets: store.wallets().map(x => x.id === id ? w : x) });
+        toast.success('Wallet updated');
+      } catch { toast.error('Failed to update wallet'); }
+    },
+    async deleteWallet(id: string): Promise<void> {
+      try {
+        await firstValueFrom(wApi.delete(id));
+        patchState(store, { wallets: store.wallets().filter(x => x.id !== id) });
+        toast.success('Wallet deleted');
+      } catch { toast.error('Failed to delete wallet'); }
+    },
+    async createTransaction(dto: CreateFinancialTransactionDto): Promise<void> {
+      try {
+        const t = await firstValueFrom(tApi.create(dto));
+        patchState(store, { transactions: [t, ...store.transactions()] });
+        // Refresh wallet balances after transaction
+        const wallets = await firstValueFrom(wApi.getAll());
+        patchState(store, { wallets });
+        toast.success('Transaction created');
+      } catch { toast.error('Failed to create transaction'); }
+    },
+    async removeTransaction(id: string): Promise<void> {
+      try {
+        await firstValueFrom(tApi.delete(id));
+        patchState(store, { transactions: store.transactions().filter(x => x.id !== id) });
+        // Re-fetch wallets to get corrected balances
+        const wallets = await firstValueFrom(wApi.getAll());
+        patchState(store, { wallets });
+        toast.success('Transaction deleted');
+      } catch { toast.error('Failed to delete transaction'); }
+    },
+    async createCategory(dto: CreateFinancialCategoryDto): Promise<void> {
+      try {
+        const c = await firstValueFrom(cApi.create(dto));
+        patchState(store, { categories: [...store.categories(), c] });
+        toast.success('Category created');
+      } catch { toast.error('Failed to create category'); }
+    },
+    async renameCategory(id: string, newName: string): Promise<void> {
+      try {
+        const c = await firstValueFrom(cApi.rename(id, newName));
+        patchState(store, { categories: store.categories().map(x => x.id === id ? c : x) });
+        toast.success('Category renamed');
+      } catch { toast.error('Failed to rename category'); }
+    },
+    async deleteCategory(id: string): Promise<void> {
+      try {
+        await firstValueFrom(cApi.delete(id));
+        patchState(store, { categories: store.categories().filter(x => x.id !== id) });
+        toast.success('Category deleted');
+      } catch { toast.error('Failed to delete category'); }
+    },
+  })),
 );

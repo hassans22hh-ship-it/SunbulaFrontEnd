@@ -1,24 +1,9 @@
-import { computed, Injectable, signal } from '@angular/core';
+import { computed, Injectable, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { environment } from '../../../environments/environment';
-import { firstValueFrom } from 'rxjs';
-
-export interface UserDto {
-  userId:                string;
-  email:                 string;
-  firstName:             string;
-  lastName:              string;
-  fullName:              string;
-  phone:                 string | null;
-  isActive:              boolean;
-  isEmailConfirmed:      boolean;
-  coinBalance:           number;
-  consecutiveStreakDays:  number;
-  createdAt:             string;
-  lastLoginAt:           string;
-}
+import { Observable, firstValueFrom, of } from 'rxjs';
+import { environment } from '@env/environment';
+import { UserDto, AuthResponseDto, RefreshTokenDto, LogoutDto } from '@shared/models/auth.models';
 
 const STORAGE_KEYS = {
   access:  'sb_access',
@@ -49,7 +34,6 @@ export class AuthService {
 
     if (!access) return;
 
-    // Check if token is still valid
     if (expires && new Date(expires) > new Date()) {
       this._accessToken.set(access);
       this._refreshToken.set(refresh);
@@ -59,9 +43,8 @@ export class AuthService {
         this.clearTokens();
       }
     } else if (refresh) {
-      // Try refresh
       try {
-        await this.performRefresh(refresh);
+        await firstValueFrom(this.refreshTokens());
         await this.loadProfile();
       } catch {
         this.clearTokens();
@@ -74,6 +57,15 @@ export class AuthService {
       this.http.get<UserDto>(`${environment.apiUrl}/api/Authentication/profile`),
     );
     this._user.set(user);
+  }
+
+  /** Refresh user profile from server — call after timer stops to get updated coinBalance */
+  async refreshUserProfile(): Promise<void> {
+    try {
+      await this.loadProfile();
+    } catch {
+      // Silently fail — profile will be stale but not broken
+    }
   }
 
   setTokens(accessToken: string, refreshToken: string, expiresAt: string): void {
@@ -92,26 +84,36 @@ export class AuthService {
     this._user.update(u => u ? { ...u, coinBalance: newBalance } : null);
   }
 
-  async performRefresh(refreshToken?: string): Promise<string> {
-    const token = refreshToken ?? this._refreshToken();
-    if (!token) throw new Error('No refresh token');
+  refreshTokens(): Observable<AuthResponseDto> {
+    const token = this._refreshToken();
+    if (!token) return of(null as unknown as AuthResponseDto);
 
-    const response = await firstValueFrom(
-      this.http.post<{ accessToken: string; refreshToken: string; expiresAt: string }>(
+    return new Observable<AuthResponseDto>(observer => {
+      this.http.post<AuthResponseDto>(
         `${environment.apiUrl}/api/Authentication/refresh`,
-        { refreshToken: token },
-      ),
-    );
-
-    this.setTokens(response.accessToken, response.refreshToken, response.expiresAt);
-    return response.accessToken;
+        { refreshToken: token } as RefreshTokenDto,
+      ).subscribe({
+        next: response => {
+          this.setTokens(response.accessToken, response.refreshToken, response.expiresAt);
+          observer.next(response);
+          observer.complete();
+        },
+        error: err => {
+          this.clearTokens();
+          observer.error(err);
+        }
+      });
+    });
   }
 
   async logout(): Promise<void> {
+    const refreshToken = this._refreshToken();
     try {
-      await firstValueFrom(
-        this.http.post(`${environment.apiUrl}/api/Authentication/logout`, {}),
-      );
+      if (refreshToken) {
+        await firstValueFrom(
+          this.http.post(`${environment.apiUrl}/api/Authentication/logout`, { refreshToken } as LogoutDto),
+        );
+      }
     } catch {
       // Ignore errors — always clear local state
     } finally {

@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, forwardRef, input } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { FolderDto } from '../../../folders/models/folder.models';
+import { FolderDto } from '@shared/models/task.models';
 
 @Component({
   selector: 'sb-folder-selector',

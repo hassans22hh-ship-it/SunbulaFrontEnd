@@ -1,0 +1,12 @@
+.page { max-width: 1280px; margin: 0 auto; }
+.timeline { display: flex; flex-direction: column; gap: 2rem; }
+.timeline-day-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+.timeline-date { font-family: var(--font-display); font-weight: 700; font-size: 1rem; color: var(--color-text); }
+.timeline-total { font-family: var(--font-mono); font-size: 0.8125rem; color: var(--color-text-muted); }
+.timeline-blocks { display: flex; flex-direction: column; gap: 0.5rem; border-left: 3px solid var(--color-border); padding-left: 1.25rem; }
+.timeline-block { display: flex; align-items: center; gap: 0.75rem; }
+.block-color { width: 6px; height: 32px; border-radius: var(--radius-sm); flex-shrink: 0; }
+.block-info { flex: 1; }
+.block-title { font-size: 0.875rem; font-weight: 600; color: var(--color-text); display: block; }
+.block-time { font-size: 0.75rem; color: var(--color-text-muted); }
+.block-duration { font-family: var(--font-mono); font-size: 0.8125rem; color: var(--color-text-muted); }

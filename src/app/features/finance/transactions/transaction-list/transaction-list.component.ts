@@ -1,10 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, signal } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { FinanceStore } from '@features/finance/store/finance.store';
 import { TransactionFormComponent } from '../transaction-form/transaction-form.component';
 import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
 import { SbEmptyStateComponent } from '@shared/ui/empty-state/sb-empty-state.component';
-import { TransactionDto } from '@features/finance/models/finance.models';
+import { FinancialTransactionDto, WalletDto } from '@shared/models/finance.models';
 import { TransactionType } from '@shared/models/enums';
 
 @Component({
@@ -17,14 +17,14 @@ import { TransactionType } from '@shared/models/enums';
       
       <div class="flex justify-between items-center mb-6">
         <h3 class="font-semibold text-lg text-text">
-          @if (store.selectedWallet()) {
+          @if (selectedWalletId()) {
             Recent Transactions
           } @else {
             All Transactions
           }
         </h3>
         
-        <sb-button size="sm" (clicked)="showForm.set(true)" [disabled]="store.allWallets().length === 0">
+        <sb-button size="sm" (clicked)="showForm.set(true)" [disabled]="store.wallets().length === 0">
           + Record
         </sb-button>
       </div>
@@ -54,10 +54,10 @@ import { TransactionType } from '@shared/models/enums';
                   </div>
                   
                   <div>
-                    <div class="font-medium text-text text-sm">{{ t.notes || getLabelForType(t.type) }}</div>
+                    <div class="font-medium text-text text-sm">{{ t.description || getLabelForType(t.type) }}</div>
                     <div class="text-xs text-subtle mt-0.5">
                       {{ t.transactionDate | date:'MMM d, y' }}
-                      @if (!store.selectedWalletId()) {
+                      @if (!selectedWalletId()) {
                         • {{ getWalletName(t.walletId) }}
                       }
                     </div>
@@ -86,9 +86,9 @@ import { TransactionType } from '@shared/models/enums';
 
       @if (showForm()) {
         <sb-transaction-form 
-          [wallets]="store.allWallets()"
-          [categories]="store.allCategories()"
-          [defaultWalletId]="store.selectedWalletId()"
+          [wallets]="store.wallets()"
+          [categories]="store.categories()"
+          [defaultWalletId]="selectedWalletId()"
           (saved)="onFormSave($event)"
           (cancelled)="showForm.set(false)"
         />
@@ -121,17 +121,19 @@ export class TransactionListComponent {
   protected readonly store = inject(FinanceStore);
   readonly TransactionType = TransactionType;
 
+  selectedWalletId = input<string | null>(null);
+
   showForm = signal(false);
 
-  filteredTransactions(): TransactionDto[] {
-    const selected = this.store.selectedWalletId();
-    const all = this.store.allTransactions();
+  filteredTransactions(): FinancialTransactionDto[] {
+    const selected = this.selectedWalletId();
+    const all = this.store.transactions();
     if (!selected) return all;
-    return all.filter(t => t.walletId === selected);
+    return all.filter((t: FinancialTransactionDto) => t.walletId === selected);
   }
 
   getWalletName(id: string): string {
-    const w = this.store.allWallets().find(x => x.id === id);
+    const w = this.store.wallets().find((x: WalletDto) => x.id === id);
     return w ? w.name : 'Unknown Wallet';
   }
 
@@ -154,13 +156,13 @@ export class TransactionListComponent {
   }
 
   onFormSave(dto: any): void {
-    this.store.addTransaction(dto);
+    this.store.createTransaction(dto);
     this.showForm.set(false);
   }
 
-  onDelete(t: TransactionDto): void {
+  onDelete(t: FinancialTransactionDto): void {
     if (confirm('Delete this transaction? This will automatically reverse the wallet balance.')) {
-      this.store.deleteTransaction({ id: t.id, walletId: t.walletId, amount: t.amount, type: t.type });
+      this.store.removeTransaction(t.id);
     }
   }
 }

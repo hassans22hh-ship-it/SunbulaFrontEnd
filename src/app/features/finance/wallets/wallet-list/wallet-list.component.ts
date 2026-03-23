@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { FinanceStore } from '@features/finance/store/finance.store';
-import { WalletDto, CreateWalletDto, UpdateWalletDto } from '@features/finance/models/finance.models';
+import { WalletDto, CreateWalletDto, UpdateWalletDto } from '@shared/models/finance.models';
 import { WalletCardComponent } from '../wallet-card/wallet-card.component';
 import { WalletFormComponent } from '../wallet-form/wallet-form.component';
 import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
@@ -18,7 +18,7 @@ import { AnimateDirective } from '@shared/directives/animate.directive';
     <div class="h-full flex flex-col pt-6 pb-2" sbPage>
       
       <!-- Header Area -->
-      <div class="flex justify-between items-end mb-6" sbAnimate="slideLeft">
+      <div class="flex justify-between items-end mb-6" sbAnimate="slideIn">
         <div>
           <h2 class="section-title">My Wallets</h2>
           <div class="mt-2 text-2xl font-bold text-text font-display tracking-tight">
@@ -27,14 +27,14 @@ import { AnimateDirective } from '@shared/directives/animate.directive';
           </div>
         </div>
         
-        <sb-button variant="secondary" (clicked)="openForm()">+ Add Wallet</sb-button>
+        <sb-button variant="outline" (clicked)="openForm()">+ Add Wallet</sb-button>
       </div>
 
       <!-- List Area -->
-      <div class="flex-1 overflow-y-auto pb-4 custom-scrollbar" sbAnimate="fadeUp">
-        @if (store.isLoading() && store.allWallets().length === 0) {
+      <div class="flex-1 overflow-y-auto pb-4 custom-scrollbar" sbAnimate="fadeInUp">
+        @if (store.isLoading() && store.wallets().length === 0) {
           <div class="py-12 flex justify-center"><sb-spinner /></div>
-        } @else if (store.allWallets().length === 0) {
+        } @else if (store.wallets().length === 0) {
           <sb-empty-state 
             title="No Wallets" 
             message="Create a wallet to start tracking your finances." 
@@ -42,11 +42,11 @@ import { AnimateDirective } from '@shared/directives/animate.directive';
           />
         } @else {
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            @for (w of store.allWallets(); track w.id) {
+            @for (w of store.wallets(); track w.id) {
               <sb-wallet-card 
                 [wallet]="w" 
-                [selected]="w.id === store.selectedWalletId()"
-                (clicked)="store.selectWallet(w.id)"
+                [selected]="w.id === selectedWalletId()"
+                (clicked)="selectedWalletId.set(w.id)"
                 (editClicked)="openForm(w)"
               />
             }
@@ -78,10 +78,11 @@ export class WalletListComponent implements OnInit {
 
   showForm = signal(false);
   editingWallet = signal<WalletDto | null>(null);
+  selectedWalletId = signal<string | null>(null);
 
   ngOnInit(): void {
     this.titleService.setTitle('Wallets | Sunbula');
-    if (this.store.allWallets().length === 0) {
+    if (this.store.wallets().length === 0) {
       this.store.loadAll();
     }
   }
@@ -103,9 +104,9 @@ export class WalletListComponent implements OnInit {
 
   onFormSave(event: { dto: CreateWalletDto | UpdateWalletDto, isEdit: boolean }): void {
     if (event.isEdit && this.editingWallet()) {
-      this.store.editWallet({ id: this.editingWallet()!.id, dto: event.dto as UpdateWalletDto });
+      this.store.updateWallet(this.editingWallet()!.id, event.dto as UpdateWalletDto);
     } else {
-      this.store.addWallet(event.dto as CreateWalletDto);
+      this.store.createWallet(event.dto as CreateWalletDto);
     }
     this.closeForm();
   }

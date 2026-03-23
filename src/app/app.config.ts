@@ -1,34 +1,24 @@
 import {
   ApplicationConfig,
-  inject,
-  provideAppInitializer,
   provideZonelessChangeDetection,
+  APP_INITIALIZER,
+  inject,
 } from '@angular/core';
-import {
-  provideRouter,
-  withComponentInputBinding,
-  withViewTransitions,
-} from '@angular/router';
-import {
-  provideHttpClient,
-  withInterceptors,
-} from '@angular/common/http';
+import { provideRouter, withComponentInputBinding, withViewTransitions } from '@angular/router';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { APP_ROUTES } from './app.routes';
-import { authInterceptor } from './core/auth/auth.interceptor';
-import { errorInterceptor } from './core/http/error.interceptor';
-import { AuthService } from './core/auth/auth.service';
+import { authInterceptor } from '@core/auth/auth.interceptor';
+import { errorInterceptor } from '@core/http/error.interceptor';
+import { AuthService } from '@core/auth/auth.service';
+import { ThemeService } from '@core/theme/theme.service';
 
-function initApp() {
+function initApp(): () => Promise<void> {
+  const auth  = inject(AuthService);
+  const theme = inject(ThemeService);
+
   return async () => {
-    // 1. Restore theme preference
-    const theme = localStorage.getItem('sb_theme') ?? 'light';
-    document.documentElement.setAttribute('data-theme', theme);
-
-    // 2. Restore timer from sessionStorage (handled by TimerStore on inject)
-
-    // 3. Initialize auth (loads tokens + user profile)
-    const auth = inject(AuthService);
+    theme.init();
     await auth.initialize();
   };
 }
@@ -39,6 +29,10 @@ export const appConfig: ApplicationConfig = {
     provideRouter(APP_ROUTES, withComponentInputBinding(), withViewTransitions()),
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
     provideAnimationsAsync(),
-    provideAppInitializer(initApp()),
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initApp,
+      multi: true,
+    },
   ],
 };

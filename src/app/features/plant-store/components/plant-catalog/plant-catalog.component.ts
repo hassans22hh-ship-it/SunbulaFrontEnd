@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { PlantStore } from '../../store/plant-store.store';
-import { PlantDto } from '../../models/plant-store.models';
+import { PlantStoreStore } from '../../store/plant-store.store';
+import { PlantDto } from '@shared/models/plant.models';
 import { PlantLevel } from '@shared/models/enums';
 import { PlantCardComponent } from '../plant-card/plant-card.component';
 import { PlantLevelFilterComponent } from '../plant-level-filter/plant-level-filter.component';
@@ -25,17 +25,17 @@ import { AnimateDirective } from '@shared/directives/animate.directive';
   template: `
     <div class="h-full flex flex-col pt-6 pb-2" sbPage>
       
-      <div class="mb-6" sbAnimate="slideLeft">
+      <div class="mb-6" sbAnimate="slideIn">
         <h2 class="section-title">Plant Store</h2>
         <p class="text-subtle mt-1 text-sm">Use your earned 🪙 coins to buy new plants for your virtual garden.</p>
       </div>
 
-      <div class="mb-6" sbAnimate="fadeUp">
+      <div class="mb-6" sbAnimate="fadeInUp">
          <sb-plant-level-filter [selected]="selectedLevel()" (changed)="selectedLevel.set($event)" />
       </div>
 
-      <div class="flex-1 overflow-y-auto custom-scrollbar pr-2 pb-4" sbAnimate="fadeUp" style="animation-delay: 0.1s;">
-        @if (store.isLoading() && store.allPlants().length === 0) {
+      <div class="flex-1 overflow-y-auto custom-scrollbar pr-2 pb-4" sbAnimate="fadeInUp" style="animation-delay: 0.1s;">
+        @if (store.isLoading() && store.available().length === 0) {
           <div class="py-12 flex justify-center"><sb-spinner /></div>
         } @else if (filteredPlants().length === 0) {
           <sb-empty-state 
@@ -72,7 +72,7 @@ import { AnimateDirective } from '@shared/directives/animate.directive';
   `]
 })
 export class PlantCatalogComponent implements OnInit {
-  protected readonly store = inject(PlantStore);
+  protected readonly store = inject(PlantStoreStore);
   private readonly titleService = inject(Title);
 
   selectedLevel = signal<PlantLevel | null>(null);
@@ -81,16 +81,16 @@ export class PlantCatalogComponent implements OnInit {
 
   ngOnInit(): void {
     this.titleService.setTitle('Store | Sunbula');
-    if (this.store.allPlants().length === 0) {
+    if (this.store.available().length === 0) {
       this.store.loadAll();
     }
   }
 
   filteredPlants(): PlantDto[] {
     const l = this.selectedLevel();
-    const all = this.store.allPlants();
+    const all = this.store.available();
     if (l === null) return all;
-    return all.filter(p => p.plantLevel === l);
+    return all.filter(p => p.level === l);
   }
 
   inspectPlant(plant: PlantDto): void {
@@ -102,7 +102,7 @@ export class PlantCatalogComponent implements OnInit {
     this.isPurchasing.set(true);
     // Mimic the async call finishing by temporarily setting this
     setTimeout(() => {
-       this.store.purchasePlant(plant.id);
+       this.store.purchase(plant.id);
        this.isPurchasing.set(false);
        this.inspectingPlant.set(null);
     }, 500);

@@ -1,0 +1,31 @@
+<div class="page" sbPageTransition>
+  <h1 class="section-title">⚙️ Settings</h1>
+
+  <sb-card padding="lg">
+    <h2 class="subsection-title">Profile</h2>
+    <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="settings-form">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">First name</label><input formControlName="firstName" class="input-field"></div>
+        <div class="form-group"><label class="form-label">Last name</label><input formControlName="lastName" class="input-field"></div>
+      </div>
+      <div class="form-group"><label class="form-label">Email</label><input class="input-field" [value]="auth.user()?.email" disabled></div>
+      <div class="form-group"><label class="form-label">Phone</label><input formControlName="phone" class="input-field"></div>
+      <sb-button type="submit" [loading]="saving()" [disabled]="profileForm.invalid">Save Changes</sb-button>
+    </form>
+  </sb-card>
+
+  <sb-card padding="lg">
+    <h2 class="subsection-title">Appearance</h2>
+    <div class="theme-toggle">
+      <span>Theme: {{ theme.isDark() ? 'Dark' : 'Light' }}</span>
+      <sb-button variant="outline" (click)="theme.toggle()">{{ theme.isDark() ? '☀️ Light Mode' : '🌙 Dark Mode' }}</sb-button>
+    </div>
+  </sb-card>
+
+  <sb-card padding="lg">
+    <h2 class="subsection-title">Account</h2>
+    <p class="account-info">Coin balance: {{ auth.coinBalance() }} 🪙</p>
+    <p class="account-info">Streak: {{ auth.streakDays() }} 🔥 days</p>
+    <sb-button variant="danger" (click)="auth.logout()">Sign Out</sb-button>
+  </sb-card>
+</div>

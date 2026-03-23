@@ -1,14 +1,14 @@
 import { HttpParams } from '@angular/common/http';
 
 /**
- * Convert a plain object to HttpParams, filtering out null/undefined values.
+ * Build HttpParams from a plain object, skipping null/undefined values.
  */
-export function toHttpParams(obj: Record<string, unknown>): HttpParams {
-  let params = new HttpParams();
-  for (const [key, value] of Object.entries(obj)) {
+export function buildHttpParams(params: Record<string, string | number | boolean | null | undefined>): HttpParams {
+  let httpParams = new HttpParams();
+  for (const [key, value] of Object.entries(params)) {
     if (value !== null && value !== undefined && value !== '') {
-      params = params.set(key, String(value));
+      httpParams = httpParams.set(key, String(value));
     }
   }
-  return params;
+  return httpParams;
 }

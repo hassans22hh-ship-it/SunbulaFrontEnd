@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, inject, input, OnInit, output } fro
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SbModalComponent } from '@shared/ui/modal/sb-modal.component';
 import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
-import { WalletDto, CreateWalletDto, UpdateWalletDto } from '@features/finance/models/finance.models';
-import { WalletType, WALLET_META } from '@shared/models/enums';
+import { WalletDto, CreateWalletDto, UpdateWalletDto } from '@shared/models/finance.models';
+import { WalletType, WALLET_TYPE_META } from '@shared/models/enums';
 
 const WALLET_COLORS = [
   '#0F172A', // Slate 900 (Dark)
@@ -43,10 +43,10 @@ const WALLET_COLORS = [
               <button
                 type="button"
                 class="type-select-btn"
-                [class.selected]="form.value.walletType === t.value"
-                (click)="form.patchValue({ walletType: t.value })"
+                [class.selected]="form.value.type === t.value"
+                (click)="form.patchValue({ type: t.value })"
               >
-                {{ t.meta.emoji }} {{ t.meta.label }}
+                {{ t.meta.icon }} {{ t.meta.label }}
               </button>
             }
           </div>
@@ -70,20 +70,7 @@ const WALLET_COLORS = [
           </div>
         }
 
-        <div class="form-group mb-6">
-          <label class="label-text">Card Color</label>
-          <div class="flex gap-2 flex-wrap">
-            @for (color of walletColors; track color) {
-              <button
-                type="button"
-                [style.background]="color"
-                [class.selected]="form.value.color === color"
-                class="color-btn"
-                (click)="form.patchValue({ color: color })"
-              ></button>
-            }
-          </div>
-        </div>
+
 
         <div class="flex justify-between items-center mt-2">
            @if (wallet()) {
@@ -122,12 +109,6 @@ const WALLET_COLORS = [
       background: color-mix(in srgb, var(--color-primary) 5%, transparent);
       box-shadow: 0 0 0 1px var(--color-primary);
     }
-    .color-btn {
-      width: 32px; height: 32px; border-radius: 50%;
-      border: 2px solid transparent; cursor: pointer; transition: transform 0.1s;
-    }
-    .color-btn:hover { transform: scale(1.1); }
-    .color-btn.selected { border-color: white; outline: 2px solid var(--color-primary); }
     .error-text { color: var(--color-danger); font-size: 0.8rem; margin-top: 0.25rem; display: block; }
     .text-danger { color: var(--color-danger); background: none; border: none; cursor: pointer; }
   `]
@@ -143,15 +124,14 @@ export class WalletFormComponent implements OnInit {
   readonly walletColors = WALLET_COLORS;
 
   readonly typeOptions = [
-    WalletType.Cash, WalletType.Bank, WalletType.CreditCard, WalletType.EWallet
-  ].map(value => ({ value, meta: WALLET_META[value] }));
+    WalletType.Cash, WalletType.Bank, WalletType.Card
+  ].map(value => ({ value, meta: WALLET_TYPE_META[value] }));
 
   form = this.fb.group({
     name:           ['', Validators.required],
-    walletType:     [WalletType.Cash, Validators.required],
+    type:           [WalletType.Cash, Validators.required],
     initialBalance: [0],
-    currency:       ['USD'],
-    color:          ['#0F172A']
+    currency:       ['USD']
   });
 
   ngOnInit(): void {
@@ -159,8 +139,7 @@ export class WalletFormComponent implements OnInit {
     if (w) {
       this.form.patchValue({
         name: w.name,
-        walletType: w.walletType,
-        color: w.color || '#0F172A',
+        type: w.type as unknown as WalletType,
         // currency/balance not editable on update
       });
       // Disable the balance/currency fields via form array or just hide them (hidden in template)
@@ -177,11 +156,10 @@ export class WalletFormComponent implements OnInit {
     const isEdit = !!this.wallet();
 
     const dto = isEdit 
-      ? { name: v.name!, walletType: v.walletType!, color: v.color } as UpdateWalletDto
+      ? { name: v.name!, type: v.type! } as UpdateWalletDto
       : { 
           name: v.name!, 
-          walletType: v.walletType!, 
-          color: v.color, 
+          type: v.type!, 
           initialBalance: v.initialBalance, 
           currency: v.currency 
         } as CreateWalletDto;

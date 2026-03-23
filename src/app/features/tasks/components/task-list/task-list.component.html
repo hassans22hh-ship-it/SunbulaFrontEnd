@@ -1,100 +1,61 @@
 <div class="tasks-page" sbPage>
-
-  <!-- Header -->
-  <div class="tasks-header" sbAnimate="slideLeft">
+  <div class="tasks-header" sbAnimate="fadeInUp">
     <div>
       <h1 class="tasks-title">Tasks</h1>
       <p class="tasks-sub">Manage your workflow and productivity.</p>
     </div>
-    <input type="hidden" [value]="foldersStore.allFolders().length">
     <sb-button (clicked)="openForm()">
       <span class="btn-icon">+</span> Create Task
     </sb-button>
   </div>
 
-  <!-- Filter Bar -->
-  <div class="tasks-filters" sbAnimate="fadeUp">
-    <sb-task-filter-bar
-      [folders]="foldersStore.allFolders()"
-      (filtersChanged)="onFiltersChanged($event)"
-    />
+  <div class="tasks-filters" sbAnimate="fadeInUp">
+    <sb-task-filter-bar [folders]="foldersStore.folders()" (filtersChanged)="onFiltersChanged($event)" />
   </div>
 
-  <!-- Board -->
-  @if (store.isLoading() && store.allTasks().length === 0) {
+  @if (store.isLoading() && store.tasks().length === 0) {
     <div class="board-loading"><sb-spinner /></div>
   } @else if (store.error()) {
     <div class="board-error">
-      <sb-empty-state icon="⚠️" title="Failed to load tasks" [message]="store.error()!" [showRetry]="true" (retry)="store.loadAll()" />
+      <sb-empty-state icon="⚠️" title="Failed to load tasks" [message]="store.error()!" />
     </div>
   } @else {
-    <div class="kanban-board" cdkDropListGroup sbAnimate="fadeUp">
-
-      <!-- Todo Column -->
+    <div class="kanban-board kanban-board-2col" cdkDropListGroup sbAnimate="fadeInUp">
+      
+      <!-- Active Column -->
       <div class="kanban-col">
         <div class="col-header">
           <div class="col-header-left">
             <span class="col-dot col-dot-todo"></span>
-            <h3 class="col-title">To Do</h3>
+            <h3 class="col-title">Active</h3>
           </div>
-          <span class="col-count">{{ store.todoTasks().length }}</span>
+          <span class="col-count">{{ store.activeTasks().length }}</span>
         </div>
-        <div
-          class="drop-list"
-          id="col-0"
-          cdkDropList
-          [cdkDropListData]="store.todoTasks()"
-          (cdkDropListDropped)="drop($event, TaskStatus.Todo)"
-        >
-          @for (task of store.todoTasks(); track task.id) {
+        <div class="drop-list" id="col-0" cdkDropList [cdkDropListData]="store.activeTasks()" (cdkDropListDropped)="drop($event, TaskStatus.Active)">
+          @for (task of store.activeTasks(); track task.id) {
             <sb-task-card [task]="task" cdkDrag (cardClicked)="openForm(task)" (menuClicked)="confirmDelete(task)" />
           }
-          @if (store.todoTasks().length === 0) {
-            <div class="col-empty">No tasks yet</div>
+          @if (store.activeTasks().length === 0) {
+            <div class="col-empty">No active tasks</div>
           }
         </div>
       </div>
 
-      <!-- In Progress Column -->
-      <div class="kanban-col">
-        <div class="col-header">
-          <div class="col-header-left">
-            <span class="col-dot col-dot-progress"></span>
-            <h3 class="col-title">In Progress</h3>
-          </div>
-          <span class="col-count">{{ store.inProgressTasks().length }}</span>
-        </div>
-        <div
-          class="drop-list"
-          id="col-1"
-          cdkDropList
-          [cdkDropListData]="store.inProgressTasks()"
-          (cdkDropListDropped)="drop($event, TaskStatus.InProgress)"
-        >
-          @for (task of store.inProgressTasks(); track task.id) {
-            <sb-task-card [task]="task" cdkDrag (cardClicked)="openForm(task)" (menuClicked)="confirmDelete(task)" />
-          }
-        </div>
-      </div>
-
-      <!-- Done Column -->
+      <!-- Completed Column -->
       <div class="kanban-col kanban-col-done">
         <div class="col-header">
           <div class="col-header-left">
             <span class="col-dot col-dot-done"></span>
-            <h3 class="col-title">Done</h3>
+            <h3 class="col-title">Completed</h3>
           </div>
-          <span class="col-count">{{ store.doneTasks().length }}</span>
+          <span class="col-count">{{ store.completedTasks().length }}</span>
         </div>
-        <div
-          class="drop-list"
-          id="col-2"
-          cdkDropList
-          [cdkDropListData]="store.doneTasks()"
-          (cdkDropListDropped)="drop($event, TaskStatus.Done)"
-        >
-          @for (task of store.doneTasks(); track task.id) {
+        <div class="drop-list" id="col-1" cdkDropList [cdkDropListData]="store.completedTasks()" (cdkDropListDropped)="drop($event, TaskStatus.Completed)">
+          @for (task of store.completedTasks(); track task.id) {
             <sb-task-card [task]="task" cdkDrag (cardClicked)="openForm(task)" (menuClicked)="confirmDelete(task)" />
+          }
+          @if (store.completedTasks().length === 0) {
+            <div class="col-empty">No completed tasks</div>
           }
         </div>
       </div>
@@ -102,26 +63,11 @@
     </div>
   }
 
-  <!-- Task Form Modal -->
   @if (showForm()) {
-    <sb-task-form
-      [task]="selectedTask()"
-      [folders]="foldersStore.allFolders()"
-      (saved)="onFormSave($event)"
-      (cancelled)="closeForm()"
-    />
+    <sb-task-form [task]="selectedTask()" [folders]="foldersStore.folders()" (saved)="onFormSave($event)" (cancelled)="closeForm()" />
   }
 
-  <!-- Delete Confirm Dialog -->
   @if (taskToDelete()) {
-    <sb-confirm-dialog
-      title="Delete Task"
-      [message]="'Are you sure you want to delete \'' + taskToDelete()?.title + '\'?'"
-      confirmLabel="Delete"
-      [destructive]="true"
-      (confirmed)="onDelete()"
-      (cancelled)="taskToDelete.set(null)"
-    />
+    <sb-confirm-dialog title="Delete Task" [message]="'Are you sure you want to delete \'' + taskToDelete()?.title + '\'?'" confirmLabel="Delete" (confirmed)="onDelete()" (cancelled)="taskToDelete.set(null)" />
   }
-
 </div>

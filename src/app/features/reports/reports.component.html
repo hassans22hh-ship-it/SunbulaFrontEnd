@@ -1,0 +1,43 @@
+<div class="page" sbPageTransition>
+  <h1 class="section-title">📈 Reports</h1>
+  @if (loading()) {
+    <sb-spinner size="lg" />
+  } @else {
+    <div class="stats-grid">
+      <sb-card><div class="stat"><span class="stat-icon">⏱️</span><div class="stat-info"><span class="stat-value">{{ totalTrackedAllTime | duration }}</span><span class="stat-label">Total tracked</span></div></div></sb-card>
+      <sb-card><div class="stat"><span class="stat-icon">📋</span><div class="stat-info"><span class="stat-value">{{ sessions().length }}</span><span class="stat-label">Total sessions</span></div></div></sb-card>
+      <sb-card><div class="stat"><span class="stat-icon">🪙</span><div class="stat-info"><span class="stat-value">{{ totalCoinsAllTime | coins }}</span><span class="stat-label">Total coins earned</span></div></div></sb-card>
+      <sb-card><div class="stat"><span class="stat-icon">🔥</span><div class="stat-info"><span class="stat-value">{{ streak() }}</span><span class="stat-label">Current streak</span></div></div></sb-card>
+    </div>
+
+    @if (summary()?.behaviorBreakdown?.length) {
+      <h2 class="subsection-title">Today's Breakdown</h2>
+      <div class="behavior-grid">
+        @for (item of summary()!.behaviorBreakdown; track item.behaviorType) {
+          <sb-card padding="sm">
+            <div class="behavior-item">
+              <span class="behavior-label">{{ behaviorMeta[item.behaviorType].emoji }} {{ behaviorMeta[item.behaviorType].label }}</span>
+              <span class="behavior-time">{{ item.totalSeconds | duration }}</span>
+              <div class="bar"><div class="bar-fill" [style.width.%]="item.percentage" [style.background]="'var(' + behaviorMeta[item.behaviorType].colorVar + ')'"></div></div>
+              <span class="behavior-pct">{{ item.percentage | number:'1.0-0' }}%</span>
+            </div>
+          </sb-card>
+        }
+      </div>
+    }
+
+    <h2 class="subsection-title">All-Time Behavior Distribution</h2>
+    <div class="behavior-grid">
+      @for (item of behaviorDistribution; track item.behavior) {
+        <sb-card padding="sm">
+          <div class="behavior-item">
+            <span class="behavior-label">{{ behaviorMeta[item.behavior].emoji }} {{ behaviorMeta[item.behavior].label }}</span>
+            <span class="behavior-time">{{ item.seconds | duration }}</span>
+            <div class="bar"><div class="bar-fill" [style.width.%]="item.pct" [style.background]="'var(' + behaviorMeta[item.behavior].colorVar + ')'"></div></div>
+            <span class="behavior-pct">{{ item.pct }}%</span>
+          </div>
+        </sb-card>
+      }
+    </div>
+  }
+</div>

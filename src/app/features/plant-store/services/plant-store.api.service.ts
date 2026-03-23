@@ -1,35 +1,17 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { environment } from '../../../../environments/environment';
-import { PlantDto, UserPlantDto, PurchasePlantDto } from '../models/plant-store.models';
+import { environment } from '@env/environment';
+import { PlantDto, UserPlantDto, GardenSummaryDto, PurchasePlantDto, GrowthHistoryDto } from '@shared/models/plant.models';
 
 @Injectable({ providedIn: 'root' })
 export class PlantStoreApiService {
   private readonly http = inject(HttpClient);
-  // Based on the contract outline
-  private readonly storeBase = `${environment.apiUrl}/api/v1/Store/plants`;
-  private readonly gardenBase = `${environment.apiUrl}/api/v1/Garden`;
+  private readonly BASE = `${environment.apiUrl}/api`;
 
-  // --- Store ---
-  getAllPlants(): Observable<PlantDto[]> {
-    return this.http.get<PlantDto[]>(this.storeBase);
-  }
+  getAvailablePlants(): Observable<PlantDto[]> { return this.http.get<PlantDto[]>(`${this.BASE}/store/plants`); }
+  getGarden(): Observable<UserPlantDto[]> { return this.http.get<UserPlantDto[]>(`${this.BASE}/garden`); }
 
-  purchasePlant(plantId: string): Observable<UserPlantDto> {
-    return this.http.post<UserPlantDto>(`${this.storeBase}/purchase`, { plantId });
-  }
-
-  // --- Garden ---
-  getMyGarden(): Observable<UserPlantDto[]> {
-    return this.http.get<UserPlantDto[]>(this.gardenBase);
-  }
-
-  plantSeed(userPlantId: string): Observable<UserPlantDto> {
-    return this.http.post<UserPlantDto>(`${this.gardenBase}/${userPlantId}/plant`, {});
-  }
-
-  waterPlant(userPlantId: string): Observable<UserPlantDto> {
-    return this.http.post<UserPlantDto>(`${this.gardenBase}/${userPlantId}/water`, {});
-  }
+  purchase(dto: PurchasePlantDto): Observable<UserPlantDto> { return this.http.post<UserPlantDto>(`${this.BASE}/purchase`, dto); }
+  getPlantHistory(userPlantId: string): Observable<GrowthHistoryDto[]> { return this.http.get<GrowthHistoryDto[]>(`${this.BASE}/garden/${userPlantId}/history`); }
 }

@@ -10,8 +10,7 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SbModalComponent } from '@shared/ui/modal/sb-modal.component';
 import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
-import { TaskDto, CreateTaskDto, UpdateTaskDto } from '../../models/task.models';
-import { FolderDto } from '@features/folders/models/folder.models';
+import { TaskDto, CreateTaskDto, UpdateTaskDto, FolderDto } from '@shared/models/task.models';
 import { TaskStatus, BehaviorCategory, BEHAVIOR_META } from '@shared/models/enums';
 import { FolderSelectorComponent } from '../folder-selector/folder-selector.component';
 
@@ -61,7 +60,7 @@ const TASK_COLORS = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC
                 (click)="form.patchValue({ behaviorType: b.value })"
               >
                 <div class="flex items-center gap-2">
-                   <div class="w-2 h-2 rounded-full" [style.background]="b.meta.color"></div>
+                   <div class="w-2 h-2 rounded-full" [style.background]="b.meta.colorVar"></div>
                    <span>{{ b.meta.emoji }} {{ b.meta.label }}</span>
                 </div>
               </button>
@@ -85,15 +84,7 @@ const TASK_COLORS = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC
           </div>
         </div>
 
-        <!-- Meta info below for Edit mode -->
-        @if (task()) {
-          <div class="flex gap-4 mb-6">
-             <label class="flex items-center gap-2 cursor-pointer text-sm font-medium text-subtle">
-              <input type="checkbox" formControlName="isArchived" class="w-4 h-4 rounded">
-              Archived
-            </label>
-          </div>
-        }
+        <!-- Meta info below for Edit mode omitted as it's not supported by DTO -->
 
         <!-- Actions -->
         <div class="flex gap-3 justify-end">
@@ -156,7 +147,7 @@ export class TaskFormComponent implements OnInit {
   
   // Transform enum and meta to an array for the template
   readonly behaviorOptions = [
-    BehaviorCategory.Good,
+    BehaviorCategory.Positive,
     BehaviorCategory.Neutral,
     BehaviorCategory.Negative
   ].map(value => ({ value, meta: BEHAVIOR_META[value] }));
@@ -169,8 +160,7 @@ export class TaskFormComponent implements OnInit {
     color:        ['#3B82F6', Validators.required],
     behaviorType: [BehaviorCategory.Neutral, Validators.required],
     folderId:     [null as string | null],
-    // Update specific fields
-    status:       [TaskStatus.Todo],
+    status:       [TaskStatus.Active],
     isArchived:   [false]
   });
 
@@ -201,20 +191,18 @@ export class TaskFormComponent implements OnInit {
     if (this.task()) {
       dto = {
         title:        v.title!,
-        emoji:        v.emoji,
+        emoji:        v.emoji || undefined,
         color:        v.color!,
         behaviorType: v.behaviorType!,
-        folderId:     v.folderId,
-        status:       v.status!,
-        isArchived:   v.isArchived!
+        folderId:     v.folderId || undefined
       };
     } else {
       dto = {
         title:        v.title!,
-        emoji:        v.emoji,
+        emoji:        v.emoji || undefined,
         color:        v.color!,
         behaviorType: v.behaviorType!,
-        folderId:     v.folderId,
+        folderId:     v.folderId || undefined
       };
     }
 

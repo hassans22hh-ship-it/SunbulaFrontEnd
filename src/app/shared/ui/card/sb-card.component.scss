@@ -1,0 +1,20 @@
+.sb-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+
+  &--none { padding: 0; }
+  &--sm   { padding: 0.75rem; }
+  &--md   { padding: 1rem; }
+  &--lg   { padding: 1.5rem; }
+
+  &--hoverable {
+    transition: box-shadow var(--duration-base), transform var(--duration-base);
+    cursor: pointer;
+    &:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+  }
+}

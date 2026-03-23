@@ -12,7 +12,7 @@ import { FolderFormComponent } from '../folder-form/folder-form.component';
 import { SbSpinnerComponent } from '@shared/ui/spinner/sb-spinner.component';
 import { SbEmptyStateComponent } from '@shared/ui/empty-state/sb-empty-state.component';
 import { SbConfirmDialogComponent } from '@shared/ui/confirm-dialog/sb-confirm-dialog.component';
-import { FolderDto, CreateFolderDto, UpdateFolderDto } from '../../models/folder.models';
+import { FolderDto, CreateFolderDto, UpdateFolderDto } from '@shared/models/task.models';
 import { FoldersApiService } from '../../services/folders.api.service';
 import { ToastService } from '@shared/ui/toast/toast.service';
 import { GsapService } from '@core/animation/gsap.service';
@@ -35,7 +35,7 @@ import { AnimateDirective } from '@shared/directives/animate.directive';
     <div class="page-container" sbPage>
       
       <!-- Top header -->
-      <div class="flex items-center justify-between mb-8" sbAnimate="slideLeft">
+      <div class="flex items-center justify-between mb-8" sbAnimate="slideIn">
         <div>
           <h1 class="section-title">Folders</h1>
           <p class="text-subtle mt-1 text-sm">Organize your tasks and workflows.</p>
@@ -46,17 +46,16 @@ import { AnimateDirective } from '@shared/directives/animate.directive';
       </div>
 
       <!-- Main Content Area -->
-      @if (store.isLoading() && store.allFolders().length === 0) {
+      @if (store.isLoading() && store.folders().length === 0) {
         <sb-spinner />
       } @else if (store.error()) {
         <sb-empty-state
           icon="⚠️"
           title="Failed to load folders"
           [message]="store.error()!"
-          [showRetry]="true"
-          (retry)="store.loadAll()"
+          (retry)="store.load()"
         />
-      } @else if (store.allFolders().length === 0) {
+      } @else if (store.folders().length === 0) {
         <sb-empty-state
           icon="📁"
           title="No folders yet"
@@ -68,7 +67,7 @@ import { AnimateDirective } from '@shared/directives/animate.directive';
         </sb-empty-state>
       } @else {
         <div class="folder-grid">
-          @for (folder of store.allFolders(); track folder.id) {
+          @for (folder of store.folders(); track folder.id) {
             <div class="folder-card-wrapper">
               <sb-folder-card
                 [folder]="folder"
@@ -95,7 +94,6 @@ import { AnimateDirective } from '@shared/directives/animate.directive';
           title="Delete Folder"
           message="Are you sure you want to delete '{{ folderToDelete()?.name }}'? This action cannot be undone."
           confirmLabel="Delete"
-          [destructive]="true"
           (confirmed)="onDelete()"
           (cancelled)="folderToDelete.set(null)"
         />
@@ -121,8 +119,8 @@ export class FolderListComponent implements OnInit {
   folderToDelete = signal<FolderDto | null>(null);
 
   ngOnInit(): void {
-    if (this.store.allFolders().length === 0) {
-      this.store.loadAll();
+    if (this.store.folders().length === 0) {
+      this.store.load();
     } else {
       setTimeout(() => this.gsap.staggerIn('.folder-card-wrapper'), 50);
     }
@@ -138,7 +136,7 @@ export class FolderListComponent implements OnInit {
     this.selectedFolder.set(null);
   }
 
-  onFormSave(event: { dto: CreateFolderDto | UpdateFolderDto, isEdit: boolean }): void {
+  async onFormSave(event: { dto: CreateFolderDto | UpdateFolderDto, isEdit: boolean }): Promise<void> {
     const { dto, isEdit } = event;
     const current = this.selectedFolder();
     
@@ -147,28 +145,10 @@ export class FolderListComponent implements OnInit {
 
     if (isEdit && current) {
       const updateDto = dto as UpdateFolderDto;
-      // Optimistic update
-      const updatedMock: FolderDto = { ...current, name: updateDto.name, color: updateDto.color };
-      this.store.updateFolder(updatedMock);
-      
-      this.api.update(current.id, updateDto).subscribe({
-        next: (res) => {
-          this.store.updateFolder(res); // backend truth
-          this.toast.success('Folder updated');
-        },
-        error: () => {
-          this.store.updateFolder(current); // rollback
-        }
-      });
+      await this.store.update(current.id, updateDto);
     } else {
       const createDto = dto as CreateFolderDto;
-      this.api.create(createDto).subscribe({
-        next: (res) => {
-          this.store.addFolder(res);
-          this.toast.success('Folder created! 🎉');
-          // Optional: scaleIn strictly the newly created DOM element
-        }
-      });
+      await this.store.create(createDto);
     }
   }
 
@@ -176,20 +156,11 @@ export class FolderListComponent implements OnInit {
     this.folderToDelete.set(folder);
   }
 
-  onDelete(): void {
+  async onDelete(): Promise<void> {
     const folder = this.folderToDelete();
     if (!folder) return;
     this.folderToDelete.set(null);
 
-    // Optimistically remove from view
-    this.store.removeFolder(folder.id);
-
-    this.api.delete(folder.id).subscribe({
-      next: () => this.toast.info(`Deleted folder: ${folder.name}`),
-      error: () => {
-        // Rollback
-        this.store.addFolder(folder);
-      }
-    });
+    await this.store.remove(folder.id);
   }
 }

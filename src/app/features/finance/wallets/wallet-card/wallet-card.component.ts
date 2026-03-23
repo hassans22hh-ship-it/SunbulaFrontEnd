@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { WalletType, WALLET_META } from '@shared/models/enums';
-import { WalletDto } from '@features/finance/models/finance.models';
+import { WalletType, WALLET_TYPE_META } from '@shared/models/enums';
+import { WalletDto } from '@shared/models/finance.models';
 
 @Component({
   selector: 'sb-wallet-card',
@@ -10,8 +10,8 @@ import { WalletDto } from '@features/finance/models/finance.models';
     <div 
       class="wallet-card p-5 outline-none rounded-2xl flex flex-col justify-between"
       [class.selected]="selected()"
-      [style.background]="wallet().color || 'var(--color-surface)'"
-      [style.color]="wallet().color ? '#fff' : 'var(--color-text)'"
+      [style.background]="'var(--color-surface)'"
+      [style.color]="'var(--color-text)'"
       (click)="clicked.emit(wallet())"
       role="button"
       tabindex="0"
@@ -19,7 +19,7 @@ import { WalletDto } from '@features/finance/models/finance.models';
       <div class="flex justify-between items-start mb-6">
         <div>
           <div class="text-xs uppercase tracking-wider opacity-80 font-medium mb-1 flex items-center gap-1">
-             {{ meta.emoji }} {{ meta.label }}
+             {{ meta.icon }} {{ meta.label }}
           </div>
           <h3 class="font-semibold text-lg line-clamp-1">{{ wallet().name }}</h3>
         </div>
@@ -72,7 +72,7 @@ export class WalletCardComponent {
   editClicked = output<WalletDto>();
 
   get meta() {
-    return WALLET_META[this.wallet().walletType as WalletType] || WALLET_META[WalletType.Cash];
+    return WALLET_TYPE_META[this.wallet().type as unknown as WalletType] || WALLET_TYPE_META[WalletType.Cash];
   }
 
   formatCurrency(value: number, currency: string = 'USD'): string {

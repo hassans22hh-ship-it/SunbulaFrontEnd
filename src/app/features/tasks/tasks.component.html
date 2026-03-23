@@ -1,0 +1,106 @@
+<div class="page" sbPageTransition>
+  <div class="page-header">
+    <h1 class="section-title">✅ Tasks</h1>
+    <sb-button (click)="openCreate()">+ New Task</sb-button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab" [class.tab--active]="tab() === 'active'" (click)="tab.set('active')">Active</button>
+    <button class="tab" [class.tab--active]="tab() === 'completed'" (click)="tab.set('completed')">Completed</button>
+    <button class="tab" [class.tab--active]="tab() === 'archived'" (click)="tab.set('archived')">Archived</button>
+  </div>
+
+  @if (store.isLoading()) {
+    <sb-spinner size="lg" />
+  } @else {
+    @let currentTasks = tab() === 'active' ? store.activeTasks() : tab() === 'completed' ? store.completedTasks() : store.archivedTasks();
+    @if (currentTasks.length === 0) {
+      <sb-empty-state icon="✅" heading="No tasks here" message="Create a task to get started!" />
+    } @else {
+      <div class="task-list">
+        @for (task of currentTasks; track task.id) {
+          <sb-card [hoverable]="true">
+            <div class="task-card">
+              <div class="task-color" [style.background]="task.color"></div>
+              <div class="task-info" (click)="openEdit(task)">
+                <div class="task-top">
+                  @if (task.emoji) { <span class="task-emoji">{{ task.emoji }}</span> }
+                  <h3 class="task-title">{{ task.title }}</h3>
+                </div>
+                <div class="task-meta">
+                  <sb-behavior-badge [behavior]="task.behaviorType" />
+                  @if (task.folder) {
+                    <span class="task-folder">📁 {{ task.folder }}</span>
+                  }
+                </div>
+              </div>
+              <div class="task-actions">
+                @if (tab() === 'active') {
+                  <button class="action-btn" title="Complete" (click)="store.complete(task.id)">✅</button>
+                  <button class="action-btn" title="Archive" (click)="store.archive(task.id)">📦</button>
+                }
+                @if (tab() === 'archived') {
+                  <button class="action-btn" title="Restore" (click)="store.restore(task.id)">♻️</button>
+                }
+                <button class="action-btn action-btn--danger" title="Delete" (click)="confirmDelete(task)">🗑️</button>
+              </div>
+            </div>
+          </sb-card>
+        }
+      </div>
+    }
+  }
+</div>
+
+<!-- Create/Edit Modal -->
+@if (showForm()) {
+  <sb-modal [title]="editing() ? 'Edit Task' : 'New Task'" (close)="showForm.set(false)">
+    <form [formGroup]="form" (ngSubmit)="onSave()" class="task-form">
+      <div class="form-group">
+        <label class="form-label">Title</label>
+        <input formControlName="title" class="input-field" placeholder="Task title">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Emoji</label>
+          <input formControlName="emoji" class="input-field" placeholder="📝">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Color</label>
+          <input formControlName="color" type="color" class="color-picker">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Behavior</label>
+        <select formControlName="behaviorType" class="input-field">
+          @for (b of behaviors; track b) {
+            <option [value]="b">{{ b === 0 ? '🟢 Positive' : b === 1 ? '🔵 Neutral' : b === 2 ? '🔴 Negative' : '🟡 Rest' }}</option>
+          }
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Folder (optional)</label>
+        <select formControlName="folderId" class="input-field">
+          <option value="">No folder</option>
+          @for (f of folders.folders(); track f.id) {
+            <option [value]="f.id">{{ f.name }}</option>
+          }
+        </select>
+      </div>
+      <div modal-footer>
+        <sb-button variant="ghost" (click)="showForm.set(false)">Cancel</sb-button>
+        <sb-button type="submit" [disabled]="form.invalid">{{ editing() ? 'Update' : 'Create' }}</sb-button>
+      </div>
+    </form>
+  </sb-modal>
+}
+
+<!-- Delete Confirm -->
+@if (showDelete()) {
+  <sb-confirm-dialog
+    title="Delete Task"
+    [message]="'Delete \'' + deleting()?.title + '\'?'"
+    (confirmed)="onDelete()"
+    (cancelled)="showDelete.set(false)" />
+}

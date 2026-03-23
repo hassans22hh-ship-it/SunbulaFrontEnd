@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, inject, input, OnInit, output } fro
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { SbModalComponent } from '@shared/ui/modal/sb-modal.component';
 import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
-import { TransactionDto, CreateTransactionDto, WalletDto, FinancialCategoryDto } from '@features/finance/models/finance.models';
+import { FinancialTransactionDto as TransactionDto, CreateFinancialTransactionDto as CreateTransactionDto, WalletDto, FinancialCategoryDto } from '@shared/models/finance.models';
 import { TransactionType } from '@shared/models/enums';
 
 @Component({
@@ -75,17 +75,17 @@ import { TransactionType } from '@shared/models/enums';
           <div class="form-group col-span-1">
             @if (form.value.type === TransactionType.Transfer) {
               <label class="label-text">To Wallet</label>
-              <select class="input-field" formControlName="toWalletId">
+              <select class="input-field" formControlName="destinationWalletId">
                 @for (w of wallets(); track w.id) {
                   <option [value]="w.id" [disabled]="w.id === form.value.walletId">{{ w.name }}</option>
                 }
               </select>
             } @else {
               <label class="label-text">Category</label>
-              <select class="input-field" formControlName="categoryId">
+              <select class="input-field" formControlName="financialCategoryId">
                 <option [value]="null">Select Category...</option>
                 @for (c of categoriesForType(); track c.id) {
-                  <option [value]="c.id">{{ c.icon }} {{ c.name }}</option>
+                  <option [value]="c.id">{{ c.name }}</option>
                 }
               </select>
             }
@@ -95,7 +95,7 @@ import { TransactionType } from '@shared/models/enums';
         <!-- Notes -->
         <div class="form-group mb-6">
           <label class="label-text">Notes / Description (Optional)</label>
-          <input class="input-field" type="text" formControlName="notes" placeholder="What was this for?">
+          <input class="input-field" type="text" formControlName="description" placeholder="What was this for?">
         </div>
 
         <div class="flex justify-end gap-3">
@@ -135,10 +135,10 @@ export class TransactionFormComponent implements OnInit {
     amount:          [null as number | null, [Validators.required, Validators.min(0.01)]],
     type:            [TransactionType.Expense, Validators.required],
     transactionDate: [new Date().toISOString().split('T')[0], Validators.required],
-    walletId:        ['', Validators.required],
-    categoryId:      [null as string | null],
-    toWalletId:      [null as string | null],
-    notes:           ['']
+    walletId:            ['', Validators.required],
+    financialCategoryId: [null as string | null],
+    destinationWalletId: [null as string | null],
+    description:         ['']
   });
 
   ngOnInit(): void {
@@ -151,8 +151,8 @@ export class TransactionFormComponent implements OnInit {
         type: t.type,
         transactionDate: t.transactionDate.split('T')[0],
         walletId: t.walletId,
-        categoryId: t.categoryId,
-        notes: t.notes
+        financialCategoryId: t.financialCategoryId,
+        description: t.description
       });
     } else {
       // Default creation state
@@ -167,8 +167,7 @@ export class TransactionFormComponent implements OnInit {
   }
 
   categoriesForType(): FinancialCategoryDto[] {
-    const t = this.form.value.type;
-    return this.categories().filter(c => c.type === t);
+    return this.categories();
   }
 
   onSubmit(): void {
@@ -180,13 +179,13 @@ export class TransactionFormComponent implements OnInit {
     const v = this.form.getRawValue();
     
     const dto: CreateTransactionDto = {
-      walletId:        v.walletId!,
-      amount:          v.amount as number,
-      type:            v.type!,
-      transactionDate: new Date(v.transactionDate!).toISOString(),
-      categoryId:      v.type === TransactionType.Transfer ? null : v.categoryId,
-      toWalletId:      v.type === TransactionType.Transfer ? v.toWalletId : null,
-      notes:           v.notes
+      walletId:            v.walletId!,
+      amount:              v.amount as number,
+      type:                v.type!,
+      transactionDate:     new Date(v.transactionDate!).toISOString(),
+      financialCategoryId: v.type === TransactionType.Transfer ? undefined : (v.financialCategoryId || undefined),
+      destinationWalletId: v.type === TransactionType.Transfer ? (v.destinationWalletId || undefined) : undefined,
+      description:         v.description || undefined
     };
 
     this.saved.emit(dto);

@@ -1,29 +1,26 @@
 <header class="sb-topbar">
-  <!-- Left: page title slot -->
-  <div class="topbar-left">
-    <ng-content />
+  <div class="sb-topbar__left">
+    <h1 class="sb-topbar__greeting">Welcome back! 👋</h1>
   </div>
 
-  <!-- Right: Coins + Theme + User -->
-  <div class="topbar-right">
-    <!-- Coin Balance -->
-    <div #coinEl class="coin-badge">
-      <span>🪙</span>
-      <span>{{ auth.coinBalance() | coins:false }}</span>
-    </div>
-
+  <div class="sb-topbar__right">
     <!-- Streak -->
-    <div class="streak-badge">
-      🔥 <span>{{ auth.streakDays() }}</span>
+    <div class="sb-topbar__streak" title="Consecutive streak days">
+      🔥 {{ auth.streakDays() }} days
     </div>
 
-    <!-- Theme Toggle -->
-    <button class="icon-btn" (click)="toggleTheme()" [title]="isDark() ? 'Switch to Light' : 'Switch to Dark'">
-      {{ isDark() ? '☀️' : '🌙' }}
+    <!-- Coin balance -->
+    <div class="sb-topbar__coins">
+      {{ auth.coinBalance() | coins }}
+    </div>
+
+    <!-- Theme toggle -->
+    <button class="sb-topbar__theme-btn" (click)="theme.toggle()" title="Toggle theme">
+      {{ theme.isDark() ? '☀️' : '🌙' }}
     </button>
 
     <!-- Logout -->
-    <button class="icon-btn" (click)="logout()" title="Logout">
+    <button class="sb-topbar__logout" (click)="logout()" title="Sign out">
       🚪
     </button>
   </div>

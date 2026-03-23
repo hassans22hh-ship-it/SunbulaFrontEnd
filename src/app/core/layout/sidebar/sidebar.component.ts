@@ -5,9 +5,8 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
-import { AuthService } from '../../auth/auth.service';
-import { GsapService } from '../../animation/gsap.service';
-import { CoinsPipe } from '../../../shared/pipes/coins.pipe';
+import { AuthService } from '@core/auth/auth.service';
+import { CoinsPipe } from '@shared/pipes/coins.pipe';
 
 interface NavItem {
   path:  string;
@@ -23,6 +22,7 @@ const NAV_ITEMS: NavItem[] = [
   { path: '/timeline',   label: 'Timeline',     icon: '📅' },
   { path: '/reports',    label: 'Reports',      icon: '📈' },
   { path: '/finance',    label: 'Finance',      icon: '💰' },
+  { path: '/debts',      label: 'Debts',        icon: '📋' },
   { path: '/store',      label: 'Plant Store',  icon: '🌱' },
   { path: '/settings',   label: 'Settings',     icon: '⚙️' },
 ];
@@ -33,7 +33,7 @@ const NAV_ITEMS: NavItem[] = [
   imports: [RouterLink, RouterLinkActive, CoinsPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.css',
+  styleUrl: './sidebar.component.scss',
 })
 export class SidebarComponent {
   protected readonly auth     = inject(AuthService);

@@ -1,0 +1,58 @@
+<div class="page" sbPageTransition>
+  <div class="page-header">
+    <h1 class="section-title">📁 Folders</h1>
+    <sb-button (click)="openCreate()">+ New Folder</sb-button>
+  </div>
+
+  @if (store.isLoading()) {
+    <sb-spinner size="lg" />
+  } @else if (store.folders().length === 0) {
+    <sb-empty-state icon="📁" heading="No folders yet" message="Create a folder to organize your tasks">
+      <sb-button variant="outline" (click)="openCreate()">Create First Folder</sb-button>
+    </sb-empty-state>
+  } @else {
+    <div class="folder-grid">
+      @for (folder of store.folders(); track folder.id) {
+        <sb-card [hoverable]="true">
+          <div class="folder-card" (click)="openEdit(folder)">
+            <div class="folder-color" [style.background]="folder.color"></div>
+            <div class="folder-info">
+              <h3 class="folder-name">{{ folder.name }}</h3>
+              <span class="folder-count">{{ folder.taskCount }} tasks</span>
+            </div>
+            <button class="folder-delete" (click)="$event.stopPropagation(); confirmDelete(folder)">🗑️</button>
+          </div>
+        </sb-card>
+      }
+    </div>
+  }
+</div>
+
+<!-- Create/Edit Modal -->
+@if (showForm()) {
+  <sb-modal [title]="editing() ? 'Edit Folder' : 'New Folder'" (close)="showForm.set(false)">
+    <form [formGroup]="form" (ngSubmit)="onSave()" class="folder-form">
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <input formControlName="name" class="input-field" placeholder="Folder name">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Color</label>
+        <input formControlName="color" type="color" class="color-picker">
+      </div>
+      <div modal-footer>
+        <sb-button variant="ghost" (click)="showForm.set(false)">Cancel</sb-button>
+        <sb-button type="submit" [disabled]="form.invalid">{{ editing() ? 'Update' : 'Create' }}</sb-button>
+      </div>
+    </form>
+  </sb-modal>
+}
+
+<!-- Delete Confirm -->
+@if (showDelete()) {
+  <sb-confirm-dialog
+    title="Delete Folder"
+    [message]="'Delete \'' + deleting()?.name + '\'? This cannot be undone.'"
+    (confirmed)="onDelete()"
+    (cancelled)="showDelete.set(false)" />
+}

@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, computed } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { TaskDto } from '@features/tasks/models/task.models';
-import { TimerSessionDto } from '@features/timer/models/timer.models';
+import { TaskDto } from '@shared/models/task.models';
+import { TimeSessionDto } from '@shared/models/timer.models';
 import { TaskStatus } from '@shared/models/enums';
 import { DurationPipe } from '@shared/pipes/duration.pipe';
 
@@ -15,7 +15,7 @@ import { DurationPipe } from '@shared/pipes/duration.pipe';
 })
 export class DailySummaryComponent {
   tasks    = input<TaskDto[]>([]);
-  sessions = input<TimerSessionDto[]>([]);
+  sessions = input<TimeSessionDto[]>([]);
 
   activities = computed(() => {
     const today = new Date().toDateString();
@@ -23,7 +23,7 @@ export class DailySummaryComponent {
     const sessions = this.sessions();
 
     const doneTasks = tasks
-      .filter(t => t.status === TaskStatus.Done)
+      .filter(t => t.status === TaskStatus.Completed)
       .filter(t => new Date(t.updatedAt || t.createdAt).toDateString() === today)
       .map(t => ({
         id: `task_${t.id}`,
@@ -39,10 +39,10 @@ export class DailySummaryComponent {
       .map(s => ({
         id: `session_${s.id}`,
         type: 'session',
-        title: s.notes || 'Focus Session',
+        title: s.taskTitle || 'Focus Session',
         time: new Date(s.endTime || s.startTime),
-        color: 'var(--color-primary)',
-        durationSecs: s.duration
+        color: s.taskColor || 'var(--color-primary)',
+        durationSecs: s.durationSeconds || 0
       }));
 
     return [...doneTasks, ...todaySessions].sort((a, b) => b.time.getTime() - a.time.getTime());

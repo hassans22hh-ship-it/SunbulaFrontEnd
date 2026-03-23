@@ -1,51 +1,108 @@
-<div class="dashboard-page" sbPage>
-
-  <!-- Greeting Header -->
-  <div class="greeting-header" sbAnimate="slideLeft">
-    <div class="greeting-text">
-      <h1 class="greeting-title">
-        {{ getGreeting() }}, {{ auth.user()?.firstName || 'Archivist' }}.
-      </h1>
-      <p class="greeting-sub">
-        Today is {{ today | date:'EEEE, MMMM d' }}.
-        You have
-        <strong class="priority-count">{{ tasksStore.todoTasks().length }} high-priority tasks</strong>
-        requiring meticulous documentation.
-      </p>
+<div class="page" sbPageTransition>
+  <div class="dashboard-header">
+    <div>
+      <h1 class="greeting">{{ greeting }}, {{ auth.user()?.firstName }} 👋</h1>
+      <p class="greeting-sub">Here's your productivity overview for today</p>
     </div>
-    <div class="greeting-actions">
-      <button class="btn-secondary-dash">🗂 Catalog New Entry</button>
-      <button class="btn-outline-dash">📅 View Schedule</button>
+    <div class="header-badges">
+      <span class="streak-badge">🔥 {{ streak() }} day streak</span>
+      <span class="coin-badge">{{ auth.coinBalance() | coins }}</span>
     </div>
   </div>
 
-  <!-- Stats & Score Row -->
-  <div class="stats-score-row" sbAnimate="fadeUp">
-    <sb-stats-bar
-      class="stats-bar-wrap"
-      [tasksCompleted]="tasksStore.doneTasks().length"
-      [focusTimeSecs]="timerStore.todaysTotalSecs()"
-      [streakDays]="auth.streakDays()"
-      [coinsEarnedToday]="todaysCoinsEarned()"
-    />
-  </div>
-
-  <!-- Main Grid -->
-  <div class="dashboard-grid" sbAnimate="fadeUp" style="animation-delay:0.1s">
-
-    <!-- Left: Active Timer -->
-    <div class="grid-timer">
-      <sb-active-timer-card />
+  <!-- Stats Row -->
+  @if (loading()) {
+    <sb-spinner size="lg" />
+  } @else {
+    <div class="stats-grid">
+      <sb-card>
+        <div class="stat">
+          <span class="stat-icon">⏱️</span>
+          <div class="stat-info">
+            <span class="stat-value">{{ dailySummary()?.totalTrackedSeconds ?? 0 | duration }}</span>
+            <span class="stat-label">Tracked today</span>
+          </div>
+        </div>
+      </sb-card>
+      <sb-card>
+        <div class="stat">
+          <span class="stat-icon">📋</span>
+          <div class="stat-info">
+            <span class="stat-value">{{ dailySummary()?.sessionCount ?? 0 }}</span>
+            <span class="stat-label">Sessions today</span>
+          </div>
+        </div>
+      </sb-card>
+      <sb-card>
+        <div class="stat">
+          <span class="stat-icon">🪙</span>
+          <div class="stat-info">
+            <span class="stat-value">{{ dailySummary()?.coinsEarned ?? 0 | coins }}</span>
+            <span class="stat-label">Coins earned today</span>
+          </div>
+        </div>
+      </sb-card>
+      <sb-card>
+        <div class="stat">
+          <span class="stat-icon">⭐</span>
+          <div class="stat-info">
+            <span class="stat-value">{{ dailySummary()?.topTask ?? 'None' }}</span>
+            <span class="stat-label">Top task today</span>
+          </div>
+        </div>
+      </sb-card>
     </div>
 
-    <!-- Right: Daily Summary -->
-    <div class="grid-summary">
-      <sb-daily-summary
-        [tasks]="tasksStore.allTasks()"
-        [sessions]="timerStore.todaysSessions()"
-      />
+    <!-- Active Timer Card -->
+    @if (timer.isRunning()) {
+      <sb-card padding="lg">
+        <div class="active-timer">
+          <div class="active-timer__pulse"></div>
+          <div class="active-timer__info">
+            <span class="active-timer__label">Currently tracking</span>
+            <span class="active-timer__task">{{ timer.activeSession()?.taskTitle }}</span>
+          </div>
+          <sb-button variant="danger" size="sm" (click)="timer.stop()">Stop</sb-button>
+        </div>
+      </sb-card>
+    }
+
+    <!-- Behavior Breakdown -->
+    @if (dailySummary()?.behaviorBreakdown?.length) {
+      <div class="breakdown-section">
+        <h2 class="subsection-title">Today's Behavior Mix</h2>
+        <div class="breakdown-grid">
+          @for (item of dailySummary()!.behaviorBreakdown; track item.behaviorType) {
+            <sb-card padding="sm">
+              <div class="breakdown-item">
+                <sb-behavior-badge [behavior]="item.behaviorType" />
+                <span class="breakdown-time">{{ item.totalSeconds | duration }}</span>
+                <div class="breakdown-bar">
+                  <div class="breakdown-fill" [style.width.%]="item.percentage"
+                       [style.background]="'var(' + behaviorMeta[item.behaviorType].colorVar + ')'"></div>
+                </div>
+                <span class="breakdown-pct">{{ item.percentage | number:'1.0-0' }}%</span>
+              </div>
+            </sb-card>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Quick Tasks -->
+    <div class="quick-section">
+      <h2 class="subsection-title">Quick Start ({{ tasks.activeTasks().length }} active tasks)</h2>
+      <div class="quick-grid">
+        @for (task of tasks.activeTasks().slice(0, 6); track task.id) {
+          <sb-card [hoverable]="true" (click)="timer.start(task.id)">
+            <div class="quick-task">
+              <span class="quick-dot" [style.background]="task.color"></span>
+              @if (task.emoji) { <span>{{ task.emoji }}</span> }
+              <span class="quick-name">{{ task.title }}</span>
+            </div>
+          </sb-card>
+        }
+      </div>
     </div>
-
-  </div>
-
+  }
 </div>

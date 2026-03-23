@@ -1,4 +1,3 @@
-/* core/animation/gsap.service.ts */
 import { Injectable, inject, NgZone } from '@angular/core';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -10,7 +9,7 @@ gsap.registerPlugin(ScrollTrigger, TextPlugin);
 export class GsapService {
   private readonly zone = inject(NgZone);
 
-  // All GSAP runs outside NgZone — no unnecessary change detection
+  /** All GSAP runs outside Angular — no unnecessary change detection */
   run<T>(fn: () => T): T {
     return this.zone.runOutsideAngular(fn);
   }

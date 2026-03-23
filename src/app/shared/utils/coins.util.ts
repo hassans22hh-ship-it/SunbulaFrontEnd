@@ -1,4 +1,4 @@
-import { BehaviorCategory, BEHAVIOR_COIN_RATES } from '../models/enums';
+import { BehaviorCategory, BEHAVIOR_COIN_RATES } from '@shared/models/enums';
 
 /**
  * Calculate coins earned for a session
@@ -7,7 +7,7 @@ import { BehaviorCategory, BEHAVIOR_COIN_RATES } from '../models/enums';
  */
 export const calculateCoins = (seconds: number, behavior: BehaviorCategory): number => {
   const hours = seconds / 3600;
-  const rate   = BEHAVIOR_COIN_RATES[behavior];
+  const rate  = BEHAVIOR_COIN_RATES[behavior];
   return Math.round(hours * rate * 100) / 100;
 };
 
@@ -26,7 +26,7 @@ export const formatBalance = (n: number): string =>
 /**
  * Check if user can afford a plant
  */
-export const canAfford = (balance: number, price: number): boolean => balance >= price;
+export const canAffordPlant = (balance: number, price: number): boolean => balance >= price;
 
 /**
  * How many more coins a user needs

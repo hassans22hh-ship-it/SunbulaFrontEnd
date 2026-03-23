@@ -6,46 +6,34 @@ import {
   HttpErrorResponse,
 } from '@angular/common/http';
 import { catchError, switchMap, throwError } from 'rxjs';
-import { from } from 'rxjs';
 import { AuthService } from './auth.service';
-
-let isRefreshing = false;
 
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const auth = inject(AuthService);
-  const isAuthEndpoint =
-    req.url.includes('/api/Authentication/login') ||
-    req.url.includes('/api/Authentication/register') ||
-    req.url.includes('/api/Authentication/refresh');
-  const hasRefreshToken = !!sessionStorage.getItem('sb_refresh');
-
-  // Attach token if available
   const token = auth.accessToken();
-  const authReq = token ? addToken(req, token) : req;
 
-  return next(authReq).pipe(
-    catchError((error: HttpErrorResponse) => {
-      if (error.status === 401 && !isAuthEndpoint && hasRefreshToken && !isRefreshing) {
-        isRefreshing = true;
-        return from(auth.performRefresh()).pipe(
-          switchMap(newToken => {
-            isRefreshing = false;
-            return next(addToken(req, newToken));
-          }),
-          catchError(refreshError => {
-            isRefreshing = false;
+  const withToken = (r: HttpRequest<unknown>, t: string) =>
+    r.clone({ setHeaders: { Authorization: `Bearer ${t}` } });
+
+  const authedReq = token ? withToken(req, token) : req;
+
+  return next(authedReq).pipe(
+    catchError((err: HttpErrorResponse) => {
+      if (
+        err.status === 401 &&
+        !req.url.includes('/refresh') &&
+        !req.url.includes('/login') &&
+        !req.url.includes('/register')
+      ) {
+        return auth.refreshTokens().pipe(
+          switchMap(res => next(withToken(req, res.accessToken))),
+          catchError(() => {
             auth.logout();
-            return throwError(() => refreshError);
+            return throwError(() => err);
           }),
         );
       }
-      return throwError(() => error);
+      return throwError(() => err);
     }),
   );
 };
-
-function addToken(req: HttpRequest<unknown>, token: string): HttpRequest<unknown> {
-  return req.clone({
-    setHeaders: { Authorization: `Bearer ${token}` },
-  });
-}

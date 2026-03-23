@@ -1,55 +1,46 @@
-<aside [class.collapsed]="collapsed()" class="sb-sidebar">
-  <!-- Logo -->
-  <div class="sb-sidebar-logo">
-    <span class="logo-icon">🌻</span>
+<aside class="sb-sidebar" [class.sb-sidebar--collapsed]="collapsed()">
+  <!-- Brand -->
+  <div class="sb-sidebar__brand">
+    <span class="sb-sidebar__logo">🌱</span>
     @if (!collapsed()) {
-      <span class="logo-text">Sunbula</span>
+      <span class="sb-sidebar__title">Sunbula</span>
     }
   </div>
 
-  <!-- Coin balance -->
-  @if (!collapsed()) {
-    <div class="coin-badge mx-3 mb-4 justify-center">
-      <span>🪙</span>
-      <span>{{ auth.coinBalance() | coins:false }}</span>
-      <span style="font-size:0.7rem; font-weight:500; opacity:0.7;">coins</span>
-    </div>
-  }
-
   <!-- Navigation -->
-  <nav class="sb-nav">
+  <nav class="sb-sidebar__nav">
     @for (item of navItems; track item.path) {
-      <a
-        [routerLink]="item.path"
-        routerLinkActive="active"
-        class="sb-nav-item"
-        [title]="collapsed() ? item.label : ''"
-      >
-        <span class="nav-icon">{{ item.icon }}</span>
+      <a class="sb-sidebar__link"
+         [routerLink]="item.path"
+         routerLinkActive="sb-sidebar__link--active">
+        <span class="sb-sidebar__icon">{{ item.icon }}</span>
         @if (!collapsed()) {
-          <span class="nav-label">{{ item.label }}</span>
+          <span class="sb-sidebar__label">{{ item.label }}</span>
         }
       </a>
     }
   </nav>
 
-  <!-- Collapse Toggle -->
-  <button class="collapse-btn" (click)="toggleCollapse()">
+  <!-- User section -->
+  <div class="sb-sidebar__footer">
+    @if (!collapsed()) {
+      <div class="sb-sidebar__coin-badge">
+        🪙 {{ auth.coinBalance() | coins }}
+      </div>
+    }
+    <div class="sb-sidebar__user">
+      <div class="sb-sidebar__avatar">{{ userInitials() }}</div>
+      @if (!collapsed()) {
+        <div class="sb-sidebar__user-info">
+          <span class="sb-sidebar__user-name">{{ auth.user()?.fullName }}</span>
+          <span class="sb-sidebar__user-email">{{ auth.user()?.email }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Collapse toggle -->
+  <button class="sb-sidebar__toggle" (click)="toggleCollapse()">
     {{ collapsed() ? '→' : '←' }}
   </button>
-
-  <!-- User -->
-  @if (!collapsed()) {
-    <div class="sb-sidebar-user">
-      <div class="user-avatar">{{ userInitials() }}</div>
-      <div>
-        <div style="font-weight: 600; font-size: 0.875rem; color: var(--color-text);">
-          {{ auth.user()?.fullName }}
-        </div>
-        <div style="font-size: 0.75rem; color: var(--color-text-muted);">
-          🔥 {{ auth.streakDays() }} day streak
-        </div>
-      </div>
-    </div>
-  }
 </aside>

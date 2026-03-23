@@ -1,0 +1,9 @@
+<div class="sb-toast-container">
+  @for (toast of toastService.toasts(); track toast.id) {
+    <div [class]="'sb-toast sb-toast--' + toast.type + ' animate-fadeInUp'">
+      <span class="sb-toast__icon">{{ icon(toast.type) }}</span>
+      <span class="sb-toast__message">{{ toast.message }}</span>
+      <button class="sb-toast__close" (click)="toastService.remove(toast.id)">✕</button>
+    </div>
+  }
+</div>

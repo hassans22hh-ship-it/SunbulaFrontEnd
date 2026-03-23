@@ -1,41 +1,18 @@
-import {
-  Directive,
-  ElementRef,
-  inject,
-  NgZone,
-  OnDestroy,
-  OnInit,
-  output,
-} from '@angular/core';
+import { Directive, ElementRef, inject, output } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 
-/**
- * Emits when a click event occurs outside the host element.
- * Usage: <div (clickOutside)="close()">
- */
-@Directive({
-  selector: '[clickOutside]',
-  standalone: true,
-})
-export class ClickOutsideDirective implements OnInit, OnDestroy {
-  clickOutside = output<void>();
+@Directive({ selector: '[sbClickOutside]', standalone: true })
+export class ClickOutsideDirective {
+  private readonly el  = inject(ElementRef);
+  private readonly doc = inject(DOCUMENT);
 
-  private readonly el   = inject(ElementRef);
-  private readonly zone = inject(NgZone);
+  readonly sbClickOutside = output<void>();
 
-  private listener!: (e: MouseEvent) => void;
-
-  ngOnInit(): void {
-    this.zone.runOutsideAngular(() => {
-      this.listener = (e: MouseEvent) => {
-        if (!this.el.nativeElement.contains(e.target)) {
-          this.zone.run(() => this.clickOutside.emit());
-        }
-      };
-      document.addEventListener('click', this.listener, true);
+  constructor() {
+    this.doc.addEventListener('click', (event: Event) => {
+      if (!this.el.nativeElement.contains(event.target)) {
+        this.sbClickOutside.emit();
+      }
     });
-  }
-
-  ngOnDestroy(): void {
-    document.removeEventListener('click', this.listener, true);
   }
 }

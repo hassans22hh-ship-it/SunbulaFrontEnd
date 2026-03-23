@@ -1,0 +1,24 @@
+.page { max-width: 1280px; margin: 0 auto; }
+.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.summary-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+.stat { display: flex; align-items: center; gap: 0.75rem; }
+.stat-icon { font-size: 1.5rem; }
+.stat-info { display: flex; flex-direction: column; }
+.stat-value { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; color: var(--color-text); }
+.stat-label { font-size: 0.75rem; color: var(--color-text-muted); }
+.tabs { display: flex; gap: 0.25rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--color-border); }
+.tab { background: none; border: none; padding: 0.5rem 1rem; font-weight: 500; color: var(--color-text-muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; &--active { color: var(--color-primary); border-bottom-color: var(--color-primary); } }
+.debt-list { display: flex; flex-direction: column; gap: 0.5rem; }
+.debt-row { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; }
+.debt-info { flex: 1; min-width: 120px; }
+.debt-person { font-weight: 700; color: var(--color-text); display: block; }
+.debt-desc { font-size: 0.75rem; color: var(--color-text-muted); }
+.debt-amounts { text-align: right; }
+.debt-total { font-family: var(--font-mono); font-weight: 700; color: var(--color-text); display: block; }
+.debt-remaining { font-size: 0.75rem; color: var(--color-text-muted); }
+.debt-actions { display: flex; gap: 0.375rem; align-items: center; }
+.action-btn { background: none; border: none; font-size: 0.875rem; cursor: pointer; opacity: 0.5; &:hover { opacity: 1; } }
+.modal-form { display: flex; flex-direction: column; gap: 1rem; }
+.form-group { display: flex; flex-direction: column; gap: 0.375rem; }
+.form-label { font-size: 0.8125rem; font-weight: 600; color: var(--color-text); }
+.payment-context { font-size: 0.875rem; color: var(--color-text-muted); margin: 0; }

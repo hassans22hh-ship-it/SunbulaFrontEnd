@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
-import { PlantDto } from '@features/plant-store/models/plant-store.models';
+import { PlantDto } from '@shared/models/plant.models';
 import { PlantLevel, GrowthStage, PLANT_LEVEL_META, GROWTH_STAGE_META } from '@shared/models/enums';
 
 @Component({
@@ -12,14 +12,14 @@ import { PlantLevel, GrowthStage, PLANT_LEVEL_META, GROWTH_STAGE_META } from '@s
       
       <!-- Top Badges -->
       <div class="flex justify-between items-start mb-4">
-        <div class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full"
-             [style.background]="levelMeta.color + '20'"
-             [style.color]="levelMeta.color">
+        <div class="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full border"
+             [style.border-color]="'var(--color-' + levelMeta.variant + ')'"
+             [style.color]="'var(--color-' + levelMeta.variant + ')'">
           {{ levelMeta.label }}
         </div>
         
         <div class="coin-badge text-xs px-2 py-1">
-          {{ plant().basePrice }} 🪙
+          {{ plant().price }} 🪙
         </div>
       </div>
 
@@ -50,10 +50,10 @@ export class PlantCardComponent {
   clicked = output<PlantDto>();
 
   get levelMeta() {
-    return PLANT_LEVEL_META[this.plant().plantLevel as PlantLevel] || PLANT_LEVEL_META[PlantLevel.Beginner];
+    return PLANT_LEVEL_META[this.plant().level as PlantLevel] || PLANT_LEVEL_META[PlantLevel.Beginner];
   }
 
   get stageMeta() {
-    return GROWTH_STAGE_META[this.plant().growthStage as GrowthStage] || GROWTH_STAGE_META[GrowthStage.Seedling];
+    return GROWTH_STAGE_META[GrowthStage.Seed];
   }
 }

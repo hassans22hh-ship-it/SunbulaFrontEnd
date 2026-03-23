@@ -1,13 +1,13 @@
 <div class="timeline-page" sbPage>
 
   <!-- Page Header -->
-  <div class="timeline-header" sbAnimate="fadeUp">
+  <div class="timeline-header" sbAnimate="fadeInUp">
     <h1 class="timeline-title">Your Timeline</h1>
     <p class="timeline-sub">A chronological view of your day's productivity.</p>
   </div>
 
   <!-- Day Navigator -->
-  <div sbAnimate="fadeUp" style="animation-delay:0.1s">
+  <div sbAnimate="fadeInUp" style="animation-delay:0.1s">
     <sb-day-navigator
       [date]="currentDate()"
       (previous)="changeDay(-1)"
@@ -16,7 +16,7 @@
   </div>
 
   <!-- Events -->
-  <div class="timeline-events" sbAnimate="fadeUp" style="animation-delay:0.2s">
+  <div class="timeline-events" sbAnimate="fadeInUp" style="animation-delay:0.2s">
     @if (eventsForDay().length === 0) {
       <sb-empty-state
         icon="📅"

@@ -1,0 +1,8 @@
+<div class="sb-empty">
+  <span class="sb-empty__icon">{{ icon() }}</span>
+  <h3 class="sb-empty__heading">{{ heading() }}</h3>
+  @if (message()) {
+    <p class="sb-empty__message">{{ message() }}</p>
+  }
+  <ng-content />
+</div>
