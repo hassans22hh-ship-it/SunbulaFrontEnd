@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy, signal }
 import { TimerStore } from './store/timer.store';
 import { TasksStore } from '../tasks/store/tasks.store';
 import { SbCardComponent } from '@shared/ui/card/sb-card.component';
-import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
 import { SbEmptyStateComponent } from '@shared/ui/empty-state/sb-empty-state.component';
 import { SbSpinnerComponent } from '@shared/ui/spinner/sb-spinner.component';
 import { SbBehaviorBadgeComponent } from '@shared/ui/behavior-badge/sb-behavior-badge.component';
@@ -10,13 +9,15 @@ import { DurationPipe } from '@shared/pipes/duration.pipe';
 import { CoinsPipe } from '@shared/pipes/coins.pipe';
 import { RelativeDatePipe } from '@shared/pipes/relative-date.pipe';
 import { PageTransitionDirective } from '@core/animation/page-transition.directive';
+import { TimerControlsComponent } from './components/timer-controls/timer-controls.component';
 
 @Component({
   selector: 'sb-timer',
   standalone: true,
   imports: [
-    SbCardComponent, SbButtonComponent, SbEmptyStateComponent, SbSpinnerComponent,
+    SbCardComponent, SbEmptyStateComponent, SbSpinnerComponent,
     SbBehaviorBadgeComponent, DurationPipe, CoinsPipe, RelativeDatePipe, PageTransitionDirective,
+    TimerControlsComponent,
   ],
   templateUrl: './timer.component.html',
   styleUrl: './timer.component.scss',

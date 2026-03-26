@@ -28,6 +28,7 @@ export const TimerStore = signalStore(
   withState(initialState),
   withComputed(({ activeSession }) => ({
     isRunning: computed(() => activeSession() !== null),
+    isPaused:  computed(() => activeSession()?.isPaused ?? false),
     /** Drift-safe elapsed calculation from server startTime */
     elapsedSeconds: computed(() => {
       const session = activeSession();
@@ -85,6 +86,38 @@ export const TimerStore = signalStore(
       } catch (e: unknown) {
         patchState(store, { isLoading: false });
         toast.error((e as { message: string }).message ?? 'Failed to stop timer');
+      }
+    },
+
+    /** Pause the current session */
+    async pauseTimer(): Promise<void> {
+      const session = store.activeSession();
+      if (!session) return;
+
+      patchState(store, { isLoading: true });
+      try {
+        const paused = await firstValueFrom(api.pause(session.id));
+        patchState(store, { activeSession: paused, isLoading: false });
+        toast.success(`Timer paused`);
+      } catch (e: unknown) {
+        patchState(store, { isLoading: false });
+        toast.error((e as { message: string }).message ?? 'Failed to pause timer');
+      }
+    },
+
+    /** Resume the current session */
+    async resumeTimer(): Promise<void> {
+      const session = store.activeSession();
+      if (!session) return;
+
+      patchState(store, { isLoading: true });
+      try {
+        const resumed = await firstValueFrom(api.resume(session.id));
+        patchState(store, { activeSession: resumed, isLoading: false });
+        toast.success(`Timer resumed`);
+      } catch (e: unknown) {
+        patchState(store, { isLoading: false });
+        toast.error((e as { message: string }).message ?? 'Failed to resume timer');
       }
     },
 

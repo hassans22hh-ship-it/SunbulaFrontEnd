@@ -1,0 +1,27 @@
+<div class="page" sbPageTransition>
+  <h1 class="section-title">Delete Account</h1>
+  
+  @if (!showConfirm()) {
+    <sb-card padding="lg">
+      <p class="warning-text">This action is permanent and cannot be undone. All your data will be lost.</p>
+      <form [formGroup]="deleteForm" (ngSubmit)="showConfirm.set(true)" class="settings-form">
+        <div class="form-group">
+          <label class="form-label">Enter your password to proceed</label>
+          <input type="password" formControlName="password" class="input-field">
+        </div>
+        <div class="form-actions">
+          <sb-button type="submit" variant="danger" [disabled]="deleteForm.invalid" [loading]="isDeleting()">Proceed</sb-button>
+        </div>
+      </form>
+    </sb-card>
+  } @else {
+    <sb-confirm-dialog
+      title="Final Warning"
+      message="Are you absolutely sure you want to delete your account?"
+      confirmText="Yes, Delete Permanently"
+      cancelText="Cancel"
+      variant="danger"
+      (confirmed)="confirmDelete()"
+      (cancelled)="showConfirm.set(false)" />
+  }
+</div>

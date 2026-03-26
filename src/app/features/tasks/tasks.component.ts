@@ -1,25 +1,27 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { TasksStore } from './store/tasks.store';
 import { FoldersStore } from '../folders/store/folders.store';
-import { SbCardComponent } from '@shared/ui/card/sb-card.component';
 import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
 import { SbModalComponent } from '@shared/ui/modal/sb-modal.component';
 import { SbEmptyStateComponent } from '@shared/ui/empty-state/sb-empty-state.component';
 import { SbSpinnerComponent } from '@shared/ui/spinner/sb-spinner.component';
-import { SbBehaviorBadgeComponent } from '@shared/ui/behavior-badge/sb-behavior-badge.component';
 import { SbConfirmDialogComponent } from '@shared/ui/confirm-dialog/sb-confirm-dialog.component';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TaskDto } from '@shared/models/task.models';
 import { BehaviorCategory } from '@shared/models/enums';
 import { PageTransitionDirective } from '@core/animation/page-transition.directive';
+import { CoinsPipe } from '@shared/pipes/coins.pipe';
+import { AuthService } from '@core/auth/auth.service';
+import { TaskCardComponent } from './components/task-card/task-card.component';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'sb-tasks',
   standalone: true,
   imports: [
-    SbCardComponent, SbButtonComponent, SbModalComponent, SbEmptyStateComponent,
-    SbSpinnerComponent, SbBehaviorBadgeComponent, SbConfirmDialogComponent,
-    ReactiveFormsModule, PageTransitionDirective,
+    SbButtonComponent, SbModalComponent, SbEmptyStateComponent,
+    SbSpinnerComponent, SbConfirmDialogComponent,
+    ReactiveFormsModule, PageTransitionDirective, TaskCardComponent, CoinsPipe,
   ],
   templateUrl: './tasks.component.html',
   styleUrl: './tasks.component.scss',
@@ -28,6 +30,7 @@ import { PageTransitionDirective } from '@core/animation/page-transition.directi
 export class TasksComponent implements OnInit {
   protected readonly store   = inject(TasksStore);
   protected readonly folders = inject(FoldersStore);
+  protected readonly auth    = inject(AuthService);
   private readonly fb        = inject(FormBuilder);
 
   readonly showForm   = signal(false);
@@ -49,9 +52,15 @@ export class TasksComponent implements OnInit {
     folderId:     [''],
   });
 
+  readonly searchCtrl = new FormControl('');
+
   ngOnInit(): void {
     this.store.load();
     this.folders.load();
+
+    this.searchCtrl.valueChanges.pipe(takeUntilDestroyed()).subscribe(val => {
+      this.store.setSearch(val ?? '');
+    });
   }
 
   openCreate(): void {

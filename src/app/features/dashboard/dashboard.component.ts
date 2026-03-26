@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { AuthService } from '@core/auth/auth.service';
 import { TimerStore } from '../timer/store/timer.store';
 import { TasksStore } from '../tasks/store/tasks.store';
@@ -13,6 +13,7 @@ import { CoinsPipe } from '@shared/pipes/coins.pipe';
 import { BEHAVIOR_META, BehaviorCategory } from '@shared/models/enums';
 import { PageTransitionDirective } from '@core/animation/page-transition.directive';
 import { DecimalPipe } from '@angular/common';
+import { TaskDto } from '@shared/models/task.models';
 
 @Component({
   selector: 'sb-dashboard',
@@ -37,8 +38,30 @@ export class DashboardComponent implements OnInit {
 
   protected readonly behaviorMeta = BEHAVIOR_META;
 
+  readonly recentTasks = computed(() => {
+    const sessions = this.timer.sessions();
+    const allTasks = this.tasks.activeTasks();
+    
+    // Extract unique taskIds from sessions in order (most recent first)
+    const recentIds = [...new Set(sessions.map(s => s.taskId))];
+    
+    // Map IDs to actual tasks, filtering out anything not in activeTasks
+    const recent = recentIds
+      .map(id => allTasks.find(t => t.id === id))
+      .filter((t): t is TaskDto => !!t);
+      
+    // If we have sessions, return them (up to 6)
+    if (recent.length > 0) {
+      return recent.slice(0, 6);
+    }
+    
+    // Fallback: show first 6 active tasks
+    return allTasks.slice(0, 6);
+  });
+
   ngOnInit(): void {
     this.timer.initialize();
+    this.timer.loadPaged(1, 10); // Load last 10 sessions for "Recently Used"
     this.tasks.load();
     this.loadDailyData();
   }

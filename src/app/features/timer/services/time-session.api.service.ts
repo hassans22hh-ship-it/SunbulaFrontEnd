@@ -9,7 +9,7 @@ import { PagedResult } from '@shared/models/enums';
 @Injectable({ providedIn: 'root' })
 export class TimeSessionApiService {
   private readonly http = inject(HttpClient);
-  private readonly BASE = `${environment.apiUrl}/api/TimeSession`;
+  private readonly BASE = `${environment.apiUrl}/api/v1/TimeSession`;
 
   getAll(): Observable<TimeSessionDto[]> {
     return this.http.get<TimeSessionDto[]>(this.BASE);
@@ -35,6 +35,14 @@ export class TimeSessionApiService {
 
   stop(id: string): Observable<TimeSessionDto> {
     return this.http.post<TimeSessionDto>(`${this.BASE}/${id}/stop`, null);
+  }
+
+  pause(id: string): Observable<TimeSessionDto> {
+    return this.http.post<TimeSessionDto>(`${this.BASE}/${id}/pause`, null);
+  }
+
+  resume(id: string): Observable<TimeSessionDto> {
+    return this.http.post<TimeSessionDto>(`${this.BASE}/${id}/resume`, null);
   }
 
   /** Returns null if nothing was active (204) */

@@ -1,0 +1,19 @@
+<div class="page" sbPageTransition>
+  <h1 class="section-title">Reset Coins</h1>
+  
+  @if (!showConfirm()) {
+    <sb-card padding="lg">
+      <p class="warning-text">This will reset your entire coin balance to 0. This cannot be undone.</p>
+      <sb-button variant="danger" (click)="showConfirm.set(true)" [loading]="isResetting()">Reset Coins</sb-button>
+    </sb-card>
+  } @else {
+    <sb-confirm-dialog
+      title="Reset Coins"
+      message="Are you sure you want to reset your coins to 0?"
+      confirmText="Yes, Reset Coins"
+      cancelText="Cancel"
+      variant="danger"
+      (confirmed)="confirmReset()"
+      (cancelled)="showConfirm.set(false)" />
+  }
+</div>

@@ -20,8 +20,10 @@ export class RegisterComponent {
   private readonly auth   = inject(AuthService);
   private readonly router = inject(Router);
 
-  readonly loading = signal(false);
-  readonly error   = signal<string | null>(null);
+  readonly loading             = signal(false);
+  readonly error               = signal<string | null>(null);
+  readonly showPassword        = signal(false);
+  readonly showConfirmPassword = signal(false);
 
   readonly form = this.fb.nonNullable.group({
     firstName:       ['', Validators.required],

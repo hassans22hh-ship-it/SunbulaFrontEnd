@@ -89,11 +89,10 @@
       </div>
     }
 
-    <!-- Quick Tasks -->
     <div class="quick-section">
-      <h2 class="subsection-title">Quick Start ({{ tasks.activeTasks().length }} active tasks)</h2>
+      <h2 class="subsection-title">Quick Start</h2>
       <div class="quick-grid">
-        @for (task of tasks.activeTasks().slice(0, 6); track task.id) {
+        @for (task of recentTasks(); track task.id) {
           <sb-card [hoverable]="true" (click)="timer.start(task.id)">
             <div class="quick-task">
               <span class="quick-dot" [style.background]="task.color"></span>

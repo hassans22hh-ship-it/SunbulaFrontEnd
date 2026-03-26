@@ -1,67 +1,153 @@
-<div class="auth-page">
-  <div class="auth-card animate-scaleIn">
-    <div class="auth-header">
-      <span class="auth-logo">🌱</span>
-      <h1 class="auth-title">Create your account</h1>
-      <p class="auth-subtitle">Join Sunbula and start growing</p>
+<div class="min-h-screen bg-bg flex items-center justify-center p-6 relative overflow-hidden">
+  <!-- Decorative background elements -->
+  <div class="absolute bottom-0 left-0 w-64 h-64 -mb-12 -ml-12 text-primary/5 select-none pointer-events-none">
+    <svg viewBox="0 0 24 24" fill="currentColor" class="w-full h-full">
+      <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+    </svg>
+  </div>
+  <div class="absolute top-0 right-0 w-80 h-80 -mt-16 -mr-16 text-primary/5 select-none pointer-events-none rotate-12">
+    <svg viewBox="0 0 24 24" fill="currentColor" class="w-full h-full">
+      <path d="M11 20A7 7 0 0 1 11 6C16.45 6 20 9 20 9M11 20V14M11 20C6.5 20 4 17 4 17M11 6C11 6 12.5 3 16 2C16 2 15 5 15 8C15 11 11 11 11 11" />
+    </svg>
+  </div>
+
+  <div class="max-w-2xl w-full bg-surface rounded-[2.5rem] shadow-2xl p-8 lg:p-14 relative z-10 border border-border/50 animate-scaleIn">
+    <div class="flex flex-col items-center text-center mb-10">
+      <div class="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
+        <svg viewBox="0 0 24 24" fill="none" class="w-8 h-8 text-primary" stroke="currentColor" stroke-width="2.5">
+          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+        </svg>
+      </div>
+      <h1 class="text-3xl font-display font-bold text-text mb-2">Create your account</h1>
+      <p class="text-text-muted">Start tracking time and growing your garden</p>
     </div>
 
     @if (error()) {
-      <div class="auth-error">{{ error() }}</div>
+      <div class="mb-8 p-4 bg-danger/10 border border-danger/20 rounded-2xl text-danger text-sm flex items-start gap-3 animate-shake">
+        <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5 flex-shrink-0" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        {{ error() }}
+      </div>
     }
 
-    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="auth-form">
-      <div class="form-row">
-        <div class="form-group">
-          <label for="reg-first" class="form-label">First name</label>
-          <input id="reg-first" type="text" formControlName="firstName" class="input-field" placeholder="John" autocomplete="given-name">
+    <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="space-y-2">
+          <label class="text-xs font-bold uppercase tracking-wider text-text-muted">First Name <span class="text-primary">*</span></label>
+          <input type="text" formControlName="firstName" 
+            class="input-field h-12 bg-surface-2 border-transparent focus:bg-surface" 
+            placeholder="Jane">
         </div>
-        <div class="form-group">
-          <label for="reg-last" class="form-label">Last name</label>
-          <input id="reg-last" type="text" formControlName="lastName" class="input-field" placeholder="Doe" autocomplete="family-name">
+        <div class="space-y-2">
+          <label class="text-xs font-bold uppercase tracking-wider text-text-muted">Last Name <span class="text-primary">*</span></label>
+          <input type="text" formControlName="lastName" 
+            class="input-field h-12 bg-surface-2 border-transparent focus:bg-surface" 
+            placeholder="Doe">
         </div>
       </div>
 
-      <div class="form-group">
-        <label for="reg-email" class="form-label">Email</label>
-        <input id="reg-email" type="email" formControlName="email" class="input-field" placeholder="you@example.com" autocomplete="email">
+      <div class="space-y-2">
+        <label class="text-xs font-bold uppercase tracking-wider text-text-muted">Email Address <span class="text-primary">*</span></label>
+        <input type="email" formControlName="email" 
+          class="input-field h-12 bg-surface-2 border-transparent focus:bg-surface" 
+          placeholder="jane.doe&#64;example.com">
       </div>
 
-      <div class="form-group">
-        <label for="reg-phone" class="form-label">Phone (optional)</label>
-        <input id="reg-phone" type="tel" formControlName="phone" class="input-field" placeholder="+966 5xx xxx xxxx" autocomplete="tel">
+      <div class="space-y-2">
+        <label class="text-xs font-bold uppercase tracking-wider text-text-muted">Phone Number <span class="text-text-subtle">(optional)</span></label>
+        <input type="tel" formControlName="phone" 
+          class="input-field h-12 bg-surface-2 border-transparent focus:bg-surface" 
+          placeholder="+1 (555) 000-0000">
       </div>
 
-      <div class="form-group">
-        <label for="reg-password" class="form-label">Password</label>
-        <input id="reg-password" type="password" formControlName="password" class="input-field" placeholder="••••••••" autocomplete="new-password">
-        @if (pw.touched && pw.errors?.['passwordStrength']) {
-          <div class="password-rules">
-            <span [class.rule-ok]="pw.errors?.['passwordStrength']?.hasLength">✓ 8+ characters</span>
-            <span [class.rule-ok]="pw.errors?.['passwordStrength']?.hasUpper">✓ Uppercase</span>
-            <span [class.rule-ok]="pw.errors?.['passwordStrength']?.hasLower">✓ Lowercase</span>
-            <span [class.rule-ok]="pw.errors?.['passwordStrength']?.hasDigit">✓ Number</span>
-            <span [class.rule-ok]="pw.errors?.['passwordStrength']?.hasSpecial">✓ Special char</span>
+      <div class="space-y-2">
+        <label class="text-xs font-bold uppercase tracking-wider text-text-muted">Password <span class="text-primary">*</span></label>
+        <div class="relative">
+          <input [type]="showPassword() ? 'text' : 'password'" formControlName="password" 
+            class="input-field h-12 bg-surface-2 border-transparent focus:bg-surface pr-12" 
+            placeholder="••••••••">
+          <button type="button" (click)="showPassword.set(!showPassword())"
+            class="absolute right-4 top-1/2 -translate-y-1/2 text-text-subtle hover:text-primary transition-colors">
+            @if (showPassword()) {
+              <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="2">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            } @else {
+              <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            }
+          </button>
+        </div>
+        
+        <!-- Strength Meter -->
+        @if (pw.value) {
+          <div class="pt-2">
+            @let errors = pw.errors?.['passwordStrength'];
+            @let score = (!errors ? 4 : (errors.hasLength ? 1 : 0) + (errors.hasUpper ? 1 : 0) + (errors.hasLower ? 1 : 0) + (errors.hasDigit ? 1 : 0));
+            <div class="flex gap-1.5 h-1.5 mb-2">
+              <div class="flex-1 rounded-full bg-border transition-colors duration-500" [class.bg-danger]="score >= 1"></div>
+              <div class="flex-1 rounded-full bg-border transition-colors duration-500" [class.bg-accent]="score >= 2"></div>
+              <div class="flex-1 rounded-full bg-border transition-colors duration-500" [class.bg-warning]="score >= 3"></div>
+              <div class="flex-1 rounded-full bg-border transition-colors duration-500" [class.bg-success]="score >= 4"></div>
+            </div>
+            <div class="flex justify-between items-center text-[11px]">
+              <span class="font-bold uppercase tracking-wider" 
+                [class.text-danger]="score <= 1"
+                [class.text-accent]="score === 2"
+                [class.text-warning]="score === 3"
+                [class.text-success]="score === 4">
+                {{ score <= 1 ? 'Weak' : score === 2 ? 'Fair' : score === 3 ? 'Good' : 'Strong' }} Strength
+              </span>
+              <span class="text-text-subtle font-medium">Min. 8 characters</span>
+            </div>
           </div>
         }
       </div>
 
-      <div class="form-group">
-        <label for="reg-confirm" class="form-label">Confirm password</label>
-        <input id="reg-confirm" type="password" formControlName="confirmPassword" class="input-field" placeholder="••••••••" autocomplete="new-password">
+      <div class="space-y-2">
+        <label class="text-xs font-bold uppercase tracking-wider text-text-muted">Confirm Password <span class="text-primary">*</span></label>
+        <div class="relative">
+          <input [type]="showConfirmPassword() ? 'text' : 'password'" formControlName="confirmPassword" 
+            class="input-field h-12 bg-surface-2 border-transparent focus:bg-surface pr-12" 
+            placeholder="••••••••">
+          <button type="button" (click)="showConfirmPassword.set(!showConfirmPassword())"
+            class="absolute right-4 top-1/2 -translate-y-1/2 text-text-subtle hover:text-primary transition-colors">
+            @if (showConfirmPassword()) {
+              <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="2">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+            } @else {
+              <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="2">
+                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>
+              </svg>
+            }
+          </button>
+        </div>
         @if (form.errors?.['passwordMismatch'] && form.controls.confirmPassword.touched) {
-          <span class="form-error">Passwords do not match</span>
+          <p class="text-[11px] text-danger font-medium pl-1 animate-fadeIn">Passwords do not match</p>
         }
       </div>
 
-      <sb-button type="submit" variant="primary" [fullWidth]="true" [loading]="loading()" [disabled]="form.invalid">
-        Create Account
-      </sb-button>
+      <div class="pt-4">
+        <sb-button type="submit" variant="primary" [fullWidth]="true" [loading]="loading()" [disabled]="form.invalid" class="h-14 text-lg rounded-2xl">
+          Create Account
+        </sb-button>
+      </div>
     </form>
 
-    <div class="auth-footer">
-      <span class="auth-text">Already have an account?</span>
-      <a routerLink="/auth/login" class="auth-link">Sign in</a>
+    <div class="mt-8 text-center space-y-4">
+      <p class="text-xs text-text-muted leading-relaxed max-w-sm mx-auto">
+        By clicking "Create Account", you agree to Sunbula's 
+        <a href="#" class="font-bold text-primary">Terms of Service</a> and 
+        <a href="#" class="font-bold text-primary">Privacy Policy</a>.
+      </p>
+      <div class="h-px w-12 bg-border mx-auto"></div>
+      <p class="text-sm text-text-muted">
+        Already have an account? 
+        <a routerLink="/auth/login" class="font-bold text-primary hover:text-primary-light transition-colors underline decoration-2 underline-offset-4">Sign in</a>
+      </p>
     </div>
   </div>
 </div>

@@ -19,8 +19,9 @@ export class LoginComponent {
   private readonly auth    = inject(AuthService);
   private readonly router  = inject(Router);
 
-  readonly loading = signal(false);
-  readonly error   = signal<string | null>(null);
+  readonly loading      = signal(false);
+  readonly error        = signal<string | null>(null);
+  readonly showPassword = signal(false);
 
   readonly form = this.fb.nonNullable.group({
     email:    ['', [Validators.required, Validators.email]],

@@ -1,0 +1,10 @@
+.verification-card {
+  display: block;
+  margin: 1rem 1.5rem 0; /* Align with shell main spacing */
+}
+.verification-banner-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}

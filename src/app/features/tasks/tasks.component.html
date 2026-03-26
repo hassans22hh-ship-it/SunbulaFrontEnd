@@ -1,56 +1,177 @@
-<div class="page" sbPageTransition>
-  <div class="page-header">
-    <h1 class="section-title">✅ Tasks</h1>
-    <sb-button (click)="openCreate()">+ New Task</sb-button>
-  </div>
+<div class="min-h-screen bg-bg flex flex-col lg:flex-row shadow-2xl rounded-3xl overflow-hidden mr-4 my-4 ml-0 border border-border/30" sbPageTransition>
+  
+  <!-- Side Filter Sidebar -->
+  <aside class="w-full lg:w-72 bg-surface p-8 border-r border-border/30 flex flex-col gap-10">
+    <!-- Behavior Filter -->
+    <div class="space-y-4">
+      <h5 class="text-[10px] font-bold uppercase tracking-[0.2em] text-text-subtle">Behavior</h5>
+      <div class="flex flex-col gap-1">
+        <button class="flex items-center justify-between px-3 py-2 rounded-xl bg-primary/10 text-primary font-bold text-sm transition-all group">
+          <div class="flex items-center gap-3">
+            <div class="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-[10px] text-white">✓</div>
+            All
+          </div>
+        </button>
+        <button class="flex items-center justify-between px-3 py-2 rounded-xl text-text-muted hover:bg-surface-2 font-medium text-sm transition-all group">
+          <div class="flex items-center gap-3">
+            <div class="w-3 h-3 rounded-full bg-success"></div>
+            Positive
+          </div>
+        </button>
+        <button class="flex items-center justify-between px-3 py-2 rounded-xl text-text-muted hover:bg-surface-2 font-medium text-sm transition-all group">
+          <div class="flex items-center gap-3">
+            <div class="w-3 h-3 rounded-full bg-info"></div>
+            Neutral
+          </div>
+        </button>
+        <button class="flex items-center justify-between px-3 py-2 rounded-xl text-text-muted hover:bg-surface-2 font-medium text-sm transition-all group">
+          <div class="flex items-center gap-3">
+            <div class="w-3 h-3 rounded-full bg-danger"></div>
+            Negative
+          </div>
+        </button>
+        <button class="flex items-center justify-between px-3 py-2 rounded-xl text-text-muted hover:bg-surface-2 font-medium text-sm transition-all group">
+          <div class="flex items-center gap-3">
+            <div class="w-3 h-3 rounded-full bg-warning"></div>
+            Rest
+          </div>
+        </button>
+      </div>
+    </div>
 
-  <!-- Tabs -->
-  <div class="tabs">
-    <button class="tab" [class.tab--active]="tab() === 'active'" (click)="tab.set('active')">Active</button>
-    <button class="tab" [class.tab--active]="tab() === 'completed'" (click)="tab.set('completed')">Completed</button>
-    <button class="tab" [class.tab--active]="tab() === 'archived'" (click)="tab.set('archived')">Archived</button>
-  </div>
-
-  @if (store.isLoading()) {
-    <sb-spinner size="lg" />
-  } @else {
-    @let currentTasks = tab() === 'active' ? store.activeTasks() : tab() === 'completed' ? store.completedTasks() : store.archivedTasks();
-    @if (currentTasks.length === 0) {
-      <sb-empty-state icon="✅" heading="No tasks here" message="Create a task to get started!" />
-    } @else {
-      <div class="task-list">
-        @for (task of currentTasks; track task.id) {
-          <sb-card [hoverable]="true">
-            <div class="task-card">
-              <div class="task-color" [style.background]="task.color"></div>
-              <div class="task-info" (click)="openEdit(task)">
-                <div class="task-top">
-                  @if (task.emoji) { <span class="task-emoji">{{ task.emoji }}</span> }
-                  <h3 class="task-title">{{ task.title }}</h3>
-                </div>
-                <div class="task-meta">
-                  <sb-behavior-badge [behavior]="task.behaviorType" />
-                  @if (task.folder) {
-                    <span class="task-folder">📁 {{ task.folder }}</span>
-                  }
-                </div>
-              </div>
-              <div class="task-actions">
-                @if (tab() === 'active') {
-                  <button class="action-btn" title="Complete" (click)="store.complete(task.id)">✅</button>
-                  <button class="action-btn" title="Archive" (click)="store.archive(task.id)">📦</button>
-                }
-                @if (tab() === 'archived') {
-                  <button class="action-btn" title="Restore" (click)="store.restore(task.id)">♻️</button>
-                }
-                <button class="action-btn action-btn--danger" title="Delete" (click)="confirmDelete(task)">🗑️</button>
-              </div>
+    <!-- Folder Filter -->
+    <div class="space-y-4">
+      <h5 class="text-[10px] font-bold uppercase tracking-[0.2em] text-text-subtle">Folder</h5>
+      <div class="flex flex-col gap-1">
+        @for (f of folders.folders(); track f.id) {
+          <label class="flex items-center justify-between px-3 py-2 rounded-xl text-text hover:bg-surface-2 font-bold text-sm transition-all cursor-pointer group">
+            <div class="flex items-center gap-3">
+              <input type="checkbox" class="w-4 h-4 rounded border-border text-primary focus:ring-primary backdrop-blur-sm">
+              <div class="w-2 h-2 rounded-full" [style.backgroundColor]="f.color"></div>
+              {{ f.name }}
             </div>
-          </sb-card>
+            <span class="text-[10px] text-text-subtle font-bold bg-surface-3 px-2 py-0.5 rounded-full">{{ f.taskCount }}</span>
+          </label>
         }
       </div>
-    }
-  }
+    </div>
+
+    <!-- Status Filter -->
+    <div class="space-y-4">
+      <h5 class="text-[10px] font-bold uppercase tracking-[0.2em] text-text-subtle">Status</h5>
+      <div class="flex flex-col gap-1">
+        <label class="flex items-center gap-3 px-3 py-2 rounded-xl text-text font-bold text-sm cursor-pointer hover:bg-surface-2">
+          <input type="radio" name="status" [checked]="tab() === 'active'" (change)="tab.set('active')" class="w-4 h-4 text-primary focus:ring-primary">
+          Active
+        </label>
+        <label class="flex items-center gap-3 px-3 py-2 rounded-xl text-text-muted font-medium text-sm cursor-pointer hover:bg-surface-2">
+          <input type="radio" name="status" [checked]="tab() === 'archived'" (change)="tab.set('archived')" class="w-4 h-4 text-primary focus:ring-primary">
+          Archived
+        </label>
+        <label class="flex items-center gap-3 px-3 py-2 rounded-xl text-text-muted font-medium text-sm cursor-pointer hover:bg-surface-2">
+          <input type="radio" name="status" class="w-4 h-4 text-primary focus:ring-primary">
+          All
+        </label>
+      </div>
+    </div>
+
+    <button class="mt-4 text-[11px] font-bold text-text-subtle hover:text-primary transition-colors text-left pl-3">
+      Clear Filters
+    </button>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 flex flex-col bg-[#FDFDFD]">
+    <!-- Header -->
+    <header class="p-6 border-b border-border/30 flex items-center justify-between bg-white/50 backdrop-blur-xl sticky top-0 z-20">
+      <div class="relative w-96 group">
+        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-text-subtle group-focus-within:text-primary transition-colors">
+          <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="2.5">
+            <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </div>
+        <input type="text" placeholder="Search tasks..." [formControl]="searchCtrl"
+               class="w-full h-11 bg-surface-2 border-transparent focus:bg-white rounded-2xl pl-12 text-sm font-medium transition-all group-focus-within:shadow-lg group-focus-within:shadow-primary/5">
+      </div>
+
+      <div class="flex items-center gap-6">
+        <div class="flex items-center gap-6 pr-6 border-r border-border/30">
+          <a href="#" class="text-sm font-bold text-primary hover:text-primary-light transition-colors">Focus Mode</a>
+          <a href="#" class="text-sm font-bold text-text-muted hover:text-text transition-colors">Archive</a>
+        </div>
+        
+        <div class="flex items-center gap-4">
+          <!-- Coins -->
+          <div class="flex items-center gap-2.5 px-3.5 py-1.5 bg-[#FFF7ED] text-[#9A3412] rounded-xl border border-[#FED7AA]/50 shadow-sm">
+            <svg viewBox="0 0 24 24" fill="currentColor" class="w-4 h-4 text-[#F97316]">
+              <path d="M8.5,14.5L12,11L15.5,14.5L12,18L8.5,14.5M12,2L4.5,20.29L5.21,21L12,18L18.79,21L19.5,20.29L12,2Z" />
+            </svg>
+            <span class="font-display font-bold text-xs tracking-tight">{{ auth.coinBalance() | coins }}</span>
+          </div>
+          <!-- Timer -->
+          <div class="flex items-center gap-2.5 px-3.5 py-1.5 bg-[#F0FDF4] text-[#166534] rounded-xl border border-[#BBF7D0]/50 shadow-sm">
+            <svg viewBox="0 0 24 24" fill="none" class="w-4 h-4 text-[#22C55E]" stroke="currentColor" stroke-width="3">
+              <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+            <span class="font-display font-bold text-xs tracking-tight">00:25:00</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Tasks Toolbar & Grid -->
+    <div class="flex-1 p-10 overflow-auto">
+      <div class="flex items-center justify-between mb-10">
+        <div class="flex items-baseline gap-3">
+          <h2 class="text-4xl font-display font-bold text-text tracking-tight">Tasks</h2>
+          <span class="text-sm font-bold text-text-subtle uppercase tracking-widest">({{ store.count() }} active)</span>
+        </div>
+        
+        <div class="flex items-center gap-4">
+          <div class="flex bg-surface-2 p-1 rounded-xl border border-border/20 shadow-inner">
+            <button class="p-2 bg-white text-primary rounded-lg shadow-sm border border-border/20 transition-all">
+              <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            </button>
+            <button class="p-2 text-text-subtle hover:text-text transition-all">
+              <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="2.5"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
+            </button>
+          </div>
+          <button (click)="openCreate()" 
+                  class="flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+            <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="3">
+              <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            Create Task
+          </button>
+        </div>
+      </div>
+
+      @if (store.isLoading()) {
+        <div class="flex h-64 items-center justify-center">
+          <sb-spinner size="lg" />
+        </div>
+      } @else {
+        @let currentTasks = tab() === 'active' ? store.activeTasks() : tab() === 'completed' ? store.completedTasks() : store.archivedTasks();
+        @if (currentTasks.length === 0) {
+          <sb-empty-state icon="✅" heading="No tasks found" message="Try adjusting your filters or create a new task." class="mt-20" />
+        } @else {
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-32">
+            @for (task of currentTasks; track task.id) {
+              <sb-task-card [task]="task" (cardClicked)="openEdit(task)" (menuClicked)="confirmDelete(task)" (duplicateClicked)="store.duplicate(task.id)"></sb-task-card>
+            }
+          </div>
+        }
+      }
+    </div>
+  </main>
+
+  <!-- Floating Action Button -->
+  <button (click)="openCreate()" 
+          class="fixed bottom-10 right-10 w-16 h-16 bg-primary text-white rounded-full shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-30 group">
+    <svg viewBox="0 0 24 24" fill="none" class="w-8 h-8 group-hover:rotate-90 transition-transform duration-300" stroke="currentColor" stroke-width="3">
+      <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+  </button>
 </div>
 
 <!-- Create/Edit Modal -->

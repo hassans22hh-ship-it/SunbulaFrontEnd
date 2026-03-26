@@ -16,9 +16,15 @@ export class TaskCardComponent {
   task        = input.required<TaskDto>();
   cardClicked = output<TaskDto>();
   menuClicked = output<TaskDto>();
+  duplicateClicked = output<TaskDto>();
 
   onIconClick(e: MouseEvent): void {
     e.stopPropagation();
     this.menuClicked.emit(this.task());
+  }
+
+  onDuplicateClick(e: MouseEvent): void {
+    e.stopPropagation();
+    this.duplicateClicked.emit(this.task());
   }
 }

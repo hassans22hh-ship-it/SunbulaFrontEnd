@@ -12,9 +12,12 @@
           <span class="timer-task-title">{{ timer.activeSession()?.taskTitle }}</span>
           <sb-behavior-badge [behavior]="timer.activeSession()!.taskBehavior" />
         </div>
-        <sb-button variant="danger" (click)="stopTimer()" [loading]="timer.isLoading()">
-          ⏹️ Stop Timer
-        </sb-button>
+        <app-timer-controls 
+          [isPaused]="timer.isPaused()"
+          [isLoading]="timer.isLoading()"
+          (onPause)="timer.pauseTimer()"
+          (onResume)="timer.resumeTimer()"
+          (onStop)="stopTimer()" />
       </div>
     } @else {
       <div class="timer-idle">

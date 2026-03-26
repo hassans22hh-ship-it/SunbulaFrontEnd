@@ -9,7 +9,7 @@ import { environment } from '@env/environment';
 @Injectable({ providedIn: 'root' })
 export class TimeSessionApiService {
   private readonly http = inject(HttpClient);
-  private readonly BASE = `${environment.apiUrl}/api/TimeSession`;
+  private readonly BASE = `${environment.apiUrl}/api/v1/TimeSession`;
 
   getAll(): Observable<TimeSessionDto[]> {
     return this.http.get<TimeSessionDto[]>(this.BASE);

@@ -1,5 +1,13 @@
 <div class="page" sbPageTransition>
-  <h1 class="section-title">📈 Reports</h1>
+<div class="page" sbPageTransition>
+  <div class="flex items-center justify-between mb-8">
+    <h1 class="section-title mb-0">📈 Reports</h1>
+    <div class="flex gap-2">
+      <button class="range-btn" [class.active]="range() === 'today'" (click)="loadRange('today')">Today</button>
+      <button class="range-btn" [class.active]="range() === '7d'" (click)="loadRange('7d')">7 Days</button>
+      <button class="range-btn" [class.active]="range() === '30d'" (click)="loadRange('30d')">30 Days</button>
+    </div>
+  </div>
   @if (loading()) {
     <sb-spinner size="lg" />
   } @else {
@@ -10,16 +18,33 @@
       <sb-card><div class="stat"><span class="stat-icon">🔥</span><div class="stat-info"><span class="stat-value">{{ streak() }}</span><span class="stat-label">Current streak</span></div></div></sb-card>
     </div>
 
-    @if (summary()?.behaviorBreakdown?.length) {
-      <h2 class="subsection-title">Today's Breakdown</h2>
+    @let stats = summary() ? summary()?.behaviorBreakdown : report()?.behaviorBreakdown;
+    @if (stats?.length) {
+      <h2 class="subsection-title">{{ range() === 'today' ? "Today's" : "Range" }} Breakdown</h2>
       <div class="behavior-grid">
-        @for (item of summary()!.behaviorBreakdown; track item.behaviorType) {
+        @for (item of stats; track item.behaviorType) {
           <sb-card padding="sm">
             <div class="behavior-item">
               <span class="behavior-label">{{ behaviorMeta[item.behaviorType].emoji }} {{ behaviorMeta[item.behaviorType].label }}</span>
               <span class="behavior-time">{{ item.totalSeconds | duration }}</span>
               <div class="bar"><div class="bar-fill" [style.width.%]="item.percentage" [style.background]="'var(' + behaviorMeta[item.behaviorType].colorVar + ')'"></div></div>
               <span class="behavior-pct">{{ item.percentage | number:'1.0-0' }}%</span>
+            </div>
+          </sb-card>
+        }
+      </div>
+    }
+
+    @if (report()?.topTasks?.length) {
+      <h2 class="subsection-title">Top Tasks in Period</h2>
+      <div class="behavior-grid">
+        @for (task of report()!.topTasks; track task.taskId) {
+          <sb-card padding="sm">
+            <div class="behavior-item">
+              <span class="behavior-label">{{ task.taskTitle }}</span>
+              <span class="behavior-time">{{ task.totalSeconds | duration }}</span>
+              <div class="bar"><div class="bar-fill" [style.width.%]="task.percentage" [style.background]="task.taskColor"></div></div>
+              <span class="behavior-pct">{{ task.percentage | number:'1.0-0' }}%</span>
             </div>
           </sb-card>
         }

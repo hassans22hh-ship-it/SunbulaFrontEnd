@@ -41,8 +41,8 @@ export class FolderSelectorComponent implements ControlValueAccessor {
   value: string | null = null;
   disabled = false;
   
-  onChange: any = () => {};
-  onTouched: any = () => {};
+  onChange: (value: string | null) => void = () => {};
+  onTouched: () => void = () => {};
 
   onChangeEl(event: Event) {
     const val = (event.target as HTMLSelectElement).value;
@@ -52,15 +52,15 @@ export class FolderSelectorComponent implements ControlValueAccessor {
     this.onTouched();
   }
 
-  writeValue(obj: any): void {
+  writeValue(obj: string | null): void {
     this.value = obj;
   }
   
-  registerOnChange(fn: any): void {
+  registerOnChange(fn: (value: string | null) => void): void {
     this.onChange = fn;
   }
   
-  registerOnTouched(fn: any): void {
+  registerOnTouched(fn: () => void): void {
     this.onTouched = fn;
   }
   

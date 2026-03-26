@@ -93,5 +93,19 @@ export const TasksStore = signalStore(
         toast.error((e as { message: string }).message);
       }
     },
+    async duplicate(id: string): Promise<void> {
+      try {
+        const duplicated = await firstValueFrom(api.duplicate(id));
+        patchState(store, { tasks: [...store.tasks(), duplicated] });
+        toast.success('Task duplicated');
+      } catch (e: unknown) {
+        toast.error((e as { message: string }).message);
+      }
+    },
+    setSearch(query: string): void {
+      const newFilter = { ...store.filter(), search: query || undefined };
+      // Call load directly with the new filter
+      this.load(newFilter);
+    }
   })),
 );

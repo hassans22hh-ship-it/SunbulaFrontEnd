@@ -8,15 +8,21 @@ import {
   RegisterDto,
   UserDto,
   UpdateProfileDto,
+  ChangePasswordDto,
+  DeleteAccountDto,
 } from '@shared/models/auth.models';
 
 @Injectable({ providedIn: 'root' })
 export class AuthApiService {
   private readonly http = inject(HttpClient);
-  private readonly BASE = `${environment.apiUrl}/api/Authentication`;
+  private readonly BASE = `${environment.apiUrl}/api/v1/Authentication`;
 
-  register(dto: RegisterDto): Observable<AuthResponseDto>    { return this.http.post<AuthResponseDto>(`${this.BASE}/register`, dto); }
-  login(dto: LoginDto): Observable<AuthResponseDto>          { return this.http.post<AuthResponseDto>(`${this.BASE}/login`, dto); }
-  getProfile(): Observable<UserDto>                          { return this.http.get<UserDto>(`${this.BASE}/profile`); }
-  updateProfile(dto: UpdateProfileDto): Observable<UserDto>  { return this.http.put<UserDto>(`${this.BASE}/profile`, dto); }
+  register(dto: RegisterDto): Observable<AuthResponseDto> { return this.http.post<AuthResponseDto>(`${this.BASE}/register`, dto); }
+  login(dto: LoginDto): Observable<AuthResponseDto> { return this.http.post<AuthResponseDto>(`${this.BASE}/login`, dto); }
+  getProfile(): Observable<UserDto> { return this.http.get<UserDto>(`${this.BASE}/profile`); }
+  updateProfile(dto: UpdateProfileDto): Observable<UserDto> { return this.http.put<UserDto>(`${this.BASE}/profile`, dto); }
+  resendConfirmationEmail(): Observable<void> { return this.http.post<void>(`${this.BASE}/confirm-email`, {}); }
+  changePassword(dto: ChangePasswordDto): Observable<void> { return this.http.post<void>(`${this.BASE}/change-password`, dto); }
+  deleteAccount(password: string): Observable<void> { return this.http.delete<void>(`${this.BASE}/account`, { body: { password } }); }
+  resetCoins(): Observable<void> { return this.http.post<void>(`${this.BASE}/reset-coins`, {}); }
 }

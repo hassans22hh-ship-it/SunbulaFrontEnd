@@ -2,6 +2,9 @@
   <sb-sidebar />
   <div class="shell__main">
     <sb-topbar />
+    @if (auth.isAuthenticated() && !auth.isEmailConfirmed()) {
+      <app-email-verification-banner />
+    }
     <main class="shell__content">
       <router-outlet />
     </main>

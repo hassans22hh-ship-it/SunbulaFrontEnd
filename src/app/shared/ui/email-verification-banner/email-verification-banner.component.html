@@ -1,0 +1,12 @@
+<sb-card padding="sm" class="verification-card">
+  <div class="verification-banner-inner">
+    <span>⚠️ Please verify your email address to unlock all features.</span>
+    @if (!sent()) {
+      <sb-button variant="primary" size="sm" (click)="resend()" [loading]="isSending()">
+        Resend Email
+      </sb-button>
+    } @else {
+      <span class="text-success" style="color: var(--color-success); font-weight: 500;">Email Sent ✓</span>
+    }
+  </div>
+</sb-card>

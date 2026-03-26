@@ -1,0 +1,33 @@
+.filter-bar {
+  background: var(--color-surface);
+  padding: 0.75rem 1rem;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
+}
+
+.text-subtle { color: var(--color-text-muted); }
+
+.flex { display: flex; }
+.flex-wrap { flex-wrap: wrap; }
+.gap-4 { gap: 1rem; }
+.gap-2 { gap: 0.5rem; }
+.items-center { align-items: center; }
+.ml-auto { margin-left: auto; }
+.text-sm { font-size: 0.875rem; }
+.font-medium { font-weight: 500; }
+.max-w-\[200px\] { max-width: 200px; }
+.max-w-\[250px\] { max-width: 250px; }
+.py-1\.5 { padding-top: 0.375rem; padding-bottom: 0.375rem; }
+.min-h-0 { min-height: 0; }
+.cursor-pointer { cursor: pointer; }
+.w-4 { width: 1rem; }
+.h-4 { height: 1rem; }
+.rounded { border-radius: 0.25rem; }
+.input-field {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
+  background: var(--color-background);
+  color: var(--color-text-primary);
+  &:focus { outline: none; border-color: var(--color-primary); }
+}

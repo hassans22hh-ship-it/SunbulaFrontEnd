@@ -47,3 +47,20 @@ export interface UpdateProfileDto {
   lastName:  string;
   phone?:    string;
 }
+
+export interface ChangePasswordDto {
+  currentPassword:    string;
+  newPassword:        string;
+  confirmNewPassword: string;
+}
+
+export interface DeleteAccountDto {
+  password: string;
+}
+
+export interface UserSettingsDto {
+  timeZone:             string;
+  defaultCurrency:      string;
+  coinSystemEnabled:    boolean;
+  streakRewardsEnabled: boolean;
+}

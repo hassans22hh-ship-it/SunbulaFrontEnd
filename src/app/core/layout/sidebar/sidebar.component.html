@@ -1,46 +1,93 @@
-<aside class="sb-sidebar" [class.sb-sidebar--collapsed]="collapsed()">
-  <!-- Brand -->
-  <div class="sb-sidebar__brand">
-    <span class="sb-sidebar__logo">🌱</span>
-    @if (!collapsed()) {
-      <span class="sb-sidebar__title">Sunbula</span>
-    }
-  </div>
-
-  <!-- Navigation -->
-  <nav class="sb-sidebar__nav">
-    @for (item of navItems; track item.path) {
-      <a class="sb-sidebar__link"
-         [routerLink]="item.path"
-         routerLinkActive="sb-sidebar__link--active">
-        <span class="sb-sidebar__icon">{{ item.icon }}</span>
-        @if (!collapsed()) {
-          <span class="sb-sidebar__label">{{ item.label }}</span>
-        }
-      </a>
-    }
-  </nav>
-
-  <!-- User section -->
-  <div class="sb-sidebar__footer">
-    @if (!collapsed()) {
-      <div class="sb-sidebar__coin-badge">
-        🪙 {{ auth.coinBalance() | coins }}
+<aside class="flex flex-col h-screen bg-primary-dark text-white transition-all duration-300 border-r border-white/5 relative z-50"
+       [class.w-72]="!collapsed()" [class.w-20]="collapsed()">
+  
+  <!-- Header: Branding -->
+  <div class="p-6 mb-4">
+    <div class="flex items-center gap-3 overflow-hidden">
+      <div class="flex-shrink-0 w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md">
+        <svg viewBox="0 0 24 24" fill="none" class="w-6 h-6 text-white" stroke="currentColor" stroke-width="2">
+          <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+        </svg>
       </div>
-    }
-    <div class="sb-sidebar__user">
-      <div class="sb-sidebar__avatar">{{ userInitials() }}</div>
       @if (!collapsed()) {
-        <div class="sb-sidebar__user-info">
-          <span class="sb-sidebar__user-name">{{ auth.user()?.fullName }}</span>
-          <span class="sb-sidebar__user-email">{{ auth.user()?.email }}</span>
+        <div class="flex flex-col animate-fadeIn">
+          <span class="text-lg font-display font-bold whitespace-nowrap tracking-tight">Sunbula</span>
+          <span class="text-[10px] uppercase tracking-widest text-primary-light/70 font-bold whitespace-nowrap">Botanical Archivist</span>
         </div>
       }
     </div>
   </div>
 
-  <!-- Collapse toggle -->
-  <button class="sb-sidebar__toggle" (click)="toggleCollapse()">
-    {{ collapsed() ? '→' : '←' }}
+  <!-- Navigation items -->
+  <nav class="flex-1 px-3 space-y-1">
+    @for (item of navItems; track item.path) {
+      <a [routerLink]="item.path" routerLinkActive="bg-white/10 text-white shadow-sm"
+         class="flex items-center gap-3 px-3 py-3 rounded-xl text-primary-light/70 hover:bg-white/5 transition-all group relative">
+        <div class="flex-shrink-0">
+          @switch (item.icon) {
+            @case ('dashboard') {
+              <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+            }
+            @case ('tasks') {
+              <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="2"><polyline points="9 11 12 14 22 4"></polyline><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path></svg>
+            }
+            @case ('timer') {
+              <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+            }
+            @case ('library') {
+              <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            }
+            @case ('settings') {
+              <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+            }
+          }
+        </div>
+        @if (!collapsed()) {
+          <span class="font-medium tracking-wide animate-fadeIn">{{ item.label }}</span>
+        }
+        @if (collapsed()) {
+          <div class="absolute left-full ml-2 px-2 py-1 bg-primary text-white text-xs rounded opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-[100]">
+            {{ item.label }}
+          </div>
+        }
+      </a>
+    }
+  </nav>
+
+  <!-- Focus Session Section -->
+  <div class="px-3 mb-6">
+    <button class="w-full flex items-center justify-center gap-2 py-3 bg-primary-light text-primary-dark font-bold rounded-xl shadow-lg shadow-black/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+      <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="2.5">
+        <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
+      </svg>
+      @if (!collapsed()) {
+        <span class="animate-fadeIn">Start Focus Session</span>
+      }
+    </button>
+  </div>
+
+  <!-- Footer section -->
+  <div class="p-3 border-t border-white/5 space-y-1">
+    <a href="#" class="flex items-center gap-3 px-3 py-3 rounded-xl text-primary-light/50 hover:bg-white/5 transition-all group relative">
+      <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5 flex-shrink-0" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+      @if (!collapsed()) {
+        <span class="font-medium animate-fadeIn">Help</span>
+      }
+    </a>
+    <button (click)="onLogout()" class="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-primary-light/50 hover:bg-danger/20 hover:text-danger transition-all group relative">
+      <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5 flex-shrink-0" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+      @if (!collapsed()) {
+        <span class="font-medium animate-fadeIn">Logout</span>
+      }
+    </button>
+  </div>
+
+  <!-- Collapse Toggle Button -->
+  <button (click)="toggleCollapse()" 
+          class="absolute -right-3 top-20 w-6 h-6 bg-primary-light text-primary-dark rounded-full flex items-center justify-center shadow-lg border-2 border-primary-dark hover:scale-110 active:scale-95 transition-all z-[60]">
+    <svg viewBox="0 0 24 24" fill="none" class="w-4 h-4 transition-transform duration-300" 
+         [class.rotate-180]="collapsed()" stroke="currentColor" stroke-width="3">
+      <polyline points="15 18 9 12 15 6"></polyline>
+    </svg>
   </button>
 </aside>

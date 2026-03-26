@@ -1,0 +1,14 @@
+<div class="timer-controls-wrapper">
+  @if (isPaused()) {
+    <sb-button variant="outline" (click)="onResume.emit()" [loading]="isLoading()">
+      ▶️ Resume
+    </sb-button>
+  } @else {
+    <sb-button variant="outline" (click)="onPause.emit()" [loading]="isLoading()">
+      ⏸️ Pause
+    </sb-button>
+  }
+  <sb-button variant="danger" (click)="onStop.emit()" [loading]="isLoading()">
+    ⏹️ Stop Timer
+  </sb-button>
+</div>

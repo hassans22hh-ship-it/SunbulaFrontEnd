@@ -1,20 +1,18 @@
-import { computed, Injectable, signal, inject } from '@angular/core';
+import { computed, Injectable, signal, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, firstValueFrom, of } from 'rxjs';
 import { environment } from '@env/environment';
 import { UserDto, AuthResponseDto, RefreshTokenDto, LogoutDto } from '@shared/models/auth.models';
 
-const STORAGE_KEYS = {
-  access:  'sb_access',
-  refresh: 'sb_refresh',
-  expires: 'sb_expires',
-} as const;
+const REFRESH_TOKEN_KEY = 'sunbula_refresh_token';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http   = inject(HttpClient);
   private readonly router = inject(Router);
+  private readonly platformId = inject(PLATFORM_ID);
 
   private readonly _user         = signal<UserDto | null>(null);
   private readonly _accessToken  = signal<string | null>(null);
@@ -22,27 +20,23 @@ export class AuthService {
 
   readonly user            = this._user.asReadonly();
   readonly accessToken     = this._accessToken.asReadonly();
-  readonly isAuthenticated = computed(() => this._user() !== null);
-  readonly coinBalance     = computed(() => this._user()?.coinBalance ?? 0);
-  readonly streakDays      = computed(() => this._user()?.consecutiveStreakDays ?? 0);
+  readonly isAuthenticated  = computed(() => this._user() !== null);
+  readonly isEmailConfirmed = computed(() => this._user()?.isEmailConfirmed ?? false);
+  readonly coinBalance      = computed(() => this._user()?.coinBalance ?? 0);
+  readonly streakDays       = computed(() => this._user()?.consecutiveStreakDays ?? 0);
 
-  /** Load tokens from sessionStorage and restore user session */
+  /** Load tokens from localStorage and restore user session */
   async initialize(): Promise<void> {
-    const access  = sessionStorage.getItem(STORAGE_KEYS.access);
-    const refresh = sessionStorage.getItem(STORAGE_KEYS.refresh);
-    const expires = sessionStorage.getItem(STORAGE_KEYS.expires);
+    if (!isPlatformBrowser(this.platformId)) return;
 
-    if (!access) return;
+    // Clear legacy sessionStorage tokens if present
+    sessionStorage.removeItem('sb_access');
+    sessionStorage.removeItem('sb_refresh');
+    sessionStorage.removeItem('sb_expires');
 
-    if (expires && new Date(expires) > new Date()) {
-      this._accessToken.set(access);
+    const refresh = localStorage.getItem(REFRESH_TOKEN_KEY);
+    if (refresh) {
       this._refreshToken.set(refresh);
-      try {
-        await this.loadProfile();
-      } catch {
-        this.clearTokens();
-      }
-    } else if (refresh) {
       try {
         await firstValueFrom(this.refreshTokens());
         await this.loadProfile();
@@ -54,7 +48,7 @@ export class AuthService {
 
   async loadProfile(): Promise<void> {
     const user = await firstValueFrom(
-      this.http.get<UserDto>(`${environment.apiUrl}/api/Authentication/profile`),
+      this.http.get<UserDto>(`${environment.apiUrl}/api/v1/authentication/profile`),
     );
     this._user.set(user);
   }
@@ -71,9 +65,9 @@ export class AuthService {
   setTokens(accessToken: string, refreshToken: string, expiresAt: string): void {
     this._accessToken.set(accessToken);
     this._refreshToken.set(refreshToken);
-    sessionStorage.setItem(STORAGE_KEYS.access,  accessToken);
-    sessionStorage.setItem(STORAGE_KEYS.refresh, refreshToken);
-    sessionStorage.setItem(STORAGE_KEYS.expires, expiresAt);
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    }
   }
 
   setUser(user: UserDto): void {
@@ -90,7 +84,7 @@ export class AuthService {
 
     return new Observable<AuthResponseDto>(observer => {
       this.http.post<AuthResponseDto>(
-        `${environment.apiUrl}/api/Authentication/refresh`,
+        `${environment.apiUrl}/api/v1/authentication/refresh`,
         { refreshToken: token } as RefreshTokenDto,
       ).subscribe({
         next: response => {
@@ -111,7 +105,7 @@ export class AuthService {
     try {
       if (refreshToken) {
         await firstValueFrom(
-          this.http.post(`${environment.apiUrl}/api/Authentication/logout`, { refreshToken } as LogoutDto),
+          this.http.post(`${environment.apiUrl}/api/v1/authentication/logout`, { refreshToken } as LogoutDto),
         );
       }
     } catch {
@@ -126,8 +120,8 @@ export class AuthService {
     this._user.set(null);
     this._accessToken.set(null);
     this._refreshToken.set(null);
-    sessionStorage.removeItem(STORAGE_KEYS.access);
-    sessionStorage.removeItem(STORAGE_KEYS.refresh);
-    sessionStorage.removeItem(STORAGE_KEYS.expires);
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.removeItem(REFRESH_TOKEN_KEY);
+    }
   }
 }

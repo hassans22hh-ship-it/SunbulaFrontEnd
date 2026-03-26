@@ -7,7 +7,7 @@ import { DailySummaryDto } from '@shared/models/timer.models';
 @Injectable({ providedIn: 'root' })
 export class DailyTransactionApiService {
   private readonly http = inject(HttpClient);
-  private readonly BASE = `${environment.apiUrl}/api/DailyTransaction`;
+  private readonly BASE = `${environment.apiUrl}/api/v1/DailyTransaction`;
 
   getTodaySummary(): Observable<DailySummaryDto> {
     return this.http.get<DailySummaryDto>(`${this.BASE}/today/summary`);

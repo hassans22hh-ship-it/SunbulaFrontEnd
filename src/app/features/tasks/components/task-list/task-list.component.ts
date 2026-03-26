@@ -55,13 +55,13 @@ export class TaskListComponent implements OnInit {
   openForm(task: TaskDto | null = null): void { this.selectedTask.set(task); this.showForm.set(true); }
   closeForm(): void { this.showForm.set(false); this.selectedTask.set(null); }
 
-  onFormSave(event: { dto: any, isEdit: boolean }): void {
+  onFormSave(event: { dto: CreateTaskDto | UpdateTaskDto, isEdit: boolean }): void {
     const { dto, isEdit } = event;
     const current = this.selectedTask();
     this.closeForm();
     
     // Convert emoji null to undefined to match shared models
-    const parsedDto = { ...dto, emoji: dto.emoji || undefined };
+    const parsedDto = { ...dto, emoji: (dto as any).emoji || undefined };
     
     if (isEdit && current) this.store.update(current.id, parsedDto as UpdateTaskDto);
     else this.store.create(parsedDto as CreateTaskDto);

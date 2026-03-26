@@ -1,0 +1,26 @@
+<div class="filter-bar flex flex-wrap gap-4 items-center">
+  <!-- Search -->
+  <div class="filter-group flex items-center gap-2" style="flex: 1">
+    <label class="text-sm font-medium text-subtle">Search:</label>
+    <input type="text" [formControl]="searchCtrl" placeholder="Search tasks..." class="input-field max-w-[250px] text-sm py-1.5 min-h-0" style="width: 100%">
+  </div>
+
+  <!-- Folder Filter -->
+  <div class="filter-group flex items-center gap-2">
+    <label class="text-sm font-medium text-subtle">Folder:</label>
+    <select [formControl]="folderCtrl" class="input-field max-w-[200px] text-sm py-1.5 min-h-0">
+      <option [value]="null">All Folders</option>
+      @for (folder of folders(); track folder.id) {
+        <option [value]="folder.id">{{ folder.name }}</option>
+      }
+    </select>
+  </div>
+
+  <!-- Archived Toggle -->
+  <div class="filter-group flex items-center gap-2 ml-auto">
+    <label class="flex items-center gap-2 cursor-pointer text-sm font-medium text-subtle">
+      <input type="checkbox" [formControl]="archivedCtrl" class="w-4 h-4 rounded border-border text-primary focus:ring-primary focus:ring-offset-surface">
+      Show Archived
+    </label>
+  </div>
+</div>

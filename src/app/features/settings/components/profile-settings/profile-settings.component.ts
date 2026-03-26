@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../../../core/auth/auth.service';
-import { SettingsApiService, UpdateProfileDto } from '../../services/settings.api.service';
+import { SettingsApiService } from '../../services/settings.api.service';
+import { UpdateProfileDto } from '@shared/models/auth.models';
 import { ToastService } from '../../../../shared/ui/toast/toast.service';
 import { SbButtonComponent } from '../../../../shared/ui/button/sb-button.component';
 
@@ -29,21 +30,15 @@ import { SbButtonComponent } from '../../../../shared/ui/button/sb-button.compon
 
       <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
         
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
           <div class="form-group">
-            <label class="label-text">Username</label>
-            <input class="input-field" type="text" formControlName="username">
+            <label class="label-text">First Name</label>
+            <input class="input-field" type="text" formControlName="firstName">
           </div>
           <div class="form-group">
-            <label class="label-text">Email Address</label>
-            <input class="input-field" type="email" formControlName="email">
-            <!-- Technically email change might require re-verification based on backend, keeping it simple -->
+            <label class="label-text">Last Name</label>
+            <input class="input-field" type="text" formControlName="lastName">
           </div>
-        </div>
-
-        <div class="form-group mb-6 max-w-md">
-          <label class="label-text">New Password (leave blank to keep current)</label>
-          <input class="input-field" type="password" formControlName="password" placeholder="••••••••">
         </div>
 
         <div class="flex justify-end">
@@ -80,9 +75,8 @@ export class ProfileSettingsComponent {
   }
 
   form = this.fb.group({
-    username: [this.profileName, Validators.required],
-    email:    [this.auth.user()?.email || '', [Validators.required, Validators.email]],
-    password: ['']
+    firstName: [this.auth.user()?.firstName || '', Validators.required],
+    lastName:  [this.auth.user()?.lastName || '', Validators.required]
   });
 
   getInitial(): string {
@@ -97,24 +91,20 @@ export class ProfileSettingsComponent {
     this.saving.set(true);
     const v = this.form.value;
     
-    const dto: UpdateProfileDto = {};
-    if (v.username !== this.profileName) dto.username = v.username!;
-    if (v.email !== this.auth.user()?.email) dto.email = v.email!;
-    if (v.password) dto.password = v.password!;
+    const dto: UpdateProfileDto = {
+      firstName: v.firstName!,
+      lastName: v.lastName!
+    };
 
     this.api.updateProfile(dto).subscribe({
       next: () => {
         this.toast.success('Profile updated successfully.');
         this.form.markAsPristine();
         this.saving.set(false);
-        // We'd ideally refresh the token or user object here. For now rely on local change effect.
-        if (dto.password) {
-          this.form.patchValue({ password: '' }); 
-        }
+        this.auth.refreshUserProfile();
       },
       error: (_err: unknown) => {
         this.saving.set(false);
-        // Error intercepted by global interceptor, so toast already shown.
       }
     });
   }

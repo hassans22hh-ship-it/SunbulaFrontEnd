@@ -56,8 +56,9 @@ export const PlantStoreStore = signalStore(
             patchState(store, { available, garden, summary, isLoading: false });
             console.log('✅ Data loaded successfully:', { available, garden, summary });
           }),
-          catchError((e: any) => {
-            const errorMsg = e.message || e.statusText || 'Unknown error';
+          catchError((e: unknown) => {
+            const error = e as { message?: string; statusText?: string };
+            const errorMsg = error.message || error.statusText || 'Unknown error';
             patchState(store, { isLoading: false, error: errorMsg });
             console.error('❌ Data loading failed:', e);
             return of(null);

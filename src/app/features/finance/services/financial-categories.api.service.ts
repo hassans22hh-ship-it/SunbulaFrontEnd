@@ -7,7 +7,7 @@ import { FinancialCategoryDto, CreateFinancialCategoryDto } from '@shared/models
 @Injectable({ providedIn: 'root' })
 export class FinancialCategoriesApiService {
   private readonly http = inject(HttpClient);
-  private readonly BASE = `${environment.apiUrl}/api/financial-categories`;
+  private readonly BASE = `${environment.apiUrl}/api/v1/financial-categories`;
 
   getAll(): Observable<FinancialCategoryDto[]>                        { return this.http.get<FinancialCategoryDto[]>(this.BASE); }
   create(dto: CreateFinancialCategoryDto): Observable<FinancialCategoryDto> { return this.http.post<FinancialCategoryDto>(this.BASE, dto); }

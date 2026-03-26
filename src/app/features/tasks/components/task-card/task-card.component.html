@@ -1,31 +1,69 @@
-<div
-  class="task-card"
-  [style.border-left-color]="task().color"
-  (click)="cardClicked.emit(task())"
->
-  <!-- Header: Title & Menu -->
-  <div class="card-top">
-    <h4 class="card-title">
-      @if (task().emoji) {
-        <span class="card-emoji">{{ task().emoji }}</span>
-      }
-      {{ task().title }}
-    </h4>
-    <button class="menu-btn" (click)="onIconClick($event)" title="Options">•••</button>
-  </div>
+<div class="group bg-surface rounded-2xl shadow-sm border border-border/50 overflow-hidden hover:shadow-md hover:border-primary-light/50 transition-all duration-300 flex flex-col h-full"
+     (click)="cardClicked.emit(task())">
+  
+  <!-- Colored accent bar based on behavior -->
+  <div class="h-1.5 w-full" [style.backgroundColor]="task().color"></div>
 
-  <!-- Footer: Metadata -->
-  <div class="card-footer">
-    <div class="card-meta-left">
-      <sb-behavior-badge [behavior]="task().behaviorType" />
+  <div class="p-5 flex flex-col flex-1">
+    <!-- Header: Title & Menu -->
+    <div class="flex items-start justify-between mb-4">
+      <div class="flex items-center gap-3">
+        @if (task().emoji) {
+          <div class="w-10 h-10 bg-surface-2 rounded-xl flex items-center justify-center text-xl shadow-inner border border-border/20 group-hover:scale-110 transition-transform">
+            {{ task().emoji }}
+          </div>
+        }
+        <h4 class="text-base font-display font-bold text-text line-clamp-2 leading-snug group-hover:text-primary transition-colors">
+          {{ task().title }}
+        </h4>
+      </div>
+      <div class="flex gap-1">
+        <button class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-2 text-text-subtle hover:text-text transition-colors" 
+                (click)="onDuplicateClick($event)" title="Duplicate Task">
+          <svg viewBox="0 0 24 24" fill="none" class="w-4 h-4" stroke="currentColor" stroke-width="2">
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+          </svg>
+        </button>
+        <button class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-2 text-text-subtle hover:text-text transition-colors" 
+                (click)="onIconClick($event)" title="Options">
+          <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="2.5">
+            <circle cx="12" cy="12" r="1.5"></circle><circle cx="6" cy="12" r="1.5"></circle><circle cx="18" cy="12" r="1.5"></circle>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Tags -->
+    <div class="flex flex-wrap gap-2 mb-6">
+      <sb-behavior-badge [behavior]="task().behaviorType" class="scale-90 origin-left" />
       @if (task().folder) {
-        <div class="folder-tag" [title]="task().folder">
-          <span class="folder-name">{{ task().folder }}</span>
+        <div class="flex items-center gap-1.5 px-2.5 py-1 bg-surface-2 rounded-lg text-[10px] font-bold uppercase tracking-wider text-text-muted border border-border/30">
+          <svg viewBox="0 0 24 24" fill="none" class="w-3 h-3" stroke="currentColor" stroke-width="2.5">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+          </svg>
+          {{ task().folder }}
+        </div>
+      }
+      @for (cat of task().categories; track cat.id) {
+        <div class="px-2.5 py-1 bg-surface-2 rounded-lg text-[10px] font-bold uppercase tracking-wider text-text-subtle border border-border/20">
+          {{ cat.name }}
         </div>
       }
     </div>
-    <div class="card-date" [title]="'Created ' + (task().createdAt | relativeDate)">
-      {{ task().createdAt | relativeDate }}
+
+    <!-- Footer: Action & Date -->
+    <div class="mt-auto pt-4 border-t border-border/30 flex items-center justify-between">
+      <button (click)="$event.stopPropagation();" 
+              class="flex items-center gap-2 px-4 py-2 bg-surface text-text font-bold text-xs rounded-xl border-2 border-border/50 hover:border-primary-light hover:text-primary hover:bg-primary-light/5 transition-all active:scale-95 shadow-sm">
+        <svg viewBox="0 0 24 24" fill="none" class="w-4 h-4" stroke="currentColor" stroke-width="2.5">
+          <polygon points="5 3 19 12 5 21 5 3"></polygon>
+        </svg>
+        Start Timer
+      </button>
+      
+      <div class="text-[10px] font-bold uppercase tracking-tighter text-text-subtle">
+        {{ task().createdAt | relativeDate }}
+      </div>
     </div>
   </div>
 </div>

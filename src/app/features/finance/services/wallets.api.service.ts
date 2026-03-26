@@ -7,7 +7,7 @@ import { WalletDto, CreateWalletDto, UpdateWalletDto, FinanceSummaryDto } from '
 @Injectable({ providedIn: 'root' })
 export class WalletsApiService {
   private readonly http = inject(HttpClient);
-  private readonly BASE = `${environment.apiUrl}/api/wallets`;
+  private readonly BASE = `${environment.apiUrl}/api/v1/wallets`;
 
   getAll(): Observable<WalletDto[]>                              { return this.http.get<WalletDto[]>(this.BASE); }
   getById(id: string): Observable<WalletDto>                     { return this.http.get<WalletDto>(`${this.BASE}/${id}`); }

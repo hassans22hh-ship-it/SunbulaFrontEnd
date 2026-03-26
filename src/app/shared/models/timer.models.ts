@@ -12,6 +12,7 @@ export interface TimeSessionDto {
   durationSeconds: number | null;
   coinsEarned:     number | null;
   isActive:        boolean;
+  isPaused?:       boolean;
 }
 
 export interface StartSessionDto {

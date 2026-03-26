@@ -22,4 +22,5 @@ export class TasksApiService {
   complete(id: string): Observable<TaskDto> { return this.http.put<TaskDto>(`${this.BASE}/${id}/complete`, null); }
   archive(id: string): Observable<TaskDto> { return this.http.put<TaskDto>(`${this.BASE}/${id}/archive`, null); }
   restore(id: string): Observable<TaskDto> { return this.http.put<TaskDto>(`${this.BASE}/${id}/restore`, null); }
+  duplicate(id: string): Observable<TaskDto> { return this.http.post<TaskDto>(`${this.BASE}/${id}/duplicate`, null); }
 }

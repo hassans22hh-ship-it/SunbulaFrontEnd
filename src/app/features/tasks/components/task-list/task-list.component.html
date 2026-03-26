@@ -33,7 +33,7 @@
         </div>
         <div class="drop-list" id="col-0" cdkDropList [cdkDropListData]="store.activeTasks()" (cdkDropListDropped)="drop($event, TaskStatus.Active)">
           @for (task of store.activeTasks(); track task.id) {
-            <sb-task-card [task]="task" cdkDrag (cardClicked)="openForm(task)" (menuClicked)="confirmDelete(task)" />
+            <sb-task-card [task]="task" cdkDrag (cardClicked)="openForm(task)" (menuClicked)="confirmDelete(task)" (duplicateClicked)="store.duplicate(task.id)" />
           }
           @if (store.activeTasks().length === 0) {
             <div class="col-empty">No active tasks</div>
@@ -52,7 +52,7 @@
         </div>
         <div class="drop-list" id="col-1" cdkDropList [cdkDropListData]="store.completedTasks()" (cdkDropListDropped)="drop($event, TaskStatus.Completed)">
           @for (task of store.completedTasks(); track task.id) {
-            <sb-task-card [task]="task" cdkDrag (cardClicked)="openForm(task)" (menuClicked)="confirmDelete(task)" />
+            <sb-task-card [task]="task" cdkDrag (cardClicked)="openForm(task)" (menuClicked)="confirmDelete(task)" (duplicateClicked)="store.duplicate(task.id)" />
           }
           @if (store.completedTasks().length === 0) {
             <div class="col-empty">No completed tasks</div>

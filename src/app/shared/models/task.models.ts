@@ -73,4 +73,5 @@ export interface TaskQueryParams {
   folderId?: string;
   status?:   number;
   archived?: boolean;
+  search?:   string;
 }
