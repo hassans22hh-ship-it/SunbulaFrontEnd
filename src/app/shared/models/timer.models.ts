@@ -13,6 +13,15 @@ export interface TimeSessionDto {
   coinsEarned:     number | null;
   isActive:        boolean;
   isPaused?:       boolean;
+  // Fallbacks for backend variations
+  title?:          string;
+  duration?:       number;
+  coins?:          number;
+  task?: { 
+    title: string; 
+    color: string; 
+    behaviorType?: number;
+  };
 }
 
 export interface StartSessionDto {

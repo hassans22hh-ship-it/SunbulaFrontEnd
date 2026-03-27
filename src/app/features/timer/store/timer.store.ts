@@ -147,7 +147,14 @@ export const TimerStore = signalStore(
       patchState(store, { isLoading: true });
       try {
         const response: any = await firstValueFrom(api.getHistory());
-        const sessions = Array.isArray(response) ? response : (response.data ?? response.items ?? []);
+        const rawSessions = Array.isArray(response) ? response : (response.data ?? response.items ?? []);
+        const sessions = rawSessions.map((s: any) => ({
+          ...s,
+          taskTitle: s.taskTitle || s.task?.title || s.title || 'Focus Session',
+          taskColor: s.taskColor || s.task?.color || '#52B788',
+          durationSeconds: s.durationSeconds ?? s.duration ?? 0,
+          coinsEarned: s.coinsEarned ?? s.coins ?? 0,
+        }));
         patchState(store, { sessions, isLoading: false });
       } catch (e: unknown) {
         patchState(store, { isLoading: false, error: (e as { message: string }).message });
@@ -159,9 +166,16 @@ export const TimerStore = signalStore(
       patchState(store, { isLoading: true });
       try {
         const response: any = await firstValueFrom(api.getPaged(page, pageSize));
-        const sessions = response.data ?? response.items ?? response;
-        const tasks = Array.isArray(sessions) ? sessions : (sessions.items ?? []);
-        patchState(store, { pagedResult: response, sessions: tasks, isLoading: false });
+        const raw = response.data ?? response.items ?? response;
+        const rawSessions = Array.isArray(raw) ? raw : (raw.items ?? []);
+        const sessions = rawSessions.map((s: any) => ({
+          ...s,
+          taskTitle: s.taskTitle || s.task?.title || s.title || 'Focus Session',
+          taskColor: s.taskColor || s.task?.color || '#52B788',
+          durationSeconds: s.durationSeconds ?? s.duration ?? 0,
+          coinsEarned: s.coinsEarned ?? s.coins ?? 0,
+        }));
+        patchState(store, { pagedResult: response, sessions, isLoading: false });
       } catch (e: unknown) {
         // Fallback to non-paged history if paged fails
         try {

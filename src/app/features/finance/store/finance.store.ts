@@ -31,9 +31,11 @@ export const FinanceStore = signalStore(
     async loadAll(): Promise<void> {
       patchState(store, { isLoading: true, error: null });
       try {
-        const [wallets, transactions, categories, summary] = await firstValueFrom(
-          forkJoin([wApi.getAll(), tApi.getAll(), cApi.getAll(), wApi.getSummary()])
-        );
+        const wallets      = await firstValueFrom(wApi.getAll());
+        const transactions  = await firstValueFrom(tApi.getAll());
+        const categories    = await firstValueFrom(cApi.getAll());
+        const summary       = await firstValueFrom(wApi.getSummary());
+        
         patchState(store, { wallets, transactions, categories, summary, isLoading: false });
       } catch (e: unknown) { patchState(store, { isLoading: false, error: (e as { message: string }).message }); }
     },

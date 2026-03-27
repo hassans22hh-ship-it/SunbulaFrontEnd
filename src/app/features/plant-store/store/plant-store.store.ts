@@ -26,43 +26,35 @@ export const PlantStoreStore = signalStore(
     gardenApi = inject(GardenApiService),
     auth = inject(AuthService), 
     toast = inject(ToastService)) => ({
-    loadAll: rxMethod<void>(
-      pipe(
-        tap(() => patchState(store, { isLoading: true, error: null })),
-        concatMap(() => forkJoin({
-          availableData: plantApi.getAll(),
-          gardenData: gardenApi.getGarden()
-        }).pipe(
-          map(({ availableData, gardenData }) => {
-            const baseUrl = environment.apiUrl;
-            const fixUrl = (u?: string): string => {
-              if (!u) return '';
-              if (u.startsWith('http')) return u;
-              return u.startsWith('/') ? `${baseUrl}${u}` : `${baseUrl}/${u}`;
-            };
+    async loadAll(): Promise<void> {
+      patchState(store, { isLoading: true, error: null });
+      try {
+        const availableData = await firstValueFrom(plantApi.getAll());
+        const gardenData = await firstValueFrom(gardenApi.getGarden());
 
-            const summary = Array.isArray(gardenData) ? null : gardenData as unknown as GardenSummaryDto;
-            const gardenArray = Array.isArray(gardenData) 
-              ? gardenData 
-              : (gardenData as unknown as GardenSummaryDto)?.plants || [];
+        const baseUrl = environment.apiUrl;
+        const fixUrl = (u?: string): string => {
+          if (!u) return '';
+          if (u.startsWith('http')) return u;
+          return u.startsWith('/') ? `${baseUrl}${u}` : `${baseUrl}/${u}`;
+        };
 
-            return {
-              available: (availableData || []).map((p: PlantDto) => ({ ...p, imageUrl: fixUrl(p.imageUrl) })),
-              garden: gardenArray.map((p: UserPlantDto) => ({ ...p, plantImageUrl: fixUrl(p.plantImageUrl) })),
-              summary
-            };
-          }),
-          tap(({ available, garden, summary }) => {
-            patchState(store, { available, garden, summary, isLoading: false });
-          }),
-          catchError((e: unknown) => {
-            const error = e as { message?: string; statusText?: string };
-            patchState(store, { isLoading: false, error: error.message || 'Unknown error' });
-            return of(null);
-          })
-        ))
-      )
-    ),
+        const summary = Array.isArray(gardenData) ? null : gardenData as unknown as GardenSummaryDto;
+        const gardenArray = Array.isArray(gardenData) 
+          ? gardenData 
+          : (gardenData as unknown as GardenSummaryDto)?.plants || [];
+
+        patchState(store, {
+          available: (availableData || []).map((p: PlantDto) => ({ ...p, imageUrl: fixUrl(p.imageUrl) })),
+          garden: gardenArray.map((p: UserPlantDto) => ({ ...p, plantImageUrl: fixUrl(p.plantImageUrl) })),
+          summary,
+          isLoading: false
+        });
+      } catch (e: unknown) {
+        const error = e as { message?: string; statusText?: string };
+        patchState(store, { isLoading: false, error: error.message || 'Unknown error' });
+      }
+    },
     async purchase(plantId: string): Promise<void> {
       try {
         const userPlant = await firstValueFrom(gardenApi.purchase({ plantId }));

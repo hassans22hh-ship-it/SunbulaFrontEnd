@@ -18,7 +18,7 @@ export const APP_ROUTES: Routes = [
       { path: 'reports',   loadChildren: () => import('@features/reports/reports.routes').then(m => m.REPORTS_ROUTES) },
       { path: 'finance',   loadChildren: () => import('@features/finance/finance.routes').then(m => m.FINANCE_ROUTES) },
       { path: 'debts',     loadChildren: () => import('@features/debts/debts.routes').then(m => m.DEBTS_ROUTES) },
-      { path: 'store',     loadChildren: () => import('@features/plant-store/plant-store.routes').then(m => m.PLANT_STORE_ROUTES) },
+      { path: 'plant-store', loadChildren: () => import('@features/plant-store/plant-store.routes').then(m => m.PLANT_STORE_ROUTES) },
       { path: 'settings',  loadChildren: () => import('@features/settings/settings.routes').then(m => m.SETTINGS_ROUTES) },
     ],
   },

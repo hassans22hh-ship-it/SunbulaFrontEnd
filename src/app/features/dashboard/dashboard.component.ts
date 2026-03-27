@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { AuthService } from '@core/auth/auth.service';
 import { TimerStore } from '../timer/store/timer.store';
 import { TasksStore } from '../tasks/store/tasks.store';
@@ -70,12 +71,19 @@ export class DashboardComponent implements OnInit {
     return allTasks.slice(0, 6);
   });
 
-  ngOnInit(): void {
-    this.timer.initialize();
-    this.timer.loadPaged(1, 10); // Load last 10 sessions for "Recently Used"
-    this.tasks.load();
-    this.loadDailyData();
-    this.startTicker();
+  async ngOnInit(): Promise<void> {
+    try {
+      this.timer.initialize();
+      this.startTicker();
+      
+      // Sequential loading to avoid DB concurrency issues
+      await this.timer.loadPaged(1, 10);
+      await this.tasks.load();
+      await this.loadDailyData();
+      
+    } catch (e) {
+      this.loading.set(false);
+    }
   }
 
   private startTicker(): void {
@@ -83,17 +91,19 @@ export class DashboardComponent implements OnInit {
     this.timerInterval = setInterval(() => this.timer.updateTicker(), 1000);
   }
 
-  private loadDailyData(): void {
-    this.dailyApi.getTodaySummary().subscribe({
-      next: s => { this.dailySummary.set(s); this.loading.set(false); },
-      error: () => this.loading.set(false),
-    });
-    this.dailyApi.getStreak().subscribe({
-      next: (s: any) => {
-        const value = typeof s === 'number' ? s : (s?.streak ?? 0);
-        this.streak.set(value);
-      },
-    });
+  private async loadDailyData(): Promise<void> {
+    try {
+      const summary = await firstValueFrom(this.dailyApi.getTodaySummary());
+      this.dailySummary.set(summary);
+      
+      const streakData = await firstValueFrom<any>(this.dailyApi.getStreak());
+      const value = typeof streakData === 'number' ? streakData : (streakData?.streak ?? 0);
+      this.streak.set(value);
+      
+      this.loading.set(false);
+    } catch (e) {
+      this.loading.set(false);
+    }
   }
 
   get greeting(): string {
