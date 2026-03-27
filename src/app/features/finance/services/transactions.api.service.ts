@@ -7,9 +7,13 @@ import { FinancialTransactionDto, CreateFinancialTransactionDto, UpdateFinancial
 @Injectable({ providedIn: 'root' })
 export class TransactionsApiService {
   private readonly http = inject(HttpClient);
-  private readonly BASE = `${environment.apiUrl}/api/v1/transactions`;
+  private readonly BASE = `${environment.apiUrl}/api/v1/FinancialTransactions`;
 
-  getAll(): Observable<FinancialTransactionDto[]>                  { return this.http.get<FinancialTransactionDto[]>(this.BASE); }
+  getAll(): Observable<FinancialTransactionDto[]> { return this.http.get<FinancialTransactionDto[]>(this.BASE); }
+  getById(id: string): Observable<FinancialTransactionDto> { return this.http.get<FinancialTransactionDto>(`${this.BASE}/${id}`); }
+  getRange(from: string, to: string): Observable<FinancialTransactionDto[]> { 
+    return this.http.get<FinancialTransactionDto[]>(`${this.BASE}/range`, { params: { from, to } }); 
+  }
   getByWallet(walletId: string): Observable<FinancialTransactionDto[]> { return this.http.get<FinancialTransactionDto[]>(`${this.BASE}/wallet/${walletId}`); }
   create(dto: CreateFinancialTransactionDto): Observable<FinancialTransactionDto> { return this.http.post<FinancialTransactionDto>(this.BASE, dto); }
   update(id: string, dto: UpdateFinancialTransactionDto): Observable<FinancialTransactionDto> { return this.http.put<FinancialTransactionDto>(`${this.BASE}/${id}`, dto); }

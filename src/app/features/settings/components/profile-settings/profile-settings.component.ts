@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../../../core/auth/auth.service';
-import { SettingsApiService } from '../../services/settings.api.service';
+import { AuthApiService } from '../../../auth/services/auth.api.service';
 import { UpdateProfileDto } from '@shared/models/auth.models';
 import { ToastService } from '../../../../shared/ui/toast/toast.service';
 import { SbButtonComponent } from '../../../../shared/ui/button/sb-button.component';
@@ -64,7 +64,7 @@ import { SbButtonComponent } from '../../../../shared/ui/button/sb-button.compon
 })
 export class ProfileSettingsComponent {
   protected readonly auth = inject(AuthService);
-  private readonly api = inject(SettingsApiService);
+  private readonly authApi = inject(AuthApiService); // Changed from SettingsApiService
   private readonly fb = inject(FormBuilder);
   private readonly toast = inject(ToastService);
 
@@ -96,7 +96,7 @@ export class ProfileSettingsComponent {
       lastName: v.lastName!
     };
 
-    this.api.updateProfile(dto).subscribe({
+    this.authApi.updateProfile(dto).subscribe({
       next: () => {
         this.toast.success('Profile updated successfully.');
         this.form.markAsPristine();

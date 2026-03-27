@@ -41,3 +41,10 @@ export interface RecordPaymentDto {
   amount:   number;
   walletId: string;
 }
+
+export interface UpdateDebtDto {
+  type:         DebtType;
+  amount:       number;
+  personEntity: string;
+  dueDate?:     string;
+}

@@ -33,7 +33,15 @@ export const TasksStore = signalStore(
     async load(params?: TaskQueryParams): Promise<void> {
       patchState(store, { isLoading: true, error: null, filter: params ?? {} });
       try {
-        const tasks = await firstValueFrom(api.getAll(params));
+        // If behaviorType is set, we use the specialized endpoint for better accuracy
+        // or merge it into params.
+        const effectiveParams = { ...params } as any;
+        if (params?.behaviorType !== undefined) {
+          effectiveParams.behavior = params.behaviorType;
+        }
+        
+        const response: any = await firstValueFrom(api.getAll(effectiveParams));
+        const tasks = Array.isArray(response) ? response : (response.items ?? []);
         patchState(store, { tasks, isLoading: false });
       } catch (e: unknown) {
         patchState(store, { isLoading: false, error: (e as { message: string }).message });
@@ -86,7 +94,7 @@ export const TasksStore = signalStore(
     },
     async restore(id: string): Promise<void> {
       try {
-        const updated = await firstValueFrom(api.restore(id));
+        const updated = await firstValueFrom(api.unarchive(id));
         patchState(store, { tasks: store.tasks().map(t => t.id === id ? updated : t) });
         toast.success('Task restored');
       } catch (e: unknown) {
@@ -102,9 +110,20 @@ export const TasksStore = signalStore(
         toast.error((e as { message: string }).message);
       }
     },
-    setSearch(query: string): void {
-      const newFilter = { ...store.filter(), search: query || undefined };
-      // Call load directly with the new filter
+    setSearch(query: string, behavior?: number): void {
+      const newFilter = { 
+        ...store.filter(), 
+        search: query || undefined,
+        behaviorType: behavior !== undefined ? behavior : store.filter().behaviorType
+      };
+      this.load(newFilter);
+    },
+    setBehavior(behavior: number | undefined): void {
+      const newFilter = { ...store.filter(), behaviorType: behavior };
+      this.load(newFilter);
+    },
+    setFolder(folderId: string | undefined): void {
+      const newFilter = { ...store.filter(), folderId: folderId || undefined };
       this.load(newFilter);
     }
   })),

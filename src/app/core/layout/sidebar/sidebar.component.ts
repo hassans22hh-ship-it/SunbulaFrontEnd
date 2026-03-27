@@ -8,17 +8,19 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '@core/auth/auth.service';
 
 interface NavItem {
-  path:  string;
+  path: string;
   label: string;
-  icon:  string; // This will now correspond to a case in the SVG switch
+  icon: string; // This will now correspond to a case in the SVG switch
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { path: '/dashboard',  label: 'Dashboard',   icon: 'dashboard' },
-  { path: '/tasks',      label: 'Tasks',        icon: 'tasks' },
-  { path: '/timer',      label: 'Timer',        icon: 'timer' },
-  { path: '/library',    label: 'Library',      icon: 'library' },
-  { path: '/settings',   label: 'Settings',     icon: 'settings' },
+  { path: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
+  { path: '/tasks', label: 'Tasks', icon: 'tasks' },
+  { path: '/timer', label: 'Timer', icon: 'timer' },
+  { path: '/plant-store', label: 'Plant Store', icon: 'plant' },
+  { path: '/finance', label: 'Finance', icon: 'finance' },
+  { path: '/debts', label: 'Debts', icon: 'debts' },
+  { path: '/settings', icon: 'settings', label: 'Settings' },
 ];
 
 @Component({
@@ -30,10 +32,10 @@ const NAV_ITEMS: NavItem[] = [
   styleUrl: './sidebar.component.scss',
 })
 export class SidebarComponent {
-  protected readonly auth     = inject(AuthService);
-  private readonly router     = inject(Router);
+  protected readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
   protected readonly navItems = NAV_ITEMS;
-  readonly collapsed          = signal(false);
+  readonly collapsed = signal(false);
 
   protected toggleCollapse(): void {
     this.collapsed.update(v => !v);

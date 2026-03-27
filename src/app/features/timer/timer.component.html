@@ -5,12 +5,18 @@
   <div class="timer-hero">
     @if (timer.isRunning()) {
       <div class="timer-active-card animate-scaleIn">
-        <div class="timer-ring animate-timerPulse"></div>
+        <svg class="timer-progress-svg" viewBox="0 0 200 200">
+          <circle class="timer-progress-bg" cx="100" cy="100" r="90" />
+          <circle class="timer-progress-fill" cx="100" cy="100" r="90"
+                  [style.stroke-dashoffset]="calculateOffset(elapsed())" />
+        </svg>
         <div class="timer-display">{{ formatElapsed(elapsed()) }}</div>
         <div class="timer-task">
           <span class="timer-task-color" [style.background]="timer.activeSession()?.taskColor"></span>
           <span class="timer-task-title">{{ timer.activeSession()?.taskTitle }}</span>
-          <sb-behavior-badge [behavior]="timer.activeSession()!.taskBehavior" />
+          @if (timer.activeSession()?.taskBehavior; as behavior) {
+            <sb-behavior-badge [behavior]="behavior" />
+          }
         </div>
         <app-timer-controls 
           [isPaused]="timer.isPaused()"
@@ -80,7 +86,7 @@
       @if (timer.pagedResult(); as paged) {
         @if (paged.totalPages > 1) {
           <div class="pagination">
-            @for (p of [].constructor(paged.totalPages); track $index) {
+            @for (i of [].constructor(paged.totalPages); track $index) {
               <button class="page-btn" [class.page-btn--active]="$index + 1 === paged.page"
                       (click)="timer.loadPaged($index + 1)">{{ $index + 1 }}</button>
             }

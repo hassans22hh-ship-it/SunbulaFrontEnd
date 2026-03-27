@@ -19,9 +19,15 @@ export class AuthApiService {
 
   register(dto: RegisterDto): Observable<AuthResponseDto> { return this.http.post<AuthResponseDto>(`${this.BASE}/register`, dto); }
   login(dto: LoginDto): Observable<AuthResponseDto> { return this.http.post<AuthResponseDto>(`${this.BASE}/login`, dto); }
+  refreshToken(refreshToken: string): Observable<AuthResponseDto> { 
+    return this.http.post<AuthResponseDto>(`${this.BASE}/refresh`, { refreshToken }); 
+  }
+  logout(refreshToken: string): Observable<void> { 
+    return this.http.post<void>(`${this.BASE}/logout`, { refreshToken }); 
+  }
   getProfile(): Observable<UserDto> { return this.http.get<UserDto>(`${this.BASE}/profile`); }
   updateProfile(dto: UpdateProfileDto): Observable<UserDto> { return this.http.put<UserDto>(`${this.BASE}/profile`, dto); }
-  resendConfirmationEmail(): Observable<void> { return this.http.post<void>(`${this.BASE}/confirm-email`, {}); }
+  resendConfirmationEmail(): Observable<void> { return this.http.post<void>(`${this.BASE}/resend-confirmation`, {}); }
   changePassword(dto: ChangePasswordDto): Observable<void> { return this.http.post<void>(`${this.BASE}/change-password`, dto); }
   deleteAccount(password: string): Observable<void> { return this.http.delete<void>(`${this.BASE}/account`, { body: { password } }); }
   resetCoins(): Observable<void> { return this.http.post<void>(`${this.BASE}/reset-coins`, {}); }

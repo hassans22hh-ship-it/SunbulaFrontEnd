@@ -12,6 +12,7 @@ export class SbBehaviorBadgeComponent {
   readonly behavior = input.required<BehaviorCategory>();
 
   protected get meta() {
-    return BEHAVIOR_META[this.behavior()];
+    const b = this.behavior();
+    return b !== undefined && b !== null ? BEHAVIOR_META[b] : null;
   }
 }

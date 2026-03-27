@@ -12,7 +12,8 @@ export interface TaskDto {
   createdAt:    string;
   updatedAt:    string | null;
   categories:   CategoryDto[];
-  folder:       string | null;   // ← string (folder name), NOT FolderDto
+  folder:       string | null;
+  totalTrackedSeconds?: number;
 }
 
 export interface CreateTaskDto {
@@ -70,8 +71,9 @@ export interface UpdateFolderDto {
 }
 
 export interface TaskQueryParams {
-  folderId?: string;
-  status?:   number;
-  archived?: boolean;
-  search?:   string;
+  folderId?:     string;
+  status?:       number;
+  archived?:     boolean;
+  search?:       string;
+  behaviorType?: BehaviorCategory;
 }

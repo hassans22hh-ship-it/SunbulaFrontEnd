@@ -6,31 +6,46 @@
     <div class="space-y-4">
       <h5 class="text-[10px] font-bold uppercase tracking-[0.2em] text-text-subtle">Behavior</h5>
       <div class="flex flex-col gap-1">
-        <button class="flex items-center justify-between px-3 py-2 rounded-xl bg-primary/10 text-primary font-bold text-sm transition-all group">
+        <button (click)="filterByBehavior(undefined)"
+                [class.bg-primary/10]="store.filter().behaviorType === undefined"
+                [class.text-primary]="store.filter().behaviorType === undefined"
+                class="flex items-center justify-between px-3 py-2 rounded-xl text-text-muted hover:bg-surface-2 font-medium text-sm transition-all group w-full text-left">
           <div class="flex items-center gap-3">
             <div class="w-5 h-5 rounded-full bg-primary flex items-center justify-center text-[10px] text-white">✓</div>
             All
           </div>
         </button>
-        <button class="flex items-center justify-between px-3 py-2 rounded-xl text-text-muted hover:bg-surface-2 font-medium text-sm transition-all group">
+        <button (click)="filterByBehavior(0)"
+                [class.bg-primary/10]="store.filter().behaviorType === 0"
+                [class.text-primary]="store.filter().behaviorType === 0"
+                class="flex items-center justify-between px-3 py-2 rounded-xl text-text-muted hover:bg-surface-2 font-medium text-sm transition-all group w-full text-left">
           <div class="flex items-center gap-3">
             <div class="w-3 h-3 rounded-full bg-success"></div>
             Positive
           </div>
         </button>
-        <button class="flex items-center justify-between px-3 py-2 rounded-xl text-text-muted hover:bg-surface-2 font-medium text-sm transition-all group">
+        <button (click)="filterByBehavior(1)"
+                [class.bg-primary/10]="store.filter().behaviorType === 1"
+                [class.text-primary]="store.filter().behaviorType === 1"
+                class="flex items-center justify-between px-3 py-2 rounded-xl text-text-muted hover:bg-surface-2 font-medium text-sm transition-all group w-full text-left">
           <div class="flex items-center gap-3">
             <div class="w-3 h-3 rounded-full bg-info"></div>
             Neutral
           </div>
         </button>
-        <button class="flex items-center justify-between px-3 py-2 rounded-xl text-text-muted hover:bg-surface-2 font-medium text-sm transition-all group">
+        <button (click)="filterByBehavior(2)"
+                [class.bg-primary/10]="store.filter().behaviorType === 2"
+                [class.text-primary]="store.filter().behaviorType === 2"
+                class="flex items-center justify-between px-3 py-2 rounded-xl text-text-muted hover:bg-surface-2 font-medium text-sm transition-all group w-full text-left">
           <div class="flex items-center gap-3">
             <div class="w-3 h-3 rounded-full bg-danger"></div>
             Negative
           </div>
         </button>
-        <button class="flex items-center justify-between px-3 py-2 rounded-xl text-text-muted hover:bg-surface-2 font-medium text-sm transition-all group">
+        <button (click)="filterByBehavior(3)"
+                [class.bg-primary/10]="store.filter().behaviorType === 3"
+                [class.text-primary]="store.filter().behaviorType === 3"
+                class="flex items-center justify-between px-3 py-2 rounded-xl text-text-muted hover:bg-surface-2 font-medium text-sm transition-all group w-full text-left">
           <div class="flex items-center gap-3">
             <div class="w-3 h-3 rounded-full bg-warning"></div>
             Rest
@@ -41,17 +56,33 @@
 
     <!-- Folder Filter -->
     <div class="space-y-4">
-      <h5 class="text-[10px] font-bold uppercase tracking-[0.2em] text-text-subtle">Folder</h5>
+      <div class="flex items-center justify-between">
+        <h5 class="text-[10px] font-bold uppercase tracking-[0.2em] text-text-subtle">Folders</h5>
+        <button (click)="openFolderCreate()" 
+                class="w-5 h-5 flex items-center justify-center rounded-full bg-surface-3 text-text-subtle hover:bg-primary hover:text-white transition-all">
+          <svg viewBox="0 0 24 24" fill="none" class="w-3 h-3" stroke="currentColor" stroke-width="3">
+            <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+      </div>
       <div class="flex flex-col gap-1">
+        <button (click)="selectFolder(undefined)"
+                [class.bg-primary/10]="!store.filter().folderId"
+                [class.text-primary]="!store.filter().folderId"
+                class="flex items-center justify-between px-3 py-2 rounded-xl text-text-muted hover:bg-surface-2 font-medium text-sm transition-all group text-left w-full">
+          All Tasks
+        </button>
         @for (f of folders.folders(); track f.id) {
-          <label class="flex items-center justify-between px-3 py-2 rounded-xl text-text hover:bg-surface-2 font-bold text-sm transition-all cursor-pointer group">
+          <button (click)="selectFolder(f.id)"
+                  [class.bg-primary/10]="store.filter().folderId === f.id"
+                  [class.text-primary]="store.filter().folderId === f.id"
+                  class="flex items-center justify-between px-3 py-2 rounded-xl text-text hover:bg-surface-2 font-bold text-sm transition-all group text-left w-full">
             <div class="flex items-center gap-3">
-              <input type="checkbox" class="w-4 h-4 rounded border-border text-primary focus:ring-primary backdrop-blur-sm">
               <div class="w-2 h-2 rounded-full" [style.backgroundColor]="f.color"></div>
               {{ f.name }}
             </div>
             <span class="text-[10px] text-text-subtle font-bold bg-surface-3 px-2 py-0.5 rounded-full">{{ f.taskCount }}</span>
-          </label>
+          </button>
         }
       </div>
     </div>
@@ -137,7 +168,7 @@
             </button>
           </div>
           <button (click)="openCreate()" 
-                  class="flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                  class="flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all hover:bg-primary-light">
             <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="3">
               <line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line>
             </svg>
@@ -176,42 +207,86 @@
 
 <!-- Create/Edit Modal -->
 @if (showForm()) {
-  <sb-modal [title]="editing() ? 'Edit Task' : 'New Task'" (close)="showForm.set(false)">
-    <form [formGroup]="form" (ngSubmit)="onSave()" class="task-form">
-      <div class="form-group">
-        <label class="form-label">Title</label>
-        <input formControlName="title" class="input-field" placeholder="Task title">
+  <sb-modal [title]="editing() ? 'Edit Task' : 'New Task'" (close)="showForm.set(false)" size="md">
+    <form [formGroup]="form" (ngSubmit)="onSave()" class="flex flex-col gap-5 py-2">
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-text-muted uppercase tracking-wider">Task Title</label>
+        <input formControlName="title" 
+               class="input-field !text-lg !font-bold" 
+               placeholder="What needs to be done?">
       </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Emoji</label>
+
+      <div class="grid grid-cols-2 gap-4">
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-text-muted uppercase tracking-wider">Emoji Icon</label>
           <input formControlName="emoji" class="input-field" placeholder="📝">
         </div>
-        <div class="form-group">
-          <label class="form-label">Color</label>
-          <input formControlName="color" type="color" class="color-picker">
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-text-muted uppercase tracking-wider">Theme Color</label>
+          <div class="flex items-center gap-3">
+            <input formControlName="color" type="color" 
+                   class="w-10 h-10 border-2 border-border/50 rounded-xl cursor-pointer p-0 overflow-hidden">
+            <span class="text-sm font-medium text-text-subtle font-mono">{{ form.get('color')?.value }}</span>
+          </div>
         </div>
       </div>
-      <div class="form-group">
-        <label class="form-label">Behavior</label>
-        <select formControlName="behaviorType" class="input-field">
+
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-text-muted uppercase tracking-wider">Behavior Category</label>
+        <select formControlName="behaviorType" class="input-field cursor-pointer">
           @for (b of behaviors; track b) {
-            <option [value]="b">{{ b === 0 ? '🟢 Positive' : b === 1 ? '🔵 Neutral' : b === 2 ? '🔴 Negative' : '🟡 Rest' }}</option>
+            <option [ngValue]="b">{{ b === 0 ? '🟢 Positive' : b === 1 ? '🔵 Neutral' : b === 2 ? '🔴 Negative' : '🟡 Rest' }}</option>
           }
         </select>
+        <p class="text-[10px] text-text-subtle italic">This determines how this task affects your coins and mood.</p>
       </div>
-      <div class="form-group">
-        <label class="form-label">Folder (optional)</label>
-        <select formControlName="folderId" class="input-field">
+
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-text-muted uppercase tracking-wider">Assign to Folder</label>
+        <select formControlName="folderId" class="input-field cursor-pointer">
           <option value="">No folder</option>
           @for (f of folders.folders(); track f.id) {
             <option [value]="f.id">{{ f.name }}</option>
           }
         </select>
       </div>
-      <div modal-footer>
+
+      <div modal-footer class="pt-4 flex items-center justify-end gap-3">
         <sb-button variant="ghost" (click)="showForm.set(false)">Cancel</sb-button>
-        <sb-button type="submit" [disabled]="form.invalid">{{ editing() ? 'Update' : 'Create' }}</sb-button>
+        <sb-button type="submit" [disabled]="form.invalid" class="min-w-[120px]">
+          {{ editing() ? 'Update Task' : 'Create Task' }}
+        </sb-button>
+      </div>
+    </form>
+  </sb-modal>
+}
+
+<!-- Create Folder Modal -->
+@if (showFolderForm()) {
+  <sb-modal title="New Folder" (close)="showFolderForm.set(false)" size="sm">
+    <form [formGroup]="folderForm" (ngSubmit)="onSaveFolder()" class="flex flex-col gap-6 py-2">
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-text-muted uppercase tracking-wider">Folder Name</label>
+        <input formControlName="name" class="input-field" placeholder="e.g. Work, Personal, Home...">
+      </div>
+      
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-text-muted uppercase tracking-wider">Folder Color</label>
+        <div class="flex items-center gap-4 p-3 bg-surface-2 rounded-xl border border-border/30">
+          <input formControlName="color" type="color" 
+                 class="w-12 h-10 border-2 border-border/50 rounded-lg cursor-pointer p-0 overflow-hidden">
+          <div class="flex-1">
+            <span class="text-sm font-bold text-text block">Preview Color</span>
+            <span class="text-[10px] text-text-subtle font-mono">{{ folderForm.get('color')?.value }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div modal-footer class="pt-4 flex items-center justify-end gap-3">
+        <sb-button variant="ghost" (click)="showFolderForm.set(false)">Cancel</sb-button>
+        <sb-button type="submit" [disabled]="folderForm.invalid" class="w-full">
+          Create Folder
+        </sb-button>
       </div>
     </form>
   </sb-modal>

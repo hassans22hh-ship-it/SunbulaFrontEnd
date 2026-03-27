@@ -48,6 +48,14 @@
               @let progress = plant.coinsToNextStage > 0 ? (plant.stageCoinsAccumulated / plant.coinsToNextStage) * 100 : 100;
               <div class="growth-bar"><div class="growth-fill" [style.width.%]="progress"></div></div>
               <span class="growth-pct">{{ progress | number:'1.0-0' }}% grown</span>
+              
+              <div class="garden-actions">
+                @if (plant.currentStage === 0) {
+                  <sb-button variant="primary" size="sm" (click)="store.plantSeed(plant.id)">🌱 Plant Seed</sb-button>
+                } @else if (plant.currentStage < 4) {
+                  <sb-button variant="primary" size="sm" (click)="store.waterPlant(plant.id)">💧 Water</sb-button>
+                }
+              </div>
             </div></sb-card>
           }
         </div>

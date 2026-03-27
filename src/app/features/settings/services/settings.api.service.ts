@@ -7,18 +7,15 @@ import { UpdateProfileDto, UserSettingsDto } from '@shared/models/auth.models';
 @Injectable({ providedIn: 'root' })
 export class SettingsApiService {
   private readonly http = inject(HttpClient);
-  // Based on contract: PUT /api/Authentication/profile
-  private readonly base = `${environment.apiUrl}/api/v1/Authentication/profile`;
+  private readonly BASE = `${environment.apiUrl}/api/v1/UserSettings`;
 
-  updateProfile(dto: UpdateProfileDto): Observable<any> {
-    return this.http.put(this.base, dto);
-  }
-
+  /** Get user settings (theme, notifications, etc) */
   getSettings(): Observable<UserSettingsDto> {
-    return this.http.get<UserSettingsDto>(`${environment.apiUrl}/api/v1/Authentication/settings`);
+    return this.http.get<UserSettingsDto>(this.BASE);
   }
 
+  /** Update user settings */
   updateSettings(dto: UserSettingsDto): Observable<UserSettingsDto> {
-    return this.http.put<UserSettingsDto>(`${environment.apiUrl}/api/v1/Authentication/settings`, dto);
+    return this.http.put<UserSettingsDto>(this.BASE, dto);
   }
 }

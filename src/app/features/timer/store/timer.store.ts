@@ -13,6 +13,7 @@ interface TimerState {
   pagedResult:    PagedResult<TimeSessionDto> | null;
   isLoading:      boolean;
   error:          string | null;
+  ticker:         number; // For reactive computed updates
 }
 
 const initialState: TimerState = {
@@ -21,19 +22,24 @@ const initialState: TimerState = {
   pagedResult:    null,
   isLoading:      false,
   error:          null,
+  ticker:         0,
 };
 
 export const TimerStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
-  withComputed(({ activeSession }) => ({
+  withComputed(({ activeSession, ticker }) => ({
     isRunning: computed(() => activeSession() !== null),
     isPaused:  computed(() => activeSession()?.isPaused ?? false),
     /** Drift-safe elapsed calculation from server startTime */
     elapsedSeconds: computed(() => {
       const session = activeSession();
+      const _tick = ticker(); // Access ticker to force re-computation
       if (!session?.startTime) return 0;
-      return Math.floor((Date.now() - new Date(session.startTime).getTime()) / 1000);
+      
+      const start = new Date(session.startTime).getTime();
+      const now = Date.now();
+      return Math.floor((now - start) / 1000);
     }),
   })),
   withMethods((
@@ -140,8 +146,9 @@ export const TimerStore = signalStore(
     async loadAll(): Promise<void> {
       patchState(store, { isLoading: true });
       try {
-        const result = await firstValueFrom(api.getAll());
-        patchState(store, { sessions: result, isLoading: false });
+        const response: any = await firstValueFrom(api.getHistory());
+        const sessions = Array.isArray(response) ? response : (response.data ?? response.items ?? []);
+        patchState(store, { sessions, isLoading: false });
       } catch (e: unknown) {
         patchState(store, { isLoading: false, error: (e as { message: string }).message });
       }
@@ -151,11 +158,23 @@ export const TimerStore = signalStore(
     async loadPaged(page = 1, pageSize = 20): Promise<void> {
       patchState(store, { isLoading: true });
       try {
-        const result = await firstValueFrom(api.getPaged(page, pageSize));
-        patchState(store, { pagedResult: result, sessions: result.data, isLoading: false });
+        const response: any = await firstValueFrom(api.getPaged(page, pageSize));
+        const sessions = response.data ?? response.items ?? response;
+        const tasks = Array.isArray(sessions) ? sessions : (sessions.items ?? []);
+        patchState(store, { pagedResult: response, sessions: tasks, isLoading: false });
       } catch (e: unknown) {
-        patchState(store, { isLoading: false, error: (e as { message: string }).message });
+        // Fallback to non-paged history if paged fails
+        try {
+          const history = await firstValueFrom(api.getHistory());
+          patchState(store, { sessions: history, isLoading: false });
+        } catch {
+          patchState(store, { isLoading: false, error: (e as { message: string }).message });
+        }
       }
+    },
+
+    updateTicker(): void {
+      patchState(store, { ticker: store.ticker() + 1 });
     },
   })),
 );

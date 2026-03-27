@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { TasksStore } from './store/tasks.store';
 import { FoldersStore } from '../folders/store/folders.store';
 import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
@@ -14,6 +14,7 @@ import { CoinsPipe } from '@shared/pipes/coins.pipe';
 import { AuthService } from '@core/auth/auth.service';
 import { TaskCardComponent } from './components/task-card/task-card.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'sb-tasks',
@@ -32,12 +33,15 @@ export class TasksComponent implements OnInit {
   protected readonly folders = inject(FoldersStore);
   protected readonly auth    = inject(AuthService);
   private readonly fb        = inject(FormBuilder);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly router     = inject(Router);
 
-  readonly showForm   = signal(false);
-  readonly showDelete = signal(false);
-  readonly editing    = signal<TaskDto | null>(null);
-  readonly deleting   = signal<TaskDto | null>(null);
-  readonly tab        = signal<'active' | 'completed' | 'archived'>('active');
+  readonly showForm       = signal(false);
+  readonly showFolderForm = signal(false);
+  readonly showDelete     = signal(false);
+  readonly editing        = signal<TaskDto | null>(null);
+  readonly deleting       = signal<TaskDto | null>(null);
+  readonly tab            = signal<'active' | 'completed' | 'archived'>('active');
 
   protected readonly behaviors = [
     BehaviorCategory.Positive, BehaviorCategory.Neutral,
@@ -52,14 +56,19 @@ export class TasksComponent implements OnInit {
     folderId:     [''],
   });
 
+  readonly folderForm = this.fb.nonNullable.group({
+    name:  ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+    color: ['#52B788', Validators.required],
+  });
+
   readonly searchCtrl = new FormControl('');
 
   ngOnInit(): void {
     this.store.load();
     this.folders.load();
 
-    this.searchCtrl.valueChanges.pipe(takeUntilDestroyed()).subscribe(val => {
-      this.store.setSearch(val ?? '');
+    this.searchCtrl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
+      this.store.setSearch(val ?? '', this.store.filter().behaviorType);
     });
   }
 
@@ -91,6 +100,21 @@ export class TasksComponent implements OnInit {
     this.showForm.set(false);
   }
 
+  protected onLogout(): void {
+    this.auth.logout();
+    this.router.navigate(['/auth/login']);
+  }
+
+  protected filterByBehavior(behavior: number | undefined): void {
+    this.store.setBehavior(behavior);
+  }
+
+  protected userInitials(): string {
+    const u = this.auth.user();
+    if (!u) return '?';
+    return (u.firstName[0] ?? '') + (u.lastName[0] ?? '');
+  }
+
   confirmDelete(task: TaskDto): void {
     this.deleting.set(task);
     this.showDelete.set(true);
@@ -100,5 +124,20 @@ export class TasksComponent implements OnInit {
     const d = this.deleting();
     if (d) this.store.remove(d.id);
     this.showDelete.set(false);
+  }
+
+  selectFolder(folderId: string | undefined): void {
+    this.store.setFolder(folderId);
+  }
+
+  openFolderCreate(): void {
+    this.folderForm.reset({ name: '', color: '#52B788' });
+    this.showFolderForm.set(true);
+  }
+
+  onSaveFolder(): void {
+    if (this.folderForm.invalid) return;
+    this.folders.create(this.folderForm.getRawValue());
+    this.showFolderForm.set(false);
   }
 }

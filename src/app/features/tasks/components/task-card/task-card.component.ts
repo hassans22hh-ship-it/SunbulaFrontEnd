@@ -2,12 +2,13 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 import { TaskDto } from '@shared/models/task.models';
 import { TaskStatus, BEHAVIOR_META } from '@shared/models/enums';
 import { RelativeDatePipe } from '@shared/pipes/relative-date.pipe';
+import { DurationPipe } from '@shared/pipes/duration.pipe';
 import { SbBehaviorBadgeComponent } from '@shared/ui/behavior-badge/sb-behavior-badge.component';
 
 @Component({
   selector: 'sb-task-card',
   standalone: true,
-  imports: [RelativeDatePipe, SbBehaviorBadgeComponent],
+  imports: [RelativeDatePipe, SbBehaviorBadgeComponent, DurationPipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './task-card.component.html',
   styleUrl: './task-card.component.css',

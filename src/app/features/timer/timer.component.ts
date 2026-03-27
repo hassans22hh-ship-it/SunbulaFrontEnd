@@ -44,6 +44,7 @@ export class TimerComponent implements OnInit, OnDestroy {
   private startTick(): void {
     this.intervalId = setInterval(() => {
       if (this.timer.isRunning()) {
+        this.timer.updateTicker();
         this.elapsed.set(this.timer.elapsedSeconds());
       }
     }, 1000);
@@ -63,6 +64,12 @@ export class TimerComponent implements OnInit, OnDestroy {
   stopTimer(): void {
     this.timer.stop();
     this.elapsed.set(0);
+  }
+
+  calculateOffset(seconds: number): number {
+    const circumference = 565.48;
+    const progress = (seconds % 3600) / 3600;
+    return circumference * (1 - progress);
   }
 
   formatElapsed(seconds: number): string {

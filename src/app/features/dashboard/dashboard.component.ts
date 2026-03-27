@@ -14,6 +14,9 @@ import { BEHAVIOR_META, BehaviorCategory } from '@shared/models/enums';
 import { PageTransitionDirective } from '@core/animation/page-transition.directive';
 import { DecimalPipe } from '@angular/common';
 import { TaskDto } from '@shared/models/task.models';
+import { SbIconCoinComponent } from '@shared/ui/icons/coin-icon.component';
+import { ToastService } from '@shared/ui/toast/toast.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'sb-dashboard',
@@ -21,6 +24,7 @@ import { TaskDto } from '@shared/models/task.models';
   imports: [
     SbCardComponent, SbButtonComponent, SbSpinnerComponent,
     SbBehaviorBadgeComponent, DurationPipe, CoinsPipe, DecimalPipe, PageTransitionDirective,
+    SbIconCoinComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
@@ -31,16 +35,23 @@ export class DashboardComponent implements OnInit {
   protected readonly timer = inject(TimerStore);
   protected readonly tasks = inject(TasksStore);
   private readonly dailyApi = inject(DailyTransactionApiService);
+  private readonly toast    = inject(ToastService);
+  private readonly router   = inject(Router);
 
   readonly dailySummary = signal<DailySummaryDto | null>(null);
   readonly streak       = signal(0);
   readonly loading      = signal(true);
+  private timerInterval: any;
 
   protected readonly behaviorMeta = BEHAVIOR_META;
 
+  ngOnDestroy(): void {
+    if (this.timerInterval) clearInterval(this.timerInterval);
+  }
+
   readonly recentTasks = computed(() => {
-    const sessions = this.timer.sessions();
-    const allTasks = this.tasks.activeTasks();
+    const sessions = this.timer.sessions() ?? [];
+    const allTasks = this.tasks.activeTasks() ?? [];
     
     // Extract unique taskIds from sessions in order (most recent first)
     const recentIds = [...new Set(sessions.map(s => s.taskId))];
@@ -64,6 +75,12 @@ export class DashboardComponent implements OnInit {
     this.timer.loadPaged(1, 10); // Load last 10 sessions for "Recently Used"
     this.tasks.load();
     this.loadDailyData();
+    this.startTicker();
+  }
+
+  private startTicker(): void {
+    if (this.timerInterval) clearInterval(this.timerInterval);
+    this.timerInterval = setInterval(() => this.timer.updateTicker(), 1000);
   }
 
   private loadDailyData(): void {
@@ -72,7 +89,10 @@ export class DashboardComponent implements OnInit {
       error: () => this.loading.set(false),
     });
     this.dailyApi.getStreak().subscribe({
-      next: s => this.streak.set(s),
+      next: (s: any) => {
+        const value = typeof s === 'number' ? s : (s?.streak ?? 0);
+        this.streak.set(value);
+      },
     });
   }
 
@@ -81,5 +101,14 @@ export class DashboardComponent implements OnInit {
     if (h < 12) return 'Good morning';
     if (h < 17) return 'Good afternoon';
     return 'Good evening';
+  }
+
+  protected startTask(taskId: string): void {
+    const task = this.tasks.activeTasks().find(t => t.id === taskId);
+    if (!task) return;
+
+    this.timer.start(taskId);
+    this.toast.success(`Tracking session for: ${task.title} ⏱️`);
+    this.router.navigate(['/timer']);
   }
 }

@@ -4,14 +4,15 @@ import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { Observable, firstValueFrom, of } from 'rxjs';
 import { environment } from '@env/environment';
-import { UserDto, AuthResponseDto, RefreshTokenDto, LogoutDto } from '@shared/models/auth.models';
+import { UserDto, AuthResponseDto } from '@shared/models/auth.models';
+import { AuthApiService } from '../../features/auth/services/auth.api.service';
 
 const REFRESH_TOKEN_KEY = 'sunbula_refresh_token';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly http   = inject(HttpClient);
-  private readonly router = inject(Router);
+  private readonly authApi = inject(AuthApiService);
+  private readonly router  = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
 
   private readonly _user         = signal<UserDto | null>(null);
@@ -23,7 +24,10 @@ export class AuthService {
   readonly isAuthenticated  = computed(() => this._user() !== null);
   readonly isEmailConfirmed = computed(() => this._user()?.isEmailConfirmed ?? false);
   readonly coinBalance      = computed(() => this._user()?.coinBalance ?? 0);
-  readonly streakDays       = computed(() => this._user()?.consecutiveStreakDays ?? 0);
+  readonly streakDays       = computed(() => {
+    const val: any = this._user()?.consecutiveStreakDays ?? 0;
+    return typeof val === 'number' ? val : (val?.streak ?? 0);
+  });
 
   /** Load tokens from localStorage and restore user session */
   async initialize(): Promise<void> {
@@ -48,7 +52,7 @@ export class AuthService {
 
   async loadProfile(): Promise<void> {
     const user = await firstValueFrom(
-      this.http.get<UserDto>(`${environment.apiUrl}/api/v1/authentication/profile`),
+      this.authApi.getProfile() as Observable<UserDto>
     );
     this._user.set(user);
   }
@@ -83,11 +87,8 @@ export class AuthService {
     if (!token) return of(null as unknown as AuthResponseDto);
 
     return new Observable<AuthResponseDto>(observer => {
-      this.http.post<AuthResponseDto>(
-        `${environment.apiUrl}/api/v1/authentication/refresh`,
-        { refreshToken: token } as RefreshTokenDto,
-      ).subscribe({
-        next: response => {
+      this.authApi.refreshToken(token).subscribe({
+        next: (response: any) => {
           this.setTokens(response.accessToken, response.refreshToken, response.expiresAt);
           observer.next(response);
           observer.complete();
@@ -104,9 +105,7 @@ export class AuthService {
     const refreshToken = this._refreshToken();
     try {
       if (refreshToken) {
-        await firstValueFrom(
-          this.http.post(`${environment.apiUrl}/api/v1/authentication/logout`, { refreshToken } as LogoutDto),
-        );
+        await firstValueFrom(this.authApi.logout(refreshToken));
       }
     } catch {
       // Ignore errors — always clear local state

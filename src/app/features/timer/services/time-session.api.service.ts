@@ -11,44 +11,35 @@ export class TimeSessionApiService {
   private readonly http = inject(HttpClient);
   private readonly BASE = `${environment.apiUrl}/api/v1/TimeSession`;
 
-  getAll(): Observable<TimeSessionDto[]> {
-    return this.http.get<TimeSessionDto[]>(this.BASE);
-  }
-
+  // Queries
+  getAll(params?: any): Observable<TimeSessionDto[]> { return this.http.get<TimeSessionDto[]>(this.BASE, { params }); }
   getPaged(page = 1, pageSize = 20): Observable<PagedResult<TimeSessionDto>> {
-    return this.http.get<PagedResult<TimeSessionDto>>(`${this.BASE}/paged`, {
-      params: { page, pageSize },
-    });
+    return this.http.get<PagedResult<TimeSessionDto>>(this.BASE, { params: { page, pageSize } });
   }
-
-  /** Returns null if no active session (204) */
+  getHistory(): Observable<TimeSessionDto[]> { return this.http.get<TimeSessionDto[]>(`${this.BASE}/history`); }
+  getById(id: string): Observable<TimeSessionDto> { return this.http.get<TimeSessionDto>(`${this.BASE}/${id}`); }
+  getByDate(date: string): Observable<TimeSessionDto[]> { return this.http.get<TimeSessionDto[]>(`${this.BASE}/date`, { params: { date } }); }
+  getRange(from: string, to: string): Observable<TimeSessionDto[]> {
+    return this.http.get<TimeSessionDto[]>(`${this.BASE}/range`, { params: { from, to } });
+  }
   getActive(): Observable<TimeSessionDto | null> {
     return this.http.get<TimeSessionDto>(`${this.BASE}/active`).pipe(
       catchError(err => err.status === 204 ? of(null) : throwError(() => err)),
     );
   }
 
-  /** 409 if session already running */
-  start(dto: StartSessionDto): Observable<TimeSessionDto> {
-    return this.http.post<TimeSessionDto>(`${this.BASE}/start`, dto);
-  }
-
-  stop(id: string): Observable<TimeSessionDto> {
-    return this.http.post<TimeSessionDto>(`${this.BASE}/${id}/stop`, null);
-  }
-
-  pause(id: string): Observable<TimeSessionDto> {
-    return this.http.post<TimeSessionDto>(`${this.BASE}/${id}/pause`, null);
-  }
-
-  resume(id: string): Observable<TimeSessionDto> {
-    return this.http.post<TimeSessionDto>(`${this.BASE}/${id}/resume`, null);
-  }
-
-  /** Returns null if nothing was active (204) */
+  // Commands
+  start(dto: StartSessionDto): Observable<TimeSessionDto> { return this.http.post<TimeSessionDto>(`${this.BASE}/start`, dto); }
+  stop(id: string): Observable<TimeSessionDto> { return this.http.post<TimeSessionDto>(`${this.BASE}/${id}/stop`, null); }
   stopActive(): Observable<TimeSessionDto | null> {
     return this.http.post<TimeSessionDto>(`${this.BASE}/stop-active`, null).pipe(
       catchError(err => err.status === 204 ? of(null) : throwError(() => err)),
     );
   }
+  pause(id: string): Observable<TimeSessionDto> { return this.http.post<TimeSessionDto>(`${this.BASE}/${id}/pause`, null); }
+  resume(id: string): Observable<TimeSessionDto> { return this.http.post<TimeSessionDto>(`${this.BASE}/${id}/resume`, null); }
+  manual(dto: any): Observable<TimeSessionDto> { return this.http.post<TimeSessionDto>(`${this.BASE}/manual`, dto); }
+  update(id: string, dto: any): Observable<TimeSessionDto> { return this.http.put<TimeSessionDto>(`${this.BASE}/${id}`, dto); }
+  delete(id: string): Observable<void> { return this.http.delete<void>(`${this.BASE}/${id}`); }
+  recover(id: string): Observable<TimeSessionDto> { return this.http.post<TimeSessionDto>(`${this.BASE}/${id}/recover`, null); }
 }

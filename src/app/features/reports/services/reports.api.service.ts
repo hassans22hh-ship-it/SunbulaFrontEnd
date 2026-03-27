@@ -8,13 +8,24 @@ import { TimeReportDto, ReportFilterDto } from '@shared/models/reports.models';
 export class ReportsApiService {
   private readonly http = inject(HttpClient);
   // Using a hypothetical analytics endpoint based on the standard REST API for this project
-  private readonly base = `${environment.apiUrl}/api/v1/Analytics`;
+  private readonly base = `${environment.apiUrl}/api/v1/Reports`;
+  private readonly sessionBase = `${environment.apiUrl}/api/v1/TimeSession`;
 
   getReport(filters: ReportFilterDto): Observable<TimeReportDto> {
-    let params = new HttpParams()
-      .set('startDate', filters.from || '')
-      .set('endDate', filters.to || '');
+    return this.http.get<TimeReportDto>(`${this.base}/time`, { 
+      params: { from: filters.from || '', to: filters.to || '' } 
+    });
+  }
 
-    return this.http.get<TimeReportDto>(`${this.base}/summary`, { params });
+  getTaskReport(from: string, to: string): Observable<any> {
+    return this.http.get(`${this.base}/tasks`, { params: { from, to } });
+  }
+
+  getFinanceReport(from: string, to: string): Observable<any> {
+    return this.http.get(`${this.base}/finance`, { params: { from, to } });
+  }
+
+  getDebtReport(from: string, to: string): Observable<any> {
+    return this.http.get(`${this.base}/debt`, { params: { from, to } });
   }
 }
