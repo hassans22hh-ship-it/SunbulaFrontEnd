@@ -3,6 +3,7 @@ import {
   provideZonelessChangeDetection,
   APP_INITIALIZER,
   inject,
+  LOCALE_ID,
 } from '@angular/core';
 import { provideRouter, withComponentInputBinding, withViewTransitions } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
@@ -29,6 +30,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(APP_ROUTES, withComponentInputBinding(), withViewTransitions()),
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
     provideAnimationsAsync(),
+    { provide: LOCALE_ID, useValue: 'ar-EG' },
     {
       provide: APP_INITIALIZER,
       useFactory: initApp,

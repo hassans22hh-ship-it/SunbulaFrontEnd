@@ -3,6 +3,7 @@
 @theme {
   /* ── Brand ──────────────────────────────── */
   --color-primary:        #2D6A4F;
+  --color-primary-rgb:    45, 106, 79;
   --color-primary-light:  #52B788;
   --color-primary-dark:   #1B4332;
   --color-accent:         #F4A261;
@@ -22,7 +23,9 @@
 
   /* ── Light Mode Surfaces ────────────────── */
   --color-bg:           #F0F7F4;
+  --color-bg-rgb:       240, 247, 244;
   --color-surface:      #FFFFFF;
+  --color-surface-rgb:  255, 255, 255;
   --color-surface-2:    #F4FAF7;
   --color-border:       #D4E8DE;
   --color-text:         #1B2D27;
@@ -59,7 +62,9 @@
 /* ══ DARK MODE ══════════════════════════════════════════════ */
 [data-theme="dark"] {
   --color-bg:          #0D1F19;
+  --color-bg-rgb:      13, 31, 25;
   --color-surface:     #162820;
+  --color-surface-rgb: 22, 40, 32;
   --color-surface-2:   #1B3028;
   --color-border:      #243D33;
   --color-text:        #E8F5EE;

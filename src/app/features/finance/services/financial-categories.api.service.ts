@@ -7,9 +7,9 @@ import { FinancialCategoryDto, CreateFinancialCategoryDto } from '@shared/models
 @Injectable({ providedIn: 'root' })
 export class FinancialCategoriesApiService {
   private readonly http = inject(HttpClient);
-  private readonly BASE = `${environment.apiUrl}/api/v1/financial-categories`;
+  private readonly BASE = `${environment.apiUrl}/api/v1/FinancialCategories`;
 
-  getAll(): Observable<FinancialCategoryDto[]>                        { return this.http.get<FinancialCategoryDto[]>(this.BASE); }
+  getAll(): Observable<FinancialCategoryDto[]> { return this.http.get<FinancialCategoryDto[]>(this.BASE); }
   create(dto: CreateFinancialCategoryDto): Observable<FinancialCategoryDto> { return this.http.post<FinancialCategoryDto>(this.BASE, dto); }
   /** ⚠️ Rename uses query param ?newName= with null body */
   rename(id: string, newName: string): Observable<FinancialCategoryDto> {

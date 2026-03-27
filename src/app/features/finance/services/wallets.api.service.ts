@@ -9,10 +9,10 @@ export class WalletsApiService {
   private readonly http = inject(HttpClient);
   private readonly BASE = `${environment.apiUrl}/api/v1/Wallets`;
 
-  getAll(): Observable<WalletDto[]>                              { return this.http.get<WalletDto[]>(this.BASE); }
-  getById(id: string): Observable<WalletDto>                     { return this.http.get<WalletDto>(`${this.BASE}/${id}`); }
-  getSummary(): Observable<FinanceSummaryDto>                     { return this.http.get<FinanceSummaryDto>(`${this.BASE}/summary`); }
-  create(dto: CreateWalletDto): Observable<WalletDto>             { return this.http.post<WalletDto>(this.BASE, dto); }
+  getAll(): Observable<WalletDto[]> { return this.http.get<WalletDto[]>(this.BASE); }
+  getById(id: string): Observable<WalletDto> { return this.http.get<WalletDto>(`${this.BASE}/${id}`); }
+  getSummary(): Observable<FinanceSummaryDto> { return this.http.get<FinanceSummaryDto>(`${this.BASE}/summary`); }
+  create(dto: CreateWalletDto): Observable<WalletDto> { return this.http.post<WalletDto>(this.BASE, dto); }
   update(id: string, dto: UpdateWalletDto): Observable<WalletDto> { return this.http.put<WalletDto>(`${this.BASE}/${id}`, dto); }
-  delete(id: string): Observable<void>                            { return this.http.delete<void>(`${this.BASE}/${id}`); }
+  delete(id: string): Observable<void> { return this.http.delete<void>(`${this.BASE}/${id}`); }
 }

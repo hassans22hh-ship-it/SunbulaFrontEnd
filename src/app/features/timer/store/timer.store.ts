@@ -4,6 +4,7 @@ import { TimeSessionApiService } from '../services/time-session.api.service';
 import { AuthService } from '@core/auth/auth.service';
 import { ToastService } from '@shared/ui/toast/toast.service';
 import { TimeSessionDto, StartSessionDto } from '@shared/models/timer.models';
+import { TasksStore } from '../../tasks/store/tasks.store';
 import { PagedResult } from '@shared/models/enums';
 import { firstValueFrom } from 'rxjs';
 
@@ -45,6 +46,7 @@ export const TimerStore = signalStore(
   withMethods((
     store,
     api   = inject(TimeSessionApiService),
+    tasksStore = inject(TasksStore),
     auth  = inject(AuthService),
     toast = inject(ToastService),
   ) => ({
@@ -127,6 +129,38 @@ export const TimerStore = signalStore(
       }
     },
 
+    async updateSession(id: string, dto: any): Promise<void> {
+      patchState(store, { isLoading: true });
+      try {
+        const updated = await firstValueFrom(api.update(id, dto));
+        const enriched = this.enrichSessions([updated])[0];
+        patchState(store, { 
+          sessions: store.sessions().map(s => s.id === id ? enriched : s),
+          isLoading: false 
+        });
+        toast.success('Session updated');
+      } catch (e: unknown) {
+        patchState(store, { isLoading: false });
+        toast.error((e as { message: string }).message ?? 'Failed to update session');
+      }
+    },
+
+    async deleteSession(id: string): Promise<void> {
+      if (!confirm('Are you sure you want to delete this session?')) return;
+      patchState(store, { isLoading: true });
+      try {
+        await firstValueFrom(api.delete(id));
+        patchState(store, { 
+          sessions: store.sessions().filter(s => s.id !== id),
+          isLoading: false 
+        });
+        toast.success('Session deleted');
+      } catch (e: unknown) {
+        patchState(store, { isLoading: false });
+        toast.error((e as { message: string }).message ?? 'Failed to delete session');
+      }
+    },
+
     /** Switch tasks: stop active → start new */
     async switchTask(taskId: string): Promise<void> {
       patchState(store, { isLoading: true });
@@ -148,13 +182,7 @@ export const TimerStore = signalStore(
       try {
         const response: any = await firstValueFrom(api.getHistory());
         const rawSessions = Array.isArray(response) ? response : (response.data ?? response.items ?? []);
-        const sessions = rawSessions.map((s: any) => ({
-          ...s,
-          taskTitle: s.taskTitle || s.task?.title || s.title || 'Focus Session',
-          taskColor: s.taskColor || s.task?.color || '#52B788',
-          durationSeconds: s.durationSeconds ?? s.duration ?? 0,
-          coinsEarned: s.coinsEarned ?? s.coins ?? 0,
-        }));
+        const sessions = this.enrichSessions(rawSessions);
         patchState(store, { sessions, isLoading: false });
       } catch (e: unknown) {
         patchState(store, { isLoading: false, error: (e as { message: string }).message });
@@ -168,23 +196,31 @@ export const TimerStore = signalStore(
         const response: any = await firstValueFrom(api.getPaged(page, pageSize));
         const raw = response.data ?? response.items ?? response;
         const rawSessions = Array.isArray(raw) ? raw : (raw.items ?? []);
-        const sessions = rawSessions.map((s: any) => ({
-          ...s,
-          taskTitle: s.taskTitle || s.task?.title || s.title || 'Focus Session',
-          taskColor: s.taskColor || s.task?.color || '#52B788',
-          durationSeconds: s.durationSeconds ?? s.duration ?? 0,
-          coinsEarned: s.coinsEarned ?? s.coins ?? 0,
-        }));
+        const sessions = this.enrichSessions(rawSessions);
         patchState(store, { pagedResult: response, sessions, isLoading: false });
       } catch (e: unknown) {
         // Fallback to non-paged history if paged fails
         try {
           const history = await firstValueFrom(api.getHistory());
-          patchState(store, { sessions: history, isLoading: false });
+          patchState(store, { sessions: this.enrichSessions(history), isLoading: false });
         } catch {
           patchState(store, { isLoading: false, error: (e as { message: string }).message });
         }
       }
+    },
+
+    enrichSessions(sessions: any[]): TimeSessionDto[] {
+      const allTasks = tasksStore.tasks();
+      return sessions.map(s => {
+        const task = (allTasks as any[]).find(t => t.id === s.taskId);
+        return {
+          ...s,
+          taskTitle: task?.title || s.taskTitle || s.taskName || s.title || 'Focus Session',
+          taskColor: task?.color || s.taskColor || '#52B788',
+          taskBehavior: task?.behaviorType ?? s.taskBehavior ?? s.behaviorType,
+          durationSeconds: s.durationSeconds ?? s.duration ?? s.totalSeconds ?? (s.durationMinutes ? s.durationMinutes * 60 : 0),
+        };
+      });
     },
 
     updateTicker(): void {

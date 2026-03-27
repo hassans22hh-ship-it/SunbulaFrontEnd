@@ -10,14 +10,17 @@
           <circle class="timer-progress-fill" cx="100" cy="100" r="90"
                   [style.stroke-dashoffset]="calculateOffset(elapsed())" />
         </svg>
+        
         <div class="timer-display">{{ formatElapsed(elapsed()) }}</div>
+        
         <div class="timer-task">
-          <span class="timer-task-color" [style.background]="timer.activeSession()?.taskColor"></span>
+          <span class="timer-task-color" [style.background]="timer.activeSession()?.taskColor" [style.color]="timer.activeSession()?.taskColor"></span>
           <span class="timer-task-title">{{ timer.activeSession()?.taskTitle }}</span>
           @if (timer.activeSession()?.taskBehavior; as behavior) {
             <sb-behavior-badge [behavior]="behavior" />
           }
         </div>
+
         <app-timer-controls 
           [isPaused]="timer.isPaused()"
           [isLoading]="timer.isLoading()"
@@ -26,26 +29,26 @@
           (onStop)="stopTimer()" />
       </div>
     } @else {
-      <div class="timer-idle">
+      <div class="timer-idle animate-fadeIn">
         <div class="timer-display timer-display--idle">00:00:00</div>
-        <p class="timer-idle-text">Select a task to start tracking</p>
+        <p class="timer-idle-text">Ready to focus? Select a task below to begin.</p>
       </div>
     }
   </div>
 
   <!-- Quick Task Select -->
-  <div class="task-select-section">
-    <h2 class="subsection-title">Start Timer</h2>
+  <section class="task-select-section">
+    <h2 class="subsection-title">✨ Start Timer</h2>
     @if (tasks.activeTasks().length === 0) {
       <sb-empty-state icon="✅" heading="No active tasks" message="Create a task first to start tracking time" />
     } @else {
       <div class="task-grid">
         @for (task of tasks.activeTasks(); track task.id) {
-          <sb-card [hoverable]="true" (click)="startTimer(task.id)">
+          <sb-card [hoverable]="true" class="task-select-card" (click)="startTimer(task.id)">
             <div class="quick-task">
               <span class="quick-task-color" [style.background]="task.color"></span>
               <div class="quick-task-info">
-                @if (task.emoji) { <span>{{ task.emoji }}</span> }
+                @if (task.emoji) { <span class="text-xl">{{ task.emoji }}</span> }
                 <span class="quick-task-title">{{ task.title }}</span>
               </div>
               <sb-behavior-badge [behavior]="task.behaviorType" />
@@ -54,29 +57,39 @@
         }
       </div>
     }
-  </div>
+  </section>
 
   <!-- Session History -->
-  <div class="history-section">
-    <h2 class="subsection-title">Session History</h2>
+  <section class="history-section">
+    <h2 class="subsection-title">📊 Session History</h2>
     @if (timer.isLoading()) {
-      <sb-spinner size="md" />
+      <div class="flex justify-center p-8">
+        <sb-spinner size="md" />
+      </div>
     } @else if (timer.sessions().length === 0) {
       <sb-empty-state icon="📊" heading="No sessions yet" message="Start your first timer to see history here" />
     } @else {
       <div class="session-list">
         @for (session of timer.sessions(); track session.id) {
-          <sb-card padding="sm">
+          <sb-card padding="sm" class="session-card">
             <div class="session-row">
               <span class="session-color" [style.background]="session.taskColor"></span>
               <div class="session-info">
                 <span class="session-title">{{ session.taskTitle }}</span>
                 <span class="session-date">{{ session.startTime | relativeDate }}</span>
               </div>
-              <span class="session-duration">{{ session.durationSeconds | duration }}</span>
+              <span class="session-duration">{{ session.durationSeconds | duration:'words' }}</span>
               @if (session.coinsEarned !== null) {
-                <span class="coin-badge">{{ session.coinsEarned | coins }}</span>
+                <span class="coin-badge">
+                  <span>{{ session.coinsEarned | number:'1.1-1' }}</span>
+                  <span class="coin-icon">🪙</span>
+                </span>
               }
+
+              <div class="session-actions">
+                <button class="action-btn action-btn--edit" (click)="editSession(session)" title="Edit Notes">✏️</button>
+                <button class="action-btn action-btn--delete" (click)="deleteSession(session.id)" title="Delete Session">🗑️</button>
+              </div>
             </div>
           </sb-card>
         }
@@ -94,5 +107,5 @@
         }
       }
     }
-  </div>
+  </section>
 </div>
