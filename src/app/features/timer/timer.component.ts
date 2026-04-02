@@ -1,4 +1,5 @@
-import { DecimalPipe } from '@angular/common';
+import { DecimalPipe, CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
 import { TimerStore } from './store/timer.store';
 import { TasksStore } from '../tasks/store/tasks.store';
@@ -9,13 +10,16 @@ import { SbBehaviorBadgeComponent } from '@shared/ui/behavior-badge/sb-behavior-
 import { DurationPipe } from '@shared/pipes/duration.pipe';
 import { RelativeDatePipe } from '@shared/pipes/relative-date.pipe';
 import { PageTransitionDirective } from '@core/animation/page-transition.directive';
+import { SbModalComponent } from '@shared/ui/modal/sb-modal.component';
 import { TimerControlsComponent } from './components/timer-controls/timer-controls.component';
+import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
 
 @Component({
   selector: 'sb-timer',
   standalone: true,
   imports: [
-    SbCardComponent, SbEmptyStateComponent, SbSpinnerComponent,
+    CommonModule, FormsModule, 
+    SbCardComponent, SbEmptyStateComponent, SbSpinnerComponent, SbModalComponent, SbButtonComponent,
     SbBehaviorBadgeComponent, DurationPipe, DecimalPipe, RelativeDatePipe, PageTransitionDirective,
     TimerControlsComponent,
   ],
@@ -28,6 +32,14 @@ export class TimerComponent implements OnInit, OnDestroy {
   protected readonly tasks = inject(TasksStore);
 
   readonly elapsed = signal(0);
+  readonly isEditModalOpen = signal(false);
+  readonly sessionToEdit = signal<any>(null);
+  
+  // Modal Form State
+  readonly editStartTime = signal('');
+  readonly editEndTime = signal('');
+  readonly editTaskId = signal('');
+
   private intervalId: ReturnType<typeof setInterval> | null = null;
 
   ngOnInit(): void {
@@ -45,7 +57,7 @@ export class TimerComponent implements OnInit, OnDestroy {
     this.intervalId = setInterval(() => {
       if (this.timer.isRunning()) {
         this.timer.updateTicker();
-        this.elapsed.set(this.timer.elapsedSeconds());
+        this.elapsed.set(this.timer.elapsedSeconds() ?? 0);
       }
     }, 1000);
   }
@@ -62,10 +74,30 @@ export class TimerComponent implements OnInit, OnDestroy {
   }
 
   editSession(session: any): void {
-    const notes = prompt('Edit notes:', session.notes || '');
-    if (notes !== null) {
-      this.timer.updateSession(session.id, { ...session, notes });
-    }
+    this.sessionToEdit.set(session);
+    // Format dates for datetime-local input
+    this.editStartTime.set(new Date(session.startTime).toISOString().slice(0, 16));
+    this.editEndTime.set(session.endTime ? new Date(session.endTime).toISOString().slice(0, 16) : '');
+    this.editTaskId.set(session.taskId);
+    this.isEditModalOpen.set(true);
+  }
+
+  closeEditModal(): void {
+    this.isEditModalOpen.set(false);
+    this.sessionToEdit.set(null);
+  }
+
+  async saveEdit(): Promise<void> {
+    const session = this.sessionToEdit();
+    if (!session) return;
+
+    await this.timer.updateSession(session.id, {
+      ...session,
+      startTime: new Date(this.editStartTime()).toISOString(),
+      endTime: this.editEndTime() ? new Date(this.editEndTime()).toISOString() : null,
+      taskId: this.editTaskId()
+    });
+    this.closeEditModal();
   }
 
   startTimer(taskId: string): void {

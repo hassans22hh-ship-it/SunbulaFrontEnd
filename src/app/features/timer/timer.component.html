@@ -1,5 +1,11 @@
 <div class="page" sbPageTransition>
-  <h1 class="section-title">⏱️ Timer</h1>
+  <div class="timer-header">
+    <h1 class="section-title">⏱️ Timer</h1>
+    <div class="daily-total" title="Total time tracked today">
+      <span class="total-label">Today:</span>
+      <span class="total-value">{{ timer.dailyTotalSeconds() | duration:'words' }}</span>
+    </div>
+  </div>
 
   <!-- Live Timer Display -->
   <div class="timer-hero">
@@ -87,7 +93,7 @@
               }
 
               <div class="session-actions">
-                <button class="action-btn action-btn--edit" (click)="editSession(session)" title="Edit Notes">✏️</button>
+                <button class="action-btn action-btn--edit" (click)="editSession(session)" title="Edit Session">✏️</button>
                 <button class="action-btn action-btn--delete" (click)="deleteSession(session.id)" title="Delete Session">🗑️</button>
               </div>
             </div>
@@ -108,4 +114,54 @@
       }
     }
   </section>
+
+  <!-- Edit Session Modal -->
+  @if (isEditModalOpen()) {
+    <sb-modal title="Edit Focus Session" (close)="closeEditModal()">
+      <div class="edit-modal-content">
+        <!-- Visual Time Dial (Clock-like) -->
+        <div class="time-dial-container">
+          <svg class="time-dial" viewBox="0 0 100 100">
+            <circle cx="50" cy="50" r="45" class="dial-bg" />
+            <!-- Hour Markers -->
+            @for (h of [1,2,3,4,5,6,7,8,9,10,11,12]; track h) {
+              <circle cx="50" cy="5" r="1.5" class="dial-dot" [attr.transform]="'rotate(' + (h * 30) + ' 50 50)'" />
+            }
+          </svg>
+          <div class="dial-info">
+            <span class="dial-current-duration text-primary font-bold text-lg">
+              {{ sessionToEdit()?.durationSeconds | duration:'words' }}
+            </span>
+          </div>
+        </div>
+
+        <div class="edit-form">
+          <div class="form-group mb-4">
+            <label class="block text-sm font-semibold mb-1 opacity-70">Associated Task</label>
+            <select class="input-field w-full p-2 rounded-lg border bg-surface" [ngModel]="editTaskId()" (ngModelChange)="editTaskId.set($event)">
+              @for (task of tasks.tasks(); track task.id) {
+                <option [value]="task.id">{{ task.title }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="form-group">
+              <label class="block text-sm font-semibold mb-1 opacity-70">Start Time</label>
+              <input type="datetime-local" class="input-field w-full p-2 rounded-lg border bg-surface" [ngModel]="editStartTime()" (ngModelChange)="editStartTime.set($event)">
+            </div>
+            <div class="form-group">
+              <label class="block text-sm font-semibold mb-1 opacity-70">End Time</label>
+              <input type="datetime-local" class="input-field w-full p-2 rounded-lg border bg-surface" [ngModel]="editEndTime()" (ngModelChange)="editEndTime.set($event)">
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-3 pt-4 border-t border-border">
+            <sb-button variant="ghost" (click)="closeEditModal()">Cancel</sb-button>
+            <sb-button variant="primary" (click)="saveEdit()">Save Changes</sb-button>
+          </div>
+        </div>
+      </div>
+    </sb-modal>
+  }
 </div>

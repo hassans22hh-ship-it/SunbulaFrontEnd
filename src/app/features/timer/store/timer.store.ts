@@ -29,7 +29,7 @@ const initialState: TimerState = {
 export const TimerStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
-  withComputed(({ activeSession, ticker }) => ({
+  withComputed(({ activeSession, ticker, sessions }) => ({
     isRunning: computed(() => activeSession() !== null),
     isPaused:  computed(() => activeSession()?.isPaused ?? false),
     /** Drift-safe elapsed calculation from server startTime */
@@ -41,6 +41,12 @@ export const TimerStore = signalStore(
       const start = new Date(session.startTime).getTime();
       const now = Date.now();
       return Math.floor((now - start) / 1000);
+    }),
+    dailyTotalSeconds: computed(() => {
+      const today = new Date().toDateString();
+      return sessions()
+        .filter((s: TimeSessionDto) => s.startTime && new Date(s.startTime).toDateString() === today)
+        .reduce((acc: number, s: TimeSessionDto) => acc + (s.durationSeconds ?? 0), 0);
     }),
   })),
   withMethods((
