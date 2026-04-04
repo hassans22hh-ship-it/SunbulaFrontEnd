@@ -59,8 +59,8 @@ export const TimerStore = signalStore(
     /** On app init: check for active session from server */
     async initialize(): Promise<void> {
       try {
-        const active = await firstValueFrom(api.getActive());
-        patchState(store, { activeSession: active });
+        const active: any = await firstValueFrom(api.getActive());
+        patchState(store, { activeSession: active?.data ?? active });
       } catch {
         // No active session or error — ignore
       }
@@ -70,13 +70,14 @@ export const TimerStore = signalStore(
     async start(taskId: string): Promise<void> {
       patchState(store, { isLoading: true });
       try {
-        const session = await firstValueFrom(api.start({ taskId } as StartSessionDto));
+        const res: any = await firstValueFrom(api.start({ taskId } as StartSessionDto));
+        const session = res?.data ?? res;
         patchState(store, { activeSession: session, isLoading: false });
         toast.success(`Timer started for ${session.taskTitle}`);
       } catch (e: unknown) {
         patchState(store, { isLoading: false });
         const err = e as { status?: number; message?: string };
-        if (err.status === 409) {
+        if (err.status === 409 || (err.message && err.message.toLowerCase().includes('active session'))) {
           toast.warning('Another session is running. Stopping it first...');
           await this.switchTask(taskId);
         } else {
@@ -92,7 +93,8 @@ export const TimerStore = signalStore(
 
       patchState(store, { isLoading: true });
       try {
-        const stopped = await firstValueFrom(api.stop(session.id));
+        const res: any = await firstValueFrom(api.stop(session.id));
+        const stopped = res?.data ?? res;
         patchState(store, { activeSession: null, isLoading: false });
         toast.success(`Timer stopped — earned ${stopped.coinsEarned?.toFixed(1) ?? 0} 🪙`);
         // Refresh user profile to get updated coinBalance
@@ -110,7 +112,8 @@ export const TimerStore = signalStore(
 
       patchState(store, { isLoading: true });
       try {
-        const paused = await firstValueFrom(api.pause(session.id));
+        const res: any = await firstValueFrom(api.pause(session.id));
+        const paused = res?.data ?? res;
         patchState(store, { activeSession: paused, isLoading: false });
         toast.success(`Timer paused`);
       } catch (e: unknown) {
@@ -126,7 +129,8 @@ export const TimerStore = signalStore(
 
       patchState(store, { isLoading: true });
       try {
-        const resumed = await firstValueFrom(api.resume(session.id));
+        const res: any = await firstValueFrom(api.resume(session.id));
+        const resumed = res?.data ?? res;
         patchState(store, { activeSession: resumed, isLoading: false });
         toast.success(`Timer resumed`);
       } catch (e: unknown) {
@@ -138,7 +142,8 @@ export const TimerStore = signalStore(
     async updateSession(id: string, dto: any): Promise<void> {
       patchState(store, { isLoading: true });
       try {
-        const updated = await firstValueFrom(api.update(id, dto));
+        const res: any = await firstValueFrom(api.update(id, dto));
+        const updated = res?.data ?? res;
         const enriched = this.enrichSessions([updated])[0];
         patchState(store, { 
           sessions: store.sessions().map(s => s.id === id ? enriched : s),
@@ -172,7 +177,8 @@ export const TimerStore = signalStore(
       patchState(store, { isLoading: true });
       try {
         await firstValueFrom(api.stopActive());
-        const session = await firstValueFrom(api.start({ taskId } as StartSessionDto));
+        const res: any = await firstValueFrom(api.start({ taskId } as StartSessionDto));
+        const session = res?.data ?? res;
         patchState(store, { activeSession: session, isLoading: false });
         toast.success(`Switched to ${session.taskTitle}`);
         await auth.refreshUserProfile();
