@@ -6,7 +6,15 @@ export class RelativeDatePipe implements PipeTransform {
   transform(value: string | Date | null | undefined): string {
     if (!value) return '';
 
-    const date = typeof value === 'string' ? parseISO(value) : value;
+    let date: Date;
+    if (typeof value === 'string') {
+      let str = value;
+      // Removed forced 'Z' to fix local time drift
+      date = parseISO(str);
+    } else {
+      date = value;
+    }
+
     return formatDistanceToNow(date, { addSuffix: true });
   }
 }

@@ -1,0 +1,131 @@
+<div class="page" sbPageTransition>
+  <!-- Header -->
+  <header class="mb-8">
+    <button (click)="goBack()" class="flex items-center gap-2 text-text-muted hover:text-primary transition-colors text-sm font-medium mb-6">
+      <i class="fa-solid fa-arrow-left"></i>
+      <span>Back to Tasks</span>
+    </button>
+    
+    @if (task()) {
+      <div class="flex items-start justify-between">
+        <div class="flex items-center gap-4">
+          @if (task()!.emoji) {
+            <div class="w-16 h-16 bg-surface-2 rounded-2xl flex items-center justify-center text-3xl shadow-sm border border-border/20">
+              {{ task()!.emoji }}
+            </div>
+          }
+          <div>
+            <h1 class="text-3xl font-display font-bold text-text tracking-tight mb-2">
+              {{ task()!.title }}
+            </h1>
+            <div class="flex items-center gap-3">
+              <sb-behavior-badge [behavior]="task()!.behaviorType" class="scale-90 origin-left" />
+              <div class="h-1 w-1 rounded-full bg-border"></div>
+              <span class="text-xs font-medium text-text-muted uppercase tracking-wider">
+                Created {{ task()!.createdAt | date:'longDate' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    } @else {
+       <div class="h-20 flex items-center">
+         <sb-spinner />
+       </div>
+    }
+  </header>
+
+  @if (task()) {
+    <!-- Stats Row -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+      <!-- Total Time -->
+      <div class="bg-surface rounded-2xl p-6 shadow-sm border border-border/50 flex flex-col justify-between task-stat-card">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+            <i class="fa-solid fa-clock"></i>
+          </div>
+          <h3 class="text-sm font-bold text-text-muted uppercase tracking-wider">Total Time</h3>
+        </div>
+        <p class="text-2xl font-bold font-display text-text">
+          {{ totalTrackedSeconds() | duration:'words' }}
+        </p>
+      </div>
+
+      <!-- Sessions Count -->
+      <div class="bg-surface rounded-2xl p-6 shadow-sm border border-border/50 flex flex-col justify-between task-stat-card">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-8 h-8 rounded-lg bg-success-light/10 text-success flex items-center justify-center">
+            <i class="fa-solid fa-layer-group"></i>
+          </div>
+          <h3 class="text-sm font-bold text-text-muted uppercase tracking-wider">Sessions</h3>
+        </div>
+        <p class="text-2xl font-bold font-display text-text">
+          {{ sessions().length }}
+        </p>
+      </div>
+
+      <!-- Coins Earned -->
+      <div class="bg-surface rounded-2xl p-6 shadow-sm border border-border/50 flex flex-col justify-between task-stat-card">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-8 h-8 rounded-lg bg-[var(--color-coin)]/10 text-[var(--color-coin)] flex items-center justify-center">
+            <sb-icon-coin size="18" />
+          </div>
+          <h3 class="text-sm font-bold text-text-muted uppercase tracking-wider">Coins Earned</h3>
+        </div>
+        <p class="text-2xl font-bold font-display text-text">
+          {{ totalCoinsEarned() | coins }}
+        </p>
+      </div>
+    </div>
+
+    <!-- Time Track List -->
+    <section>
+      <h2 class="text-xl font-display font-bold text-text mb-6 flex items-center gap-2">
+        <i class="fa-solid fa-timeline text-primary text-base"></i> Time Track History
+      </h2>
+      
+      @if (isLoading()) {
+        <div class="flex items-center justify-center py-12">
+          <sb-spinner />
+        </div>
+      } @else if (sessions().length === 0) {
+        <sb-empty-state 
+            icon="fa-regular fa-clock" 
+            title="No sessions yet" 
+            message="Start tracking time on this task, and your sessions will appear here." />
+      } @else {
+        <div class="space-y-4">
+          @for (session of sessions(); track session.id) {
+            <div class="bg-surface rounded-2xl p-5 shadow-sm border border-border/50 flex flex-col md:flex-row md:items-center justify-between gap-4 group hover:border-primary/30 transition-colors">
+              <div class="flex items-center gap-4">
+                <div class="w-10 h-10 rounded-full bg-surface-2 flex items-center justify-center flex-shrink-0 text-text border border-border/20">
+                  <i class="fa-solid fa-check"></i>
+                </div>
+                <div>
+                  <p class="font-bold text-text leading-tight mb-1">
+                    {{ session.startTime | date:'mediumDate' }}
+                  </p>
+                  <p class="text-xs text-text-muted font-medium">
+                    {{ session.startTime | date:'shortTime' }} - {{ session.endTime ? (session.endTime | date:'shortTime') : 'Now' }}
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center gap-8 md:justify-end">
+                <div class="flex flex-col md:items-end">
+                  <span class="text-[10px] font-bold text-text-muted uppercase tracking-wider mb-0.5">Duration</span>
+                  <span class="font-bold text-primary">{{ (session.durationSeconds ?? session.duration ?? 0) | duration:'words' }}</span>
+                </div>
+                <div class="flex flex-col md:items-end">
+                  <span class="text-[10px] font-bold text-text-muted uppercase tracking-wider mb-0.5">Earned</span>
+                  <span class="font-bold text-text flex items-center gap-1">
+                    <sb-icon-coin size="12" /> {{ session.coinsEarned ?? 0 | coins }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
+</div>

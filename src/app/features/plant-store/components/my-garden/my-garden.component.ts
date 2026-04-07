@@ -36,7 +36,7 @@ import { AnimateDirective } from '../../../../shared/directives/animate.directiv
                  <div class="flex-1">
                    <div class="font-semibold text-sm truncate" [title]="seed.plantName">{{ seed.plantName }}</div>
                    <div class="text-[10px] text-subtle mb-2">{{ getLevelMeta(seed).label }}</div>
-                   <sb-button size="sm" [fullWidth]="true" (clicked)="store.plantSeed(seed.id)">Plant</sb-button>
+                   <sb-button size="sm" [fullWidth]="true" (clicked)="waterPlantPrompt(seed.id, true)">Plant</sb-button>
                  </div>
                </div>
              }
@@ -81,7 +81,7 @@ import { AnimateDirective } from '../../../../shared/directives/animate.directiv
                    
                    <div class="mt-3">
                       <!-- Basic Growth Logic Mockup (Watering needed to advance stage typically calculated backend, but UI driven action here) -->
-                      <sb-button variant="outline" size="sm" [fullWidth]="true" (clicked)="store.waterPlant(plant.id)">Water 💧</sb-button>
+                      <sb-button variant="outline" size="sm" [fullWidth]="true" (clicked)="waterPlantPrompt(plant.id, false)">Water 💧</sb-button>
                    </div>
                 </div>
 
@@ -130,6 +130,15 @@ export class MyGardenComponent implements OnInit {
   }
 
   getStageMeta(p: UserPlantDto) {
-    return GROWTH_STAGE_META[p.currentStage as GrowthStage] || GROWTH_STAGE_META[GrowthStage.Seedling];
+    return GROWTH_STAGE_META[p.currentStage as GrowthStage] || GROWTH_STAGE_META[GrowthStage.Seedling] || {};
+  }
+
+  waterPlantPrompt(id: string, isSeed: boolean) {
+    const amtStr = window.prompt('How many coins to invest?', '10');
+    if (!amtStr) return;
+    const amt = parseInt(amtStr, 10);
+    if (isNaN(amt) || amt <= 0) return;
+    if (isSeed) this.store.plantSeed(id, amt);
+    else this.store.waterPlant(id, amt);
   }
 }

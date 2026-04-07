@@ -19,6 +19,12 @@
       </div>
       <div class="flex gap-1">
         <button class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-2 text-text-subtle hover:text-text transition-colors" 
+                (click)="onEditClick($event)" title="Edit Task">
+          <svg viewBox="0 0 24 24" fill="none" class="w-4 h-4" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+          </svg>
+        </button>
+        <button class="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-2 text-text-subtle hover:text-text transition-colors" 
                 (click)="onDuplicateClick($event)" title="Duplicate Task">
           <svg viewBox="0 0 24 24" fill="none" class="w-4 h-4" stroke="currentColor" stroke-width="2">
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -53,20 +59,24 @@
 
     <!-- Footer: Action & Date -->
     <div class="mt-auto pt-4 border-t border-border/30 flex items-center justify-between">
-      <button (click)="$event.stopPropagation();" 
-              class="flex items-center gap-2 px-4 py-2 bg-surface text-text font-bold text-xs rounded-xl border-2 border-border/50 hover:border-primary-light hover:text-primary hover:bg-primary-light/5 transition-all active:scale-95 shadow-sm">
-        <svg viewBox="0 0 24 24" fill="none" class="w-4 h-4" stroke="currentColor" stroke-width="2.5">
-          <polygon points="5 3 19 12 5 21 5 3"></polygon>
-        </svg>
-        Start Timer
+      <button (click)="toggleTimer($event)" 
+              class="flex items-center gap-2 px-4 py-2 font-bold text-xs rounded-xl border-2 transition-all active:scale-95 shadow-sm"
+              [class]="isActive() && !timer.isPaused() ? 'bg-primary-light/20 text-primary border-primary/30 hover:bg-primary-light/30' : 'bg-surface text-text border-border/50 hover:border-primary-light hover:text-primary hover:bg-primary-light/5'">
+        @if (isActive() && !timer.isPaused()) {
+          <i class="fa-solid fa-pause w-4 h-4 text-center"></i>
+          Pause Timer
+        } @else {
+          <i class="fa-solid fa-play w-4 h-4 text-center"></i>
+          Start Timer
+        }
       </button>
       
       <div class="flex flex-col items-end gap-0.5">
-        <div class="text-[10px] font-bold text-primary flex items-center gap-1">
+        <div class="text-[10px] font-bold text-primary flex items-center gap-1" [class.text-success]="isActive()">
           <svg viewBox="0 0 24 24" fill="none" class="w-3 h-3" stroke="currentColor" stroke-width="3">
             <circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline>
           </svg>
-          {{ task().totalTrackedSeconds ?? 0 | duration }}
+          {{ displayElapsed() | duration:'clock' }}
         </div>
         <div class="text-[9px] font-bold uppercase tracking-tighter text-text-subtle">
           {{ task().createdAt | relativeDate }}

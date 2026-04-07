@@ -1,62 +1,175 @@
 <div class="page" sbPageTransition>
-  <div class="page-header"><h1 class="section-title">🌱 Plant Store</h1><span class="coin-display">{{ auth.coinBalance() | coins }}</span></div>
-  <div class="tabs">
-    <button class="tab" [class.tab--active]="tab() === 'store'" (click)="tab.set('store')">Store</button>
-    <button class="tab" [class.tab--active]="tab() === 'garden'" (click)="tab.set('garden')">My Garden ({{ store.gardenCount() }})</button>
+  <!-- Header -->
+  <div class="page-header">
+    <h1 class="section-title">🌱 Plant Store</h1>
+    <span class="coin-display"><sb-icon-coin size="18" /> {{ auth.coinBalance() | coins }}</span>
   </div>
-  @if (store.isLoading()) { <sb-spinner size="lg" /> } @else {
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab" [class.tab--active]="tab() === 'store'" (click)="tab.set('store')">
+      <span class="tab-icon">🏪</span> Store
+    </button>
+    <button class="tab" [class.tab--active]="tab() === 'garden'" (click)="tab.set('garden')">
+      <span class="tab-icon">🪴</span> My Garden <span class="tab-count">{{ store.gardenCount() }}</span>
+    </button>
+  </div>
+
+  @if (store.isLoading()) {
+    <div class="loading-container"><sb-spinner size="lg" /></div>
+  } @else {
+
+    <!-- ═══════════ STORE TAB ═══════════ -->
     @if (tab() === 'store') {
-      @if (store.available().length === 0) { <sb-empty-state icon="🌱" heading="No plants available" /> } @else {
+
+      <!-- Level Filter -->
+      <div class="filter-bar">
+        <sb-plant-level-filter 
+          [selected]="store.selectedLevel()" 
+          (changed)="onLevelChange($event)" 
+        />
+      </div>
+
+      @if (store.filteredAvailable().length === 0) {
+        <sb-empty-state icon="🌱" heading="No plants available" message="No plants found for this level. Try a different filter!" />
+      } @else {
         <div class="plant-grid">
-          @for (plant of store.available(); track plant.id) {
-            <sb-card><div class="plant-card">
-              <div class="plant-image">
+          @for (plant of store.filteredAvailable(); track plant.id) {
+            <div class="store-card">
+              <!-- Level Badge -->
+              <div class="store-card__level">
+                <sb-badge [variant]="getLevelVariant(plant.level)">{{ levelMeta[plant.level]?.emoji }} {{ levelMeta[plant.level]?.label ?? 'Unknown' }}</sb-badge>
+              </div>
+
+              <!-- Plant Image -->
+              <div class="store-card__image">
                 @if (plant.imageUrl) {
-                  <img [src]="plant.imageUrl" [alt]="plant.name" class="w-full h-full object-contain" />
+                  <img [src]="plant.imageUrl" [alt]="plant.name" />
                 } @else {
-                  <div class="plant-emoji">🪴</div>
+                  <div class="store-card__emoji">🪴</div>
                 }
               </div>
-              <h3 class="plant-name">{{ plant.name }}</h3>
-              <p class="plant-desc">{{ plant.description }}</p>
-              <div class="plant-meta">
-                <sb-badge [variant]="levelMeta[plant.level]?.variant ?? 'default'">{{ levelMeta[plant.level]?.label ?? 'Unknown' }}</sb-badge>
-                <span class="plant-price">{{ plant.price | coins }}</span>
+
+              <!-- Info -->
+              <h3 class="store-card__name">{{ plant.name }}</h3>
+              @if (plant.botanicName) {
+                <p class="store-card__botanic">{{ plant.botanicName }}</p>
+              }
+              <p class="store-card__desc">{{ plant.description }}</p>
+
+              <!-- Price + Buy -->
+              <div class="store-card__footer">
+                <span class="store-card__price">
+                  <sb-icon-coin size="16" /> {{ plant.price | coins }}
+                </span>
+                <sb-button variant="primary" size="sm" [disabled]="!canAfford(plant.price)" (click)="store.purchase(plant.id, plant.price)">
+                  {{ canAfford(plant.price) ? '🛒 Buy' : '🔒 Not enough' }}
+                </sb-button>
               </div>
-              <sb-button variant="primary" [fullWidth]="true" [disabled]="!canAfford(plant.price)" (click)="store.purchase(plant.id)">
-                {{ canAfford(plant.price) ? 'Buy' : 'Not enough coins' }}
-              </sb-button>
-            </div></sb-card>
+            </div>
           }
         </div>
       }
     }
+
+    <!-- ═══════════ GARDEN TAB ═══════════ -->
     @if (tab() === 'garden') {
-      @if (store.garden().length === 0) { <sb-empty-state icon="🪴" heading="Empty garden" message="Buy a plant from the store!" /> } @else {
+      @if (store.garden().length === 0) {
+        <sb-empty-state icon="🪴" heading="Empty garden" message="Buy a plant from the store to get started!" />
+      } @else {
+
+        <!-- Summary Dashboard -->
+        @if (store.summary(); as summary) {
+          <div class="summary-row">
+            <div class="summary-card summary-card--plants">
+              <div class="summary-card__icon">🌿</div>
+              <div class="summary-card__content">
+                <span class="summary-card__label">Total Plants</span>
+                <span class="summary-card__value">{{ summary.totalPlants }}</span>
+              </div>
+            </div>
+
+            <div class="summary-card summary-card--coins">
+              <div class="summary-card__icon"><sb-icon-coin size="28" /></div>
+              <div class="summary-card__content">
+                <span class="summary-card__label">Coins Invested</span>
+                <span class="summary-card__value">{{ summary.totalCoinsInvested | number }}</span>
+              </div>
+            </div>
+
+            @if (summary.mostExpensive; as mvp) {
+              <div class="summary-card summary-card--mvp">
+                <div class="summary-card__crown">👑</div>
+                <div class="summary-card__content">
+                  <span class="summary-card__label">Most Valuable</span>
+                  <span class="summary-card__value summary-card__value--name">{{ mvp.plantName }}</span>
+                  <span class="summary-card__sub">{{ mvp.coinsSpent | number }} coins invested</span>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Garden Grid -->
         <div class="plant-grid">
           @for (plant of store.garden(); track plant.id) {
-            <sb-card><div class="garden-card">
-              <div class="plant-image">
+            <div class="garden-card">
+              <!-- Plant Visual -->
+              <div class="garden-card__image">
                 @if (plant.plantImageUrl) {
-                  <img [src]="plant.plantImageUrl" [alt]="plant.plantName" class="w-full h-full object-contain" />
+                  <img [src]="plant.plantImageUrl" [alt]="plant.plantName" />
                 } @else {
-                  <div class="plant-emoji">🪴</div>
+                  <div class="garden-card__emoji">{{ getStageEmoji(plant.currentStage) }}</div>
                 }
               </div>
-              <h3 class="plant-name">{{ plant.plantName }}</h3>
-              <sb-badge [variant]="getStageVariant(plant.currentStage)">{{ getStageLabel(plant.currentStage) }}</sb-badge>
-              @let progress = plant.coinsToNextStage > 0 ? (plant.stageCoinsAccumulated / plant.coinsToNextStage) * 100 : 100;
-              <div class="growth-bar"><div class="growth-fill" [style.width.%]="progress"></div></div>
-              <span class="growth-pct">{{ progress | number:'1.0-0' }}% grown</span>
-              
-              <div class="garden-actions">
-                @if (plant.currentStage === 0) {
-                  <sb-button variant="primary" size="sm" (click)="store.plantSeed(plant.id)">🌱 Plant Seed</sb-button>
-                } @else if (plant.currentStage < 4) {
-                  <sb-button variant="primary" size="sm" (click)="store.waterPlant(plant.id)">💧 Water</sb-button>
+
+              <!-- Info -->
+              <h3 class="garden-card__name">{{ plant.plantName }}</h3>
+              <div class="garden-card__stage">
+                <sb-badge [variant]="getStageVariant(plant.currentStage)">{{ getStageEmoji(plant.currentStage) }} {{ getStageLabel(plant.currentStage) }}</sb-badge>
+              </div>
+
+              <!-- Progress -->
+              @if (plant.currentStage < 4) {
+                @let progress = plant.coinsToNextStage > 0 ? (plant.stageCoinsAccumulated / plant.coinsToNextStage) * 100 : 0;
+                <div class="garden-card__progress">
+                  <div class="progress-header">
+                    <span>{{ plant.stageCoinsAccumulated | number }} / {{ plant.coinsToNextStage | number }}</span>
+                    <span>{{ progress | number:'1.0-0' }}%</span>
+                  </div>
+                  <div class="progress-track">
+                    <div class="progress-fill" [style.width.%]="progress"></div>
+                  </div>
+                </div>
+              } @else {
+                <div class="garden-card__complete">✨ Fully Grown</div>
+              }
+
+              <!-- Action Area -->
+              <div class="garden-card__actions">
+                @if (activeInvestmentPlant() === plant.id) {
+                  <div class="invest-panel">
+                    <div class="invest-presets">
+                      <button class="invest-preset" (click)="setInvestmentAmount(10)">+10</button>
+                      <button class="invest-preset" (click)="setInvestmentAmount(50)">+50</button>
+                      <button class="invest-preset invest-preset--max" (click)="setInvestmentAmount(plant.coinsToNextStage - plant.stageCoinsAccumulated)">Max</button>
+                    </div>
+                    <div class="invest-controls">
+                      <input type="number" [ngModel]="investmentAmount()" (ngModelChange)="setInvestmentAmount($event)"
+                             class="invest-input" min="1" />
+                      <sb-button variant="primary" size="sm" (click)="submitInvestment(plant)">💰 Apply</sb-button>
+                      <button class="invest-close" (click)="closeInvestment()">✕</button>
+                    </div>
+                  </div>
+                } @else {
+                  @if (plant.currentStage === 0) {
+                    <sb-button variant="primary" size="sm" [fullWidth]="true" (click)="openInvestment(plant.id)">🌱 Plant Seed</sb-button>
+                  } @else if (plant.currentStage < 4) {
+                    <sb-button variant="primary" size="sm" [fullWidth]="true" (click)="openInvestment(plant.id)">💧 Water & Grow</sb-button>
+                  }
                 }
               </div>
-            </div></sb-card>
+            </div>
           }
         </div>
       }

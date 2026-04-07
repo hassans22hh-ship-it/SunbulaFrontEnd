@@ -1,0 +1,43 @@
+@if (timer.isRunning()) {
+  <div class="mini-timer-bar animate-slideUp">
+    <!-- Click anywhere except buttons navigates to timer page -->
+    <a routerLink="/timer" class="mini-timer-content">
+      
+      <!-- Left side: Session info -->
+      <div class="mini-timer-info">
+        <span class="pulse-dot" [class.paused]="timer.isPaused()"></span>
+        <span class="timer-emoji">{{ timer.taskEmoji() || '⏳' }}</span>
+        <div class="text-group">
+          <span class="task-title">{{ timer.taskName() }}</span>
+          @if (timer.isPaused()) {
+            <span class="status-badge paused px-1.5 py-0.5 rounded text-[10px] font-bold uppercase bg-warning/20 text-warning">Paused</span>
+          }
+        </div>
+      </div>
+
+      <!-- Right side: Time & Actions -->
+      <div class="mini-timer-actions">
+        <span class="elapsed-time" [class.text-warning]="timer.isPaused()">
+          {{ timer.elapsedSeconds() | duration:'clock' }}
+        </span>
+
+        <div class="action-buttons" (click)="$event.preventDefault(); $event.stopPropagation();">
+          @if (timer.isPaused()) {
+            <button class="btn-action play" (click)="timer.resumeTimer()" title="Resume">
+              <i class="fa-solid fa-play"></i>
+            </button>
+          } @else {
+            <button class="btn-action pause" (click)="timer.pauseTimer()" title="Pause">
+              <i class="fa-solid fa-pause"></i>
+            </button>
+          }
+          
+          <button class="btn-action stop" (click)="timer.stop()" title="Stop Session">
+            <i class="fa-solid fa-stop"></i>
+          </button>
+        </div>
+      </div>
+      
+    </a>
+  </div>
+}

@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { TasksStore } from './store/tasks.store';
 import { FoldersStore } from '../folders/store/folders.store';
+import { TimerStore } from '../timer/store/timer.store';
 import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
 import { SbModalComponent } from '@shared/ui/modal/sb-modal.component';
 import { SbEmptyStateComponent } from '@shared/ui/empty-state/sb-empty-state.component';
@@ -14,7 +15,7 @@ import { CoinsPipe } from '@shared/pipes/coins.pipe';
 import { AuthService } from '@core/auth/auth.service';
 import { TaskCardComponent } from './components/task-card/task-card.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 @Component({
   selector: 'sb-tasks',
@@ -23,6 +24,7 @@ import { Router } from '@angular/router';
     SbButtonComponent, SbModalComponent, SbEmptyStateComponent,
     SbSpinnerComponent, SbConfirmDialogComponent,
     ReactiveFormsModule, PageTransitionDirective, TaskCardComponent, CoinsPipe,
+    RouterLink,
   ],
   templateUrl: './tasks.component.html',
   styleUrl: './tasks.component.scss',
@@ -32,6 +34,7 @@ export class TasksComponent implements OnInit {
   protected readonly store   = inject(TasksStore);
   protected readonly folders = inject(FoldersStore);
   protected readonly auth    = inject(AuthService);
+  protected readonly timer   = inject(TimerStore);
   private readonly fb        = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router     = inject(Router);
@@ -41,7 +44,8 @@ export class TasksComponent implements OnInit {
   readonly showDelete     = signal(false);
   readonly editing        = signal<TaskDto | null>(null);
   readonly deleting       = signal<TaskDto | null>(null);
-  readonly tab            = signal<'active' | 'completed' | 'archived'>('active');
+  readonly tab            = signal<'active' | 'completed' | 'archived' | 'all'>('active');
+  readonly viewMode       = signal<'grid' | 'list'>('grid');
 
   protected readonly behaviors = [
     BehaviorCategory.Positive, BehaviorCategory.Neutral,
@@ -105,6 +109,10 @@ export class TasksComponent implements OnInit {
     this.router.navigate(['/auth/login']);
   }
 
+  viewTaskDetails(taskId: string): void {
+    this.router.navigate(['/tasks', taskId]);
+  }
+
   protected filterByBehavior(behavior: number | undefined): void {
     this.store.setBehavior(behavior);
   }
@@ -139,5 +147,24 @@ export class TasksComponent implements OnInit {
     if (this.folderForm.invalid) return;
     this.folders.create(this.folderForm.getRawValue());
     this.showFolderForm.set(false);
+  }
+
+  // BUG-09: Clear all filters
+  clearFilters(): void {
+    this.searchCtrl.setValue('');
+    this.tab.set('active');
+    this.store.load();
+  }
+
+  // BUG-09: Format elapsed for timer badge in header
+  formatElapsed(seconds: number): string {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  }
+
+  getFolderCount(folderId: string): number {
+    return this.store.tasks().filter(t => t.folderId === folderId && t.status === 0 && !t.isArchived).length;
   }
 }

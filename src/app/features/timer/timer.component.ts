@@ -1,6 +1,7 @@
 import { DecimalPipe, CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal, computed } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { TimerStore } from './store/timer.store';
 import { TasksStore } from '../tasks/store/tasks.store';
 import { SbCardComponent } from '@shared/ui/card/sb-card.component';
@@ -13,6 +14,7 @@ import { PageTransitionDirective } from '@core/animation/page-transition.directi
 import { SbModalComponent } from '@shared/ui/modal/sb-modal.component';
 import { TimerControlsComponent } from './components/timer-controls/timer-controls.component';
 import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
+import { SbIconCoinComponent } from '@shared/ui/icons/coin-icon.component';
 
 @Component({
   selector: 'sb-timer',
@@ -21,17 +23,16 @@ import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
     CommonModule, FormsModule, 
     SbCardComponent, SbEmptyStateComponent, SbSpinnerComponent, SbModalComponent, SbButtonComponent,
     SbBehaviorBadgeComponent, DurationPipe, DecimalPipe, RelativeDatePipe, PageTransitionDirective,
-    TimerControlsComponent,
+    TimerControlsComponent, SbIconCoinComponent,
   ],
   templateUrl: './timer.component.html',
   styleUrl: './timer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TimerComponent implements OnInit, OnDestroy {
+export class TimerComponent implements OnInit {
   protected readonly timer = inject(TimerStore);
   protected readonly tasks = inject(TasksStore);
 
-  readonly elapsed = signal(0);
   readonly isEditModalOpen = signal(false);
   readonly sessionToEdit = signal<any>(null);
   
@@ -40,46 +41,62 @@ export class TimerComponent implements OnInit, OnDestroy {
   readonly editEndTime = signal('');
   readonly editTaskId = signal('');
 
-  private intervalId: ReturnType<typeof setInterval> | null = null;
+  readonly editDuration = computed(() => {
+    const start = this.editStartTime();
+    const end = this.editEndTime();
+    if (!start || !end) return 0;
+    try {
+      const s = new Date(start).getTime();
+      const e = new Date(end).getTime();
+      return Math.max(0, Math.floor((e - s) / 1000));
+    } catch {
+      return 0;
+    }
+  });
 
   ngOnInit(): void {
-    this.timer.initialize();
+    // Timer.initialize() already called by APP_INITIALIZER (BUG-02)
     this.tasks.load();
-    this.timer.loadPaged();
-    this.startTick();
-  }
-
-  ngOnDestroy(): void {
-    this.stopTick();
-  }
-
-  private startTick(): void {
-    this.intervalId = setInterval(() => {
-      if (this.timer.isRunning()) {
-        this.timer.updateTicker();
-        this.elapsed.set(this.timer.elapsedSeconds() ?? 0);
-      }
-    }, 1000);
-  }
-
-  private stopTick(): void {
-    if (this.intervalId) {
-      clearInterval(this.intervalId);
-      this.intervalId = null;
-    }
+    // BUG-04: Load sessions for today by default
+    this.timer['loadByDate']();
   }
 
   deleteSession(id: string): void {
-    this.timer.deleteSession(id);
+    this.timer['deleteSession'](id);
   }
 
-  editSession(session: any): void {
-    this.sessionToEdit.set(session);
-    // Format dates for datetime-local input
-    this.editStartTime.set(new Date(session.startTime).toISOString().slice(0, 16));
-    this.editEndTime.set(session.endTime ? new Date(session.endTime).toISOString().slice(0, 16) : '');
-    this.editTaskId.set(session.taskId);
-    this.isEditModalOpen.set(true);
+  async editSession(session: any): Promise<void> {
+    try {
+      // BUG-FIX: Always fetch fresh data before editing as requested
+      const s: any = await this.timer['getById'](session.id);
+      
+      // Enrich with task info for display
+      const t = this.tasks.tasks().find(task => task.id === s.taskId);
+      s.taskTitle = t?.title || s.taskTitle || 'Focus Session';
+      s.taskEmoji = t?.emoji || '';
+      
+      this.sessionToEdit.set(s);
+      
+      // Formatting for <input type="datetime-local">
+      // Need to adjust for local timezone to show correct values in the input
+      const toLocalISO = (d: string | Date | null | undefined) => {
+        if (!d) return '';
+        const date = new Date(d);
+        if (isNaN(date.getTime())) return '';
+        
+        // Accurate conversion to local YYYY-MM-DDTHH:mm
+        const tzOffset = date.getTimezoneOffset() * 60000; // in ms
+        const localISOTime = new Date(date.getTime() - tzOffset).toISOString().slice(0, 16);
+        return localISOTime;
+      };
+
+      this.editStartTime.set(toLocalISO(s.startTime));
+      this.editEndTime.set(s.endTime ? toLocalISO(s.endTime) : '');
+      this.editTaskId.set(s.taskId);
+      this.isEditModalOpen.set(true);
+    } catch (err) {
+      console.error('Failed to load session for editing', err);
+    }
   }
 
   closeEditModal(): void {
@@ -91,22 +108,28 @@ export class TimerComponent implements OnInit, OnDestroy {
     const session = this.sessionToEdit();
     if (!session) return;
 
-    await this.timer.updateSession(session.id, {
-      ...session,
+    if (this.editDuration() <= 0 && this.editEndTime()) {
+       // Optional: Add a toast warning here if end < start
+    }
+
+    const payload = {
       startTime: new Date(this.editStartTime()).toISOString(),
       endTime: this.editEndTime() ? new Date(this.editEndTime()).toISOString() : null,
-      taskId: this.editTaskId()
-    });
+      behaviorType: session.behaviorType,
+      coinsEarned: session.coinsEarned || 0,
+      notes: session.notes ?? ''
+    };
+
+    await this.timer['updateSession'](session.id, payload);
     this.closeEditModal();
   }
 
   startTimer(taskId: string): void {
-    this.timer.start(taskId);
+    this.timer['start'](taskId);
   }
 
   stopTimer(): void {
-    this.timer.stop();
-    this.elapsed.set(0);
+    this.timer['stop']();
   }
 
   calculateOffset(seconds: number): number {

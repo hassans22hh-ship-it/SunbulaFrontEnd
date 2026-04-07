@@ -14,24 +14,28 @@
         <svg class="timer-progress-svg" viewBox="0 0 200 200">
           <circle class="timer-progress-bg" cx="100" cy="100" r="90" />
           <circle class="timer-progress-fill" cx="100" cy="100" r="90"
-                  [style.stroke-dashoffset]="calculateOffset(elapsed())" />
+                  [style.stroke-dashoffset]="calculateOffset(timer.elapsedSeconds())" />
         </svg>
         
-        <div class="timer-display">{{ formatElapsed(elapsed()) }}</div>
+        <div class="timer-display">{{ formatElapsed(timer.elapsedSeconds()) }}</div>
         
+        <!-- BUG-07: Show task emoji + name + behavior badge -->
         <div class="timer-task">
+          @if (timer.taskEmoji(); as emoji) {
+            <span class="timer-task-emoji">{{ emoji }}</span>
+          }
           <span class="timer-task-color" [style.background]="timer.activeSession()?.taskColor" [style.color]="timer.activeSession()?.taskColor"></span>
-          <span class="timer-task-title">{{ timer.activeSession()?.taskTitle }}</span>
-          @if (timer.activeSession()?.taskBehavior; as behavior) {
-            <sb-behavior-badge [behavior]="behavior" />
+          <span class="timer-task-title">{{ timer.taskName() }}</span>
+          @if (timer.behaviorType() !== null) {
+            <sb-behavior-badge [behavior]="timer.behaviorType()!" />
           }
         </div>
 
         <app-timer-controls 
           [isPaused]="timer.isPaused()"
           [isLoading]="timer.isLoading()"
-          (onPause)="timer.pauseTimer()"
-          (onResume)="timer.resumeTimer()"
+          (onPause)="timer['pauseTimer']()"
+          (onResume)="timer['resumeTimer']()"
           (onStop)="stopTimer()" />
       </div>
     } @else {
@@ -65,15 +69,24 @@
     }
   </section>
 
-  <!-- Session History -->
+  <!-- BUG-04: Date-Navigated Session History -->
   <section class="history-section">
-    <h2 class="subsection-title">📊 Session History</h2>
+    <div class="date-nav">
+      <button class="date-nav-btn" (click)="timer['prevDay']()" title="Previous day">
+        <i class="fa-solid fa-chevron-left"></i>
+      </button>
+      <h2 class="subsection-title date-nav-label">📊 {{ timer.dateLabel() }}</h2>
+      <button class="date-nav-btn" (click)="timer['nextDay']()" [disabled]="!timer.canGoNext()" title="Next day">
+        <i class="fa-solid fa-chevron-right"></i>
+      </button>
+    </div>
+
     @if (timer.isLoading()) {
       <div class="flex justify-center p-8">
         <sb-spinner size="md" />
       </div>
     } @else if (timer.sessions().length === 0) {
-      <sb-empty-state icon="📊" heading="No sessions yet" message="Start your first timer to see history here" />
+      <sb-empty-state icon="📊" heading="No sessions" message="No tracked sessions for this day" />
     } @else {
       <div class="session-list">
         @for (session of timer.sessions(); track session.id) {
@@ -88,7 +101,7 @@
               @if (session.coinsEarned !== null) {
                 <span class="coin-badge">
                   <span>{{ session.coinsEarned | number:'1.1-1' }}</span>
-                  <span class="coin-icon">🪙</span>
+                  <span class="coin-icon"><sb-icon-coin size="14" /></span>
                 </span>
               }
 
@@ -100,18 +113,6 @@
           </sb-card>
         }
       </div>
-
-      <!-- Pagination -->
-      @if (timer.pagedResult(); as paged) {
-        @if (paged.totalPages > 1) {
-          <div class="pagination">
-            @for (i of [].constructor(paged.totalPages); track $index) {
-              <button class="page-btn" [class.page-btn--active]="$index + 1 === paged.page"
-                      (click)="timer.loadPaged($index + 1)">{{ $index + 1 }}</button>
-            }
-          </div>
-        }
-      }
     }
   </section>
 
@@ -121,38 +122,50 @@
       <div class="edit-modal-content">
         <!-- Visual Time Dial (Clock-like) -->
         <div class="time-dial-container">
-          <svg class="time-dial" viewBox="0 0 100 100">
-            <circle cx="50" cy="50" r="45" class="dial-bg" />
-            <!-- Hour Markers -->
-            @for (h of [1,2,3,4,5,6,7,8,9,10,11,12]; track h) {
-              <circle cx="50" cy="5" r="1.5" class="dial-dot" [attr.transform]="'rotate(' + (h * 30) + ' 50 50)'" />
-            }
-          </svg>
           <div class="dial-info">
-            <span class="dial-current-duration text-primary font-bold text-lg">
-              {{ sessionToEdit()?.durationSeconds | duration:'words' }}
-            </span>
+            <span class="dial-label">Session Summary</span>
+            <div class="flex items-center justify-center gap-3">
+              <span class="dial-current-duration text-primary font-bold text-3xl">
+                {{ editDuration() | duration:'words' }}
+              </span>
+              <div class="h-8 w-px bg-border"></div>
+              <div class="flex items-center gap-1.5">
+                <svg class="coin-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="12" r="10" fill="url(#coinGradient)" stroke="#D97706" stroke-width="1.5"/>
+                  <circle cx="12" cy="12" r="7" stroke="#D97706" stroke-width="1" stroke-dasharray="2 2"/>
+                  <path d="M12 7V17M12 7L9 10M12 7L15 10M12 17L9 14M12 17L15 14" stroke="#D97706" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <defs>
+                    <linearGradient id="coinGradient" x1="4" y1="4" x2="20" y2="20" gradientUnits="userSpaceOnUse">
+                      <stop stop-color="#FBBF24"/>
+                      <stop offset="1" stop-color="#F59E0B"/>
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <span class="font-bold text-2xl text-amber-600">
+                  {{ sessionToEdit()?.coinsEarned | number:'1.1-1' }}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
         <div class="edit-form">
-          <div class="form-group mb-4">
-            <label class="block text-sm font-semibold mb-1 opacity-70">Associated Task</label>
-            <select class="input-field w-full p-2 rounded-lg border bg-surface" [ngModel]="editTaskId()" (ngModelChange)="editTaskId.set($event)">
-              @for (task of tasks.tasks(); track task.id) {
-                <option [value]="task.id">{{ task.title }}</option>
-              }
-            </select>
+          <div class="form-group pb-4">
+            <label>Associated Task</label>
+            <div class="flex items-center gap-2 p-3 bg-surface-2 rounded-xl border border-border">
+              <span class="text-lg">{{ sessionToEdit()?.taskEmoji }}</span>
+              <span class="font-bold">{{ sessionToEdit()?.taskTitle }}</span>
+            </div>
           </div>
 
           <div class="grid grid-cols-2 gap-4 mb-6">
             <div class="form-group">
-              <label class="block text-sm font-semibold mb-1 opacity-70">Start Time</label>
-              <input type="datetime-local" class="input-field w-full p-2 rounded-lg border bg-surface" [ngModel]="editStartTime()" (ngModelChange)="editStartTime.set($event)">
+              <label>From</label>
+              <input type="datetime-local" class="input-field" [ngModel]="editStartTime()" (ngModelChange)="editStartTime.set($event)">
             </div>
             <div class="form-group">
-              <label class="block text-sm font-semibold mb-1 opacity-70">End Time</label>
-              <input type="datetime-local" class="input-field w-full p-2 rounded-lg border bg-surface" [ngModel]="editEndTime()" (ngModelChange)="editEndTime.set($event)">
+              <label>To</label>
+              <input type="datetime-local" class="input-field" [ngModel]="editEndTime()" (ngModelChange)="editEndTime.set($event)">
             </div>
           </div>
 

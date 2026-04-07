@@ -1,30 +1,566 @@
-.page { max-width: 1280px; margin: 0 auto; }
-.page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-.coin-display { font-family: var(--font-mono); font-weight: 700; font-size: 1rem; color: var(--color-accent-dark); background: color-mix(in srgb, var(--color-accent) 12%, transparent); border-radius: var(--radius-full); padding: 0.375rem 1rem; }
-.tabs { display: flex; gap: 0.25rem; margin-bottom: 1.5rem; border-bottom: 2px solid var(--color-border); }
-.tab { background: none; border: none; padding: 0.5rem 1rem; font-weight: 500; color: var(--color-text-muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; &--active { color: var(--color-primary); border-bottom-color: var(--color-primary); } }
-.plant-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
-.plant-card, .garden-card { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.5rem; }
-.plant-emoji { font-size: 3rem; }
-.plant-name { font-family: var(--font-display); font-weight: 700; color: var(--color-text); margin: 0; font-size: 1rem; }
-.plant-desc { font-size: 0.8125rem; color: var(--color-text-muted); margin: 0; }
-.plant-meta { display: flex; align-items: center; gap: 0.5rem; }
-.plant-price { font-family: var(--font-mono); font-weight: 700; font-size: 0.875rem; color: var(--color-accent-dark); }
-.growth-bar { width: 100%; height: 8px; background: var(--color-surface-2); border-radius: var(--radius-full); overflow: hidden; }
-.growth-fill { height: 100%; background: linear-gradient(90deg, var(--color-primary), var(--color-success)); border-radius: var(--radius-full); transition: width 0.5s var(--ease-smooth); }
-.growth-pct { font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 0.5rem; }
-.garden-actions { display: flex; gap: 0.5rem; justify-content: center; width: 100%; margin-top: 0.5rem; }
+/* ══════════════════════════════════════
+   Plant Store – Premium Design
+   ══════════════════════════════════════ */
 
-.garden-card {
-  padding: 1rem;
-  transition: transform 0.3s var(--ease-smooth);
-  &:hover { transform: translateY(-4px); }
+.page { max-width: 1280px; margin: 0 auto; }
+
+/* ─── Header ─── */
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
 }
 
-.plant-card {
-  padding: 1rem;
-  height: 100%;
+.coin-display {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--color-accent-dark);
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  border-radius: var(--radius-full);
+  padding: 0.4rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+/* ─── Tabs ─── */
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 2px solid var(--color-border);
+}
+
+.tab {
+  background: none;
+  border: none;
+  padding: 0.625rem 1.25rem;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  border-bottom: 2.5px solid transparent;
+  margin-bottom: -2px;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.tab:hover { color: var(--color-text); }
+.tab--active {
+  color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+}
+
+.tab-icon { font-size: 1.1rem; }
+
+.tab-count {
+  font-size: 0.75rem;
+  font-weight: 700;
+  background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+  color: var(--color-primary);
+  border-radius: var(--radius-full);
+  padding: 0.125rem 0.5rem;
+  min-width: 1.25rem;
+  text-align: center;
+}
+
+/* ─── Loading ─── */
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 4rem 0;
+}
+
+/* ─── Filter Bar ─── */
+.filter-bar {
+  margin-bottom: 1.5rem;
+}
+
+/* ─── Plant Grid ─── */
+.plant-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.25rem;
+}
+
+/* ═══════════════════════════════════
+   STORE CARD
+   ═══════════════════════════════════ */
+.store-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
   display: flex;
   flex-direction: column;
+  gap: 0.625rem;
+  position: relative;
+  transition: transform 0.3s var(--ease-smooth), box-shadow 0.3s var(--ease-smooth);
+  overflow: hidden;
+}
+
+.store-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 4%, transparent), transparent 60%);
+  pointer-events: none;
+}
+
+.store-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.store-card__level {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.store-card__image {
+  width: 100%;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--color-surface-2) 60%, transparent);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  position: relative;
+}
+
+.store-card__image img {
+  max-height: 120px;
+  max-width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,0.1));
+  transition: transform 0.4s var(--ease-spring);
+}
+
+.store-card:hover .store-card__image img {
+  transform: scale(1.08);
+}
+
+.store-card__emoji {
+  font-size: 3.5rem;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.1));
+}
+
+.store-card__name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.0625rem;
+  color: var(--color-text);
+  margin: 0;
+  text-align: center;
+}
+
+.store-card__botanic {
+  font-size: 0.75rem;
+  color: var(--color-text-subtle);
+  font-style: italic;
+  margin: -0.25rem 0 0;
+  text-align: center;
+}
+
+.store-card__desc {
+  font-size: 0.8125rem;
+  color: var(--color-text-muted);
+  margin: 0;
+  text-align: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+}
+
+.store-card__footer {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
+}
+
+.store-card__price {
+  font-family: var(--font-mono);
+  font-weight: 700;
+  font-size: 0.9375rem;
+  color: var(--color-accent-dark);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* ═══════════════════════════════════
+   SUMMARY ROW
+   ═══════════════════════════════════ */
+.summary-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.summary-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.summary-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-sm);
+}
+
+.summary-card__icon {
+  font-size: 1.75rem;
+  flex-shrink: 0;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+}
+
+.summary-card--coins .summary-card__icon {
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+}
+
+.summary-card--mvp .summary-card__icon {
+  display: none;
+}
+
+.summary-card__crown {
+  position: absolute;
+  right: -4px;
+  bottom: -4px;
+  font-size: 3.5rem;
+  opacity: 0.15;
+  pointer-events: none;
+}
+
+.summary-card--mvp {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--color-accent) 8%, var(--color-surface)), var(--color-surface));
+  border-color: color-mix(in srgb, var(--color-accent) 25%, var(--color-border));
+}
+
+.summary-card__content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  min-width: 0;
+}
+
+.summary-card__label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--color-text-muted);
+}
+
+.summary-card__value {
+  font-family: var(--font-display);
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  line-height: 1.2;
+}
+
+.summary-card--coins .summary-card__value {
+  color: var(--color-accent-dark);
+}
+
+.summary-card__value--name {
+  font-size: 1.125rem;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.summary-card__sub {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-accent);
+}
+
+/* ═══════════════════════════════════
+   GARDEN CARD
+   ═══════════════════════════════════ */
+.garden-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  text-align: center;
+  transition: transform 0.3s var(--ease-smooth), box-shadow 0.3s var(--ease-smooth);
+  position: relative;
+  overflow: hidden;
+}
+
+.garden-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-success));
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.garden-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-md);
+}
+
+.garden-card:hover::after {
+  opacity: 1;
+}
+
+.garden-card__image {
+  width: 100%;
+  height: 130px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 100%, color-mix(in srgb, var(--color-primary) 6%, transparent), transparent 70%);
+  border-radius: var(--radius-md);
+}
+
+.garden-card__image img {
+  max-height: 110px;
+  max-width: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 16px rgba(45, 106, 79, 0.15));
+  transition: transform 0.4s var(--ease-spring);
+}
+
+.garden-card:hover .garden-card__image img {
+  transform: scale(1.08) translateY(-4px);
+}
+
+.garden-card__emoji {
+  font-size: 3.5rem;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,0.1));
+}
+
+.garden-card__name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--color-text);
+  margin: 0;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.garden-card__stage {
+  display: flex;
+  justify-content: center;
+}
+
+/* ─── Progress ─── */
+.garden-card__progress {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  margin-bottom: 0.375rem;
+}
+
+.progress-track {
+  height: 6px;
+  width: 100%;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-success));
+  border-radius: var(--radius-full);
+  transition: width 0.6s var(--ease-smooth);
+  position: relative;
+}
+
+.progress-fill::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 8px;
+  background: white;
+  opacity: 0.3;
+  border-radius: var(--radius-full);
+  animation: progress-shimmer 2s infinite;
+}
+
+@keyframes progress-shimmer {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 0.4; }
+}
+
+.garden-card__complete {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--color-success);
+  background: color-mix(in srgb, var(--color-success) 10%, transparent);
+  border-radius: var(--radius-md);
+  padding: 0.375rem 1rem;
+  margin-top: 0.5rem;
+}
+
+/* ─── Actions ─── */
+.garden-card__actions {
+  width: 100%;
+  margin-top: auto;
+  padding-top: 0.75rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
+}
+
+/* ─── Investment Panel ─── */
+.invest-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.invest-presets {
+  display: flex;
+  gap: 0.375rem;
+}
+
+.invest-preset {
+  flex: 1;
+  padding: 0.3rem 0;
+  border-radius: var(--radius-md);
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.invest-preset:hover {
+  background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.invest-preset--max {
+  background: color-mix(in srgb, var(--color-accent) 10%, transparent);
+  border-color: color-mix(in srgb, var(--color-accent) 30%, transparent);
+  color: var(--color-accent-dark);
+}
+
+.invest-preset--max:hover {
+  background: color-mix(in srgb, var(--color-accent) 20%, transparent);
+  border-color: var(--color-accent);
+}
+
+.invest-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.invest-input {
+  width: 56px;
+  height: 32px;
+  text-align: center;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  background: var(--color-surface);
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  transition: border-color 0.15s;
+}
+
+.invest-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.invest-close {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: all 0.15s;
+}
+
+.invest-close:hover {
+  background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+  border-color: var(--color-danger);
+  color: var(--color-danger);
+}
+
+/* ═══════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════ */
+@media (max-width: 640px) {
+  .plant-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .summary-row {
+    grid-template-columns: 1fr;
+  }
+
+  .store-card__image { height: 100px; }
+  .garden-card__image { height: 100px; }
 }

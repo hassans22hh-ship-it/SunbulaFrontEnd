@@ -13,13 +13,14 @@ import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
 import { TaskDto, CreateTaskDto, UpdateTaskDto, FolderDto } from '@shared/models/task.models';
 import { TaskStatus, BehaviorCategory, BEHAVIOR_META } from '@shared/models/enums';
 import { FolderSelectorComponent } from '../folder-selector/folder-selector.component';
+import { EmojiPickerComponent } from '@shared/ui/emoji-picker/emoji-picker.component';
 
 const TASK_COLORS = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC4899', '#6366F1'];
 
 @Component({
   selector: 'sb-task-form',
   standalone: true,
-  imports: [ReactiveFormsModule, SbModalComponent, SbButtonComponent, FolderSelectorComponent],
+  imports: [ReactiveFormsModule, SbModalComponent, SbButtonComponent, FolderSelectorComponent, EmojiPickerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <sb-modal
@@ -68,26 +69,35 @@ const TASK_COLORS = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC
           </div>
         </div>
 
-        <!-- Color Selection -->
-        <div class="form-group mb-6">
-          <label class="label-text">Task Color</label>
-          <div class="flex gap-2 flex-wrap">
-            @for (color of taskColors; track color) {
-              <button
-                type="button"
-                [style.background]="color"
-                [class.selected]="form.value.color === color"
-                class="color-btn"
-                (click)="form.patchValue({ color: color })"
-              ></button>
-            }
+        <div class="row">
+          <div class="field g-2">
+            <label>Emoji</label>
+            <button type="button" class="btn btn-outline w-full text-2xl h-14" [class.text-text]="!form.value.emoji" [class.text-text-subtle]="!form.value.emoji" (click)="showEmojiPicker.set(!showEmojiPicker())">
+              {{ form.value.emoji || '🌱' }}
+            </button>
+          </div>
+          <div class="field g-5">
+            <label>Color</label>
+            <div class="color-chips">
+              @for (color of taskColors; track color) {
+                <button type="button" class="color-chip" [style.background]="color"
+                  [class.active]="form.value.color === color" (click)="form.patchValue({ color })"
+                ></button>
+              }
+            </div>
           </div>
         </div>
+
+        @if (showEmojiPicker()) {
+          <div class="mt-4 p-4 border border-border rounded-xl bg-surface-2 animate-fadeIn">
+            <sb-emoji-picker [value]="form.value.emoji || ''" (selected)="form.patchValue({ emoji: $event }); showEmojiPicker.set(false)" />
+          </div>
+        }
 
         <!-- Meta info below for Edit mode omitted as it's not supported by DTO -->
 
         <!-- Actions -->
-        <div class="flex gap-3 justify-end">
+        <div class="flex gap-3 justify-end mt-6">
           <sb-button variant="ghost" (clicked)="cancelled.emit()">Cancel</sb-button>
           <sb-button type="submit" [disabled]="form.invalid || loading()">
             {{ task() ? 'Save Changes' : 'Create Task' }}
@@ -144,6 +154,7 @@ export class TaskFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
 
   readonly taskColors = TASK_COLORS;
+  readonly showEmojiPicker = signal(false);
   
   // Transform enum and meta to an array for the template
   readonly behaviorOptions = [

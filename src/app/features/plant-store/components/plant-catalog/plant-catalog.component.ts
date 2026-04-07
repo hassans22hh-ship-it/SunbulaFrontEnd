@@ -102,7 +102,7 @@ export class PlantCatalogComponent implements OnInit {
     this.isPurchasing.set(true);
     // Mimic the async call finishing by temporarily setting this
     setTimeout(() => {
-       this.store.purchase(plant.id);
+       this.store.purchase(plant.id, plant.price ?? 0);
        this.isPurchasing.set(false);
        this.inspectingPlant.set(null);
     }, 500);

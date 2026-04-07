@@ -1,0 +1,36 @@
+<div class="emoji-picker-container">
+  <div class="picker-header">
+    <div class="preview-box">
+      {{ preview() }}
+    </div>
+    <div class="search-box">
+      <input 
+        type="text" 
+        class="input-field search-input" 
+        placeholder="Search emoji..." 
+        [ngModel]="search()"
+        (ngModelChange)="search.set($event)"
+      >
+      <i class="fa-solid fa-search search-icon"></i>
+    </div>
+  </div>
+
+  <div class="emoji-grid">
+    @for (item of filteredEmojis(); track item.emoji) {
+      <button 
+        class="emoji-btn" 
+        [class.active]="value() === item.emoji"
+        (click)="selectEmoji(item.emoji)"
+        [title]="item.name"
+      >
+        {{ item.emoji }}
+      </button>
+    }
+  </div>
+
+  @if (filteredEmojis().length === 0) {
+    <div class="empty-state">
+      No emojis found matching "{{ search() }}"
+    </div>
+  }
+</div>

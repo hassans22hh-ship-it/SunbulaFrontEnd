@@ -13,14 +13,18 @@ import { authInterceptor } from '@core/auth/auth.interceptor';
 import { errorInterceptor } from '@core/http/error.interceptor';
 import { AuthService } from '@core/auth/auth.service';
 import { ThemeService } from '@core/theme/theme.service';
+import { TimerStore } from '@features/timer/store/timer.store';
 
 function initApp(): () => Promise<void> {
   const auth  = inject(AuthService);
   const theme = inject(ThemeService);
+  const timer = inject(TimerStore);
 
   return async () => {
     theme.init();
     await auth.initialize();
+    // BUG-02: Restore active session on app boot
+    await timer.initialize();
   };
 }
 

@@ -5,27 +5,46 @@ import { GardenApiService } from '../services/garden.api.service';
 import { AuthService } from '@core/auth/auth.service';
 import { ToastService } from '@shared/ui/toast/toast.service';
 import { PlantDto, UserPlantDto, GardenSummaryDto } from '@shared/models/plant.models';
-import { GrowthStage } from '@shared/models/enums';
-import { pipe, switchMap, tap, catchError, of, firstValueFrom, map, concatMap } from 'rxjs';
-import { rxMethod } from '@ngrx/signals/rxjs-interop';
-import { forkJoin } from 'rxjs';
+import { GrowthStage, PlantLevel } from '@shared/models/enums';
+import { firstValueFrom } from 'rxjs';
 import { environment } from '@env/environment';
 
-interface PlantState { available: PlantDto[]; garden: UserPlantDto[]; summary: GardenSummaryDto | null; isLoading: boolean; error: string | null; }
+interface PlantState {
+  available: PlantDto[];
+  garden: UserPlantDto[];
+  summary: GardenSummaryDto | null;
+  selectedLevel: PlantLevel | null;
+  isLoading: boolean;
+  error: string | null;
+}
 
 export const PlantStoreStore = signalStore(
-  withState<PlantState>({ available: [], garden: [], summary: null, isLoading: false, error: null }),
-  withComputed(({ garden }) => ({
+  withState<PlantState>({
+    available: [],
+    garden: [],
+    summary: null,
+    selectedLevel: null,
+    isLoading: false,
+    error: null,
+  }),
+  withComputed(({ garden, available, selectedLevel }) => ({
     gardenCount: computed(() => garden().length),
     allMyPlants: computed(() => garden()),
     seedInventory: computed(() => garden().filter(p => p.currentStage === GrowthStage.Seed)),
     plantedPlants: computed(() => garden().filter(p => p.currentStage !== GrowthStage.Seed)),
+    filteredAvailable: computed(() => {
+      const level = selectedLevel();
+      const all = available();
+      if (level === null) return all;
+      return all.filter(p => p.level === level);
+    }),
   })),
-  withMethods((store, 
-    plantApi = inject(PlantApiService), 
+  withMethods((store,
+    plantApi = inject(PlantApiService),
     gardenApi = inject(GardenApiService),
-    auth = inject(AuthService), 
+    auth = inject(AuthService),
     toast = inject(ToastService)) => ({
+
     async loadAll(): Promise<void> {
       patchState(store, { isLoading: true, error: null });
       try {
@@ -39,10 +58,8 @@ export const PlantStoreStore = signalStore(
           return u.startsWith('/') ? `${baseUrl}${u}` : `${baseUrl}/${u}`;
         };
 
-        const summary = Array.isArray(gardenData) ? null : gardenData as unknown as GardenSummaryDto;
-        const gardenArray = Array.isArray(gardenData) 
-          ? gardenData 
-          : (gardenData as unknown as GardenSummaryDto)?.plants || [];
+        const summary = gardenData;
+        const gardenArray = summary?.plants || [];
 
         patchState(store, {
           available: (availableData || []).map((p: PlantDto) => ({ ...p, imageUrl: fixUrl(p.imageUrl) })),
@@ -55,31 +72,77 @@ export const PlantStoreStore = signalStore(
         patchState(store, { isLoading: false, error: error.message || 'Unknown error' });
       }
     },
-    async purchase(plantId: string): Promise<void> {
+
+    setLevelFilter(level: PlantLevel | null): void {
+      patchState(store, { selectedLevel: level });
+    },
+
+    async purchase(plantId: string, price: number): Promise<void> {
       try {
+        auth.updateCoinBalance(Math.max(0, auth.coinBalance() - price));
         const userPlant = await firstValueFrom(gardenApi.purchase({ plantId }));
         patchState(store, { garden: [...store.garden(), userPlant] });
         toast.success('Plant purchased! 🌱');
-        await auth.refreshUserProfile(); 
-      } catch (e: unknown) { toast.error((e as { message: string }).message ?? 'Failed to purchase'); }
+        // Refresh profile + full garden summary to keep stats in sync
+        await auth.refreshUserProfile();
+        await this.refreshGardenSummary();
+      } catch (e: unknown) {
+        toast.error((e as { message: string }).message ?? 'Failed to purchase');
+        await auth.refreshUserProfile();
+      }
     },
-    async waterPlant(id: string): Promise<void> { 
+
+    async waterPlant(id: string, coinsSpent: number): Promise<void> {
       try {
-        const updated = await firstValueFrom(gardenApi.grow(id));
-        patchState(store, { 
-          garden: store.garden().map(p => p.id === id ? updated : p) 
+        auth.updateCoinBalance(Math.max(0, auth.coinBalance() - coinsSpent));
+        const updated = await firstValueFrom(gardenApi.grow(id, coinsSpent));
+        patchState(store, {
+          garden: store.garden().map(p => p.id === id ? updated : p)
         });
-        toast.success('Plant watered! 💧'); 
-      } catch (e: unknown) { toast.error('Failed to water plant'); }
+        toast.success(`Plant watered! Spent ${coinsSpent} 🪙`);
+        // Refresh to keep summary stats accurate
+        await auth.refreshUserProfile();
+        await this.refreshGardenSummary();
+      } catch (e: unknown) {
+        toast.error('Failed to water plant');
+        await auth.refreshUserProfile();
+      }
     },
-    async plantSeed(id: string): Promise<void> { 
+
+    async plantSeed(id: string, coinsSpent: number): Promise<void> {
       try {
-        const updated = await firstValueFrom(gardenApi.grow(id));
-        patchState(store, { 
-          garden: store.garden().map(p => p.id === id ? updated : p) 
+        if (coinsSpent > 0) auth.updateCoinBalance(Math.max(0, auth.coinBalance() - coinsSpent));
+        const updated = await firstValueFrom(gardenApi.grow(id, coinsSpent));
+        patchState(store, {
+          garden: store.garden().map(p => p.id === id ? updated : p)
         });
         toast.success('Seed planted! 🌱');
-      } catch (e: unknown) { toast.error('Failed to plant seed'); }
+        await auth.refreshUserProfile();
+        await this.refreshGardenSummary();
+      } catch (e: unknown) {
+        toast.error('Failed to plant seed');
+        await auth.refreshUserProfile();
+      }
+    },
+
+    /** Refresh only the garden summary (keeps store.available untouched) */
+    async refreshGardenSummary(): Promise<void> {
+      try {
+        const gardenData = await firstValueFrom(gardenApi.getGarden());
+        const baseUrl = environment.apiUrl;
+        const fixUrl = (u?: string): string => {
+          if (!u) return '';
+          if (u.startsWith('http')) return u;
+          return u.startsWith('/') ? `${baseUrl}${u}` : `${baseUrl}/${u}`;
+        };
+        const gardenArray = gardenData?.plants || [];
+        patchState(store, {
+          garden: gardenArray.map((p: UserPlantDto) => ({ ...p, plantImageUrl: fixUrl(p.plantImageUrl) })),
+          summary: gardenData,
+        });
+      } catch {
+        // Silently fail — data will be stale but not broken
+      }
     },
   })),
 );

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { CdkDragDrop, moveItemInArray, DragDropModule } from '@angular/cdk/drag-drop';
 import { TasksStore } from '../../store/tasks.store';
 import { FoldersStore } from '@features/folders/store/folders.store';
@@ -24,6 +25,7 @@ import { AnimateDirective } from '@shared/directives/animate.directive';
 export class TaskListComponent implements OnInit {
   protected readonly store        = inject(TasksStore);
   protected readonly foldersStore = inject(FoldersStore);
+  protected readonly router       = inject(Router);
   readonly TaskStatus = TaskStatus;
 
   showForm     = signal(false);
@@ -54,6 +56,10 @@ export class TaskListComponent implements OnInit {
 
   openForm(task: TaskDto | null = null): void { this.selectedTask.set(task); this.showForm.set(true); }
   closeForm(): void { this.showForm.set(false); this.selectedTask.set(null); }
+
+  viewTaskDetails(taskId: string): void {
+    this.router.navigate(['/tasks', taskId]);
+  }
 
   onFormSave(event: { dto: CreateTaskDto | UpdateTaskDto, isEdit: boolean }): void {
     const { dto, isEdit } = event;

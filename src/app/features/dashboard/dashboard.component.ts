@@ -40,7 +40,6 @@ export class DashboardComponent implements OnInit {
   private readonly router   = inject(Router);
 
   readonly dailySummary = signal<DailySummaryDto | null>(null);
-  readonly streak       = signal(0);
   readonly loading      = signal(true);
   private timerInterval: any;
 
@@ -95,10 +94,6 @@ export class DashboardComponent implements OnInit {
     try {
       const summary = await firstValueFrom(this.dailyApi.getTodaySummary());
       this.dailySummary.set(summary);
-      
-      const streakData = await firstValueFrom<any>(this.dailyApi.getStreak());
-      const value = typeof streakData === 'number' ? streakData : (streakData?.streak ?? 0);
-      this.streak.set(value);
       
       this.loading.set(false);
     } catch (e) {

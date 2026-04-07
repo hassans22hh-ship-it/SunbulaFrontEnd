@@ -5,7 +5,7 @@
       <p class="greeting-sub">Here's your productivity overview for today</p>
     </div>
     <div class="header-badges">
-      <span class="streak-badge">🔥 {{ streak() }} day streak</span>
+      <span class="streak-badge">🔥 {{ auth.streakDays() }} day streak</span>
       <span class="coin-badge"><sb-icon-coin /> {{ auth.coinBalance() | coins }}</span>
     </div>
   </div>
@@ -19,7 +19,7 @@
       <div class="stat">
         <span class="stat-icon">⏱️</span>
         <div class="stat-info">
-          <span class="stat-value">{{ dailySummary()?.totalTrackedSeconds ?? 0 | duration }}</span>
+          <span class="stat-value">{{ timer.dailyTotalSeconds() | duration }}</span>
           <span class="stat-label">Tracked today</span>
         </div>
       </div>
@@ -37,17 +37,8 @@
       <div class="stat">
         <span class="stat-icon"><sb-icon-coin size="32" /></span>
         <div class="stat-info">
-          <span class="stat-value">{{ dailySummary()?.coinsEarned ?? 0 | coins }}</span>
+          <span class="stat-value">{{ (dailySummary()?.coinsEarned ?? 0) | coins }}</span>
           <span class="stat-label">Coins earned today</span>
-        </div>
-      </div>
-    </sb-card>
-    <sb-card>
-      <div class="stat">
-        <span class="stat-icon">⭐</span>
-        <div class="stat-info">
-          <span class="stat-value">{{ dailySummary()?.topTask ?? 'None' }}</span>
-          <span class="stat-label">Top task today</span>
         </div>
       </div>
     </sb-card>

@@ -97,6 +97,48 @@
 
 .timer-task-color { width: 12px; height: 12px; border-radius: 50%; box-shadow: 0 0 8px currentColor; }
 .timer-task-title { font-weight: 700; font-size: 1rem; color: var(--color-text); }
+.timer-task-emoji { font-size: 1.5rem; }
+
+.date-nav {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.date-nav-label {
+  flex: 1;
+  text-align: center;
+  margin: 0 !important;
+
+  &::after { display: none; }
+}
+
+.date-nav-btn {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-text);
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+
+  &:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: rgba(var(--color-primary-rgb), 0.05);
+  }
+
+  &:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
+}
 
 .timer-idle {
   text-align: center;
@@ -331,50 +373,93 @@
 .edit-modal-content {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
-  padding: 1rem 0;
+  gap: 1.5rem;
+  padding: 0.5rem;
 }
 
 .time-dial-container {
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
-  height: 160px;
-}
-
-.time-dial {
-  width: 150px;
-  height: 150px;
-  
-  .dial-bg {
-    fill: none;
-    stroke: var(--color-surface-2);
-    stroke-width: 4;
-  }
-  
-  .dial-dot {
-    fill: var(--color-border);
-    transition: fill 0.3s ease;
-  }
+  padding: 1.5rem;
+  background: rgba(var(--color-primary-rgb, 82, 183, 136), 0.05);
+  border-radius: 1rem;
+  border: 1px dashed rgba(var(--color-primary-rgb, 82, 183, 136), 0.2);
 }
 
 .dial-info {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dial-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.5;
+}
+
+.dial-current-duration {
+  font-variant-numeric: tabular-nums;
+  color: var(--color-primary);
+}
+
+.coin-svg {
+  width: 28px;
+  height: 28px;
+  filter: drop-shadow(0 2px 4px rgba(217, 119, 6, 0.2));
+  animation: coinPulse 4s infinite ease-in-out;
+}
+
+@keyframes coinPulse {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.1); filter: brightness(1.2); }
 }
 
 .edit-form {
   .input-field {
-    transition: all 0.2s ease;
+    background: var(--color-surface);
+    color: var(--color-text);
+    border: 1.5px solid var(--color-border);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    width: 100%;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     
     &:focus {
       border-color: var(--color-primary);
-      box-shadow: 0 0 0 2px rgba(var(--color-primary-rgb), 0.1);
+      background: var(--color-surface);
+      box-shadow: 0 0 0 4px rgba(var(--color-primary-rgb, 82, 183, 136), 0.15);
       outline: none;
     }
+
+    &::placeholder {
+      color: var(--color-text-muted);
+      opacity: 0.5;
+    }
   }
+
+  label {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: var(--color-text-muted);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+  }
+}
+
+select.input-field {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236B7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.25rem;
+  padding-right: 2.5rem;
 }

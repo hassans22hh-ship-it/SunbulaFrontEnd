@@ -23,12 +23,24 @@ const initialState: TasksState = {
 export const TasksStore = signalStore(
   { providedIn: 'root' },
   withState(initialState),
-  withComputed(({ tasks }) => ({
-    activeTasks:    computed(() => tasks().filter(t => t.status === TaskStatus.Active && !t.isArchived)),
-    completedTasks: computed(() => tasks().filter(t => t.status === TaskStatus.Completed)),
-    archivedTasks:  computed(() => tasks().filter(t => t.isArchived)),
-    count:          computed(() => tasks().length),
-  })),
+  withComputed(({ tasks, filter }) => {
+    // Shared inner filter function so grids update instantly
+    const applyFilters = (list: TaskDto[]) => {
+      const b = filter().behaviorType;
+      const f = filter().folderId;
+      return list.filter(t => 
+        (b === undefined || t.behaviorType === b) &&
+        (f === undefined || t.folderId === f)
+      );
+    };
+
+    return {
+      activeTasks:    computed(() => applyFilters(tasks().filter(t => t.status === TaskStatus.Active && !t.isArchived))),
+      completedTasks: computed(() => applyFilters(tasks().filter(t => t.status === TaskStatus.Completed))),
+      archivedTasks:  computed(() => applyFilters(tasks().filter(t => t.isArchived))),
+      count:          computed(() => applyFilters(tasks().filter(t => t.status === TaskStatus.Active && !t.isArchived)).length),
+    };
+  }),
   withMethods((store, api = inject(TasksApiService), toast = inject(ToastService)) => ({
     async load(params?: TaskQueryParams): Promise<void> {
       patchState(store, { isLoading: true, error: null, filter: params ?? {} });

@@ -16,9 +16,9 @@ export class TimeSessionApiService {
   getPaged(page = 1, pageSize = 20): Observable<PagedResult<TimeSessionDto>> {
     return this.http.get<PagedResult<TimeSessionDto>>(this.BASE, { params: { page, pageSize } });
   }
-  getHistory(): Observable<TimeSessionDto[]> { return this.http.get<TimeSessionDto[]>(`${this.BASE}/history`); }
+  getHistory(): Observable<TimeSessionDto[]> { return this.http.get<TimeSessionDto[]>(this.BASE); }
   getById(id: string): Observable<TimeSessionDto> { return this.http.get<TimeSessionDto>(`${this.BASE}/${id}`); }
-  getByDate(date: string): Observable<TimeSessionDto[]> { return this.http.get<TimeSessionDto[]>(`${this.BASE}/date`, { params: { date } }); }
+  getByDate(date: string): Observable<TimeSessionDto[]> { return this.http.get<TimeSessionDto[]>(`${this.BASE}/date/${date}`); }
   getRange(from: string, to: string): Observable<TimeSessionDto[]> {
     return this.http.get<TimeSessionDto[]>(`${this.BASE}/range`, { params: { from, to } });
   }
