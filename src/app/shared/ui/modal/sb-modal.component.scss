@@ -1,16 +1,22 @@
+:host {
+  display: contents;
+}
+
 .sb-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5) !important;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
   padding: 1rem;
+  isolation: isolate;
 }
 
 .sb-modal-content {
-  background: var(--color-surface);
+  background: var(--color-surface) !important;
+  background-color: var(--color-surface) !important;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xl);
   width: 100%;

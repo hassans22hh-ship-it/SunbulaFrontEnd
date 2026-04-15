@@ -1,48 +1,116 @@
-<div class="page" sbPageTransition>
-  <div class="page-header"><h1 class="section-title">📋 Debts</h1><sb-button (click)="showCreate.set(true)">+ New Debt</sb-button></div>
+<div class="debts-page page-container" sbPageTransition>
+  <!-- ═══ NAV TABS ═══ -->
+  <nav class="nav-tabs">
+    <a class="nav-tab" [class.nav-tab--active]="tab() === 'active'" (click)="tab.set('active')">Active</a>
+    <a class="nav-tab" [class.nav-tab--active]="tab() === 'settled'" (click)="tab.set('settled')">Settled</a>
+  </nav>
 
-  @if (store.summary(); as summary) {
-    <div class="summary-row">
-      <sb-card><div class="stat"><span class="stat-icon">💵</span><div class="stat-info"><span class="stat-value">{{ summary.totalOwedByMe | number:'1.2-2' }}</span><span class="stat-label">Total owed to others</span></div></div></sb-card>
-      <sb-card><div class="stat"><span class="stat-icon">💰</span><div class="stat-info"><span class="stat-value">{{ summary.totalOwedToMe | number:'1.2-2' }}</span><span class="stat-label">Total owing to you</span></div></div></sb-card>
+  @if (store.isLoading()) {
+    <div class="loading-wrap">
+      <sb-spinner size="lg" />
     </div>
-  }
+  } @else {
+    <!-- ═══ SUMMARY CARD ═══ -->
+    @if (store.summary(); as summary) {
+      <div class="summary-card">
+        <div class="summary-item">
+          <span class="summary-label">Total Debts</span>
+          <span class="summary-value">{{ summary.totalDebtsCount }}</span>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-item">
+          <span class="summary-label">Unpaid</span>
+          <span class="summary-value summary-value--info">{{ summary.unpaidDebtsCount }}</span>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-item">
+          <span class="summary-label">Overdue</span>
+          <span class="summary-value summary-value--danger">{{ summary.overdueDebtsCount }}</span>
+        </div>
+      </div>
+    }
 
-  <div class="tabs">
-    <button class="tab" [class.tab--active]="tab() === 'active'" (click)="tab.set('active')">Active</button>
-    <button class="tab" [class.tab--active]="tab() === 'settled'" (click)="tab.set('settled')">Settled</button>
-  </div>
-
-  @if (store.isLoading()) { <sb-spinner size="lg" /> } @else {
+    <!-- ═══ DEBT LIST ═══ -->
     @let list = tab() === 'active' ? store.activeDebts() : store.settledDebts();
-    @if (list.length === 0) { <sb-empty-state icon="📋" heading="No debts" message="Looking debt-free! 🎉" /> } @else {
+    @if (list.length === 0) { 
+      <sb-empty-state icon="📋" heading="No debts found" message="Looking debt-free! 🎉" /> 
+    } @else {
       <div class="debt-list">
         @for (debt of list; track debt.id) {
-          <sb-card padding="sm"><div class="debt-row">
-            <div class="debt-type"><sb-badge [variant]="debtMeta[debt.type].variant">{{ debtMeta[debt.type].label }}</sb-badge></div>
-            <div class="debt-info"><span class="debt-person">{{ debt.personEntity }}</span></div>
-            <div class="debt-amounts">
-              <span class="debt-total">{{ debt.amount | number:'1.2-2' }}</span>
+          <div class="tx-item" [class.tx-item--selected]="selectedDebtId() === debt.id" (click)="toggleDebtDetail(debt.id)">
+            <div class="tx-icon-wrap" [style.background]="(debt.debtType === 'OWED_TO_ME' ? 'var(--color-success)' : 'var(--color-danger)') + '1a'">
+              <span class="tx-icon">{{ debt.debtType === 'OWED_TO_ME' ? '⬇️' : '⬆️' }}</span>
             </div>
-            <div class="debt-actions">
-              @if (debt.status === 'OUTSTANDING') { <sb-button size="sm" variant="outline" (click)="openPayment(debt)">Pay</sb-button> }
-              <button class="action-btn action-btn--danger" (click)="confirmDelete(debt)">🗑️</button>
+            <div class="tx-info">
+              <span class="tx-category">{{ debt.creditorName }}</span>
+              <span class="tx-date">
+                @if (debt.isOverdue) { <span style="color: var(--color-danger); font-weight: 600;">Overdue</span> | }
+                @if (debt.dueDate) { Due: {{ debt.dueDate | date:'MMM d, y':'':'en-US' }} }
+              </span>
             </div>
-          </div></sb-card>
+            <div style="display: flex; flex-direction: column; align-items: flex-end;">
+              <span class="tx-amount" [style.color]="debt.debtType === 'OWED_TO_ME' ? 'var(--color-success)' : 'var(--color-danger)'">
+                {{ debt.amount | number:'1.2-2' }}
+              </span>
+              @if (!debt.isPaid) {
+                <span style="font-size: 0.75rem; color: var(--color-text-muted);">Left: {{ debt.remainingAmount | number:'1.2-2' }}</span>
+              }
+            </div>
+          </div>
+
+          <!-- ═══ DEBT DETAIL EXPANDED ═══ -->
+          @if (selectedDebtId() === debt.id) {
+            <div class="tx-detail">
+              <div class="tx-detail-rows">
+                <div class="tx-detail-row">
+                  <span class="tx-detail-label">Type</span>
+                  <span class="tx-detail-value">
+                    @if (debt.debtType) { <sb-badge [variant]="debtMeta[debt.debtType].variant">{{ debtMeta[debt.debtType].label }}</sb-badge> }
+                  </span>
+                </div>
+                <div class="tx-detail-row">
+                  <span class="tx-detail-label">Total Amount</span>
+                  <span class="tx-detail-value tx-detail-amount">{{ debt.amount | number:'1.2-2' }}</span>
+                </div>
+                <div class="tx-detail-row">
+                  <span class="tx-detail-label">Remaining Amount</span>
+                  <span class="tx-detail-value tx-detail-amount">{{ debt.remainingAmount | number:'1.2-2' }}</span>
+                </div>
+                @if (debt.notes) {
+                  <div class="tx-detail-row">
+                    <span class="tx-detail-label">Notes</span>
+                    <span class="tx-detail-value">{{ debt.notes }}</span>
+                  </div>
+                }
+              </div>
+              <div class="tx-detail-actions">
+                @if (!debt.isPaid) { 
+                  <button class="detail-action-btn detail-action-btn--edit" (click)="openPayment(debt); $event.stopPropagation()">💰 Record Payment</button> 
+                }
+                <button class="detail-action-btn detail-action-btn--delete" (click)="confirmDelete(debt); $event.stopPropagation()">🗑️ Delete</button>
+              </div>
+            </div>
+          }
         }
       </div>
     }
   }
+
+  <!-- ═══ FAB ═══ -->
+  <button class="fab" (click)="showCreate.set(true)" aria-label="New Debt">
+    <span class="fab-icon">+</span>
+  </button>
 </div>
 
+<!-- ═══ MODALS ═══ -->
 @if (showCreate()) {
   <sb-modal title="New Debt" (close)="showCreate.set(false)">
     <form [formGroup]="createForm" (ngSubmit)="onCreate()" class="modal-form">
-      <div class="form-group"><label class="form-label">Person</label><input formControlName="personName" class="input-field" placeholder="Name"></div>
-      <div class="form-group"><label class="form-label">Type</label><select formControlName="type" class="input-field">@for (t of debtTypes; track t) { <option [value]="t">{{ debtMeta[t].label }}</option> }</select></div>
-      <div class="form-group"><label class="form-label">Amount</label><input type="number" formControlName="amount" class="input-field" step="0.01"></div>
-      <div class="form-group"><label class="form-label">Description</label><input formControlName="description" class="input-field"></div>
+      <div class="form-group"><label class="form-label">Person / Entity</label><input formControlName="creditorName" class="input-field" placeholder="E.g., John Doe"></div>
+      <div class="form-group"><label class="form-label">Debt Type</label><select formControlName="debtType" class="input-field">@for (t of debtTypes; track t) { <option [value]="t">{{ debtMeta[t].label }}</option> }</select></div>
+      <div class="form-group"><label class="form-label">Amount</label><input type="number" formControlName="amount" class="input-field" step="0.01" placeholder="0.00"></div>
       <div class="form-group"><label class="form-label">Due Date</label><input type="date" formControlName="dueDate" class="input-field"></div>
+      <div class="form-group"><label class="form-label">Description (Optional)</label><input formControlName="notes" class="input-field" placeholder="Notes"></div>
       <div modal-footer><sb-button variant="ghost" (click)="showCreate.set(false)">Cancel</sb-button><sb-button type="submit" [disabled]="createForm.invalid">Create</sb-button></div>
     </form>
   </sb-modal>
@@ -50,13 +118,14 @@
 @if (showPayment()) {
   <sb-modal title="Record Payment" size="sm" (close)="showPayment.set(false)">
     <form [formGroup]="paymentForm" (ngSubmit)="onPayment()" class="modal-form">
-      <p class="payment-context">Payment to <strong>{{ selectedDebt()?.personEntity }}</strong>.</p>
+      <p class="payment-context">Payment to <strong style="color: var(--color-text);">{{ selectedDebt()?.creditorName }}</strong>.</p>
       <div class="form-group"><label class="form-label">Amount</label><input type="number" formControlName="amount" class="input-field" step="0.01"></div>
-      <div class="form-group"><label class="form-label">Note</label><input formControlName="note" class="input-field"></div>
+      <div class="form-group"><label class="form-label">Payment Date</label><input type="date" formControlName="paymentDate" class="input-field"></div>
+      <div class="form-group"><label class="form-label">Description (Optional)</label><input formControlName="notes" class="input-field" placeholder="Notes"></div>
       <div modal-footer><sb-button variant="ghost" (click)="showPayment.set(false)">Cancel</sb-button><sb-button type="submit" [disabled]="paymentForm.invalid">Record</sb-button></div>
     </form>
   </sb-modal>
 }
 @if (showDelete()) {
-  <sb-confirm-dialog title="Delete Debt" [message]="'Delete debt to ' + selectedDebt()?.personEntity + '?'" (confirmed)="onDelete()" (cancelled)="showDelete.set(false)" />
+  <sb-confirm-dialog title="Delete Debt" [message]="'Are you sure you want to delete the debt associated with ' + selectedDebt()?.creditorName + '?'" (confirmed)="onDelete()" (cancelled)="showDelete.set(false)" variant="danger" />
 }
