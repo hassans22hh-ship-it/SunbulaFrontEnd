@@ -13,6 +13,7 @@ export interface TimeSessionDto {
   coinsEarned:     number | null;
   isActive:        boolean;
   isPaused?:       boolean;
+  taskEmoji?:      string;
   // Fallbacks for backend variations
   title?:          string;
   duration?:       number;
@@ -28,6 +29,14 @@ export interface StartSessionDto {
   taskId: string;
 }
 
+export interface CreateManualSessionDto {
+  taskId:       string;
+  startTime:    string;
+  endTime:      string;
+  behaviorType: BehaviorCategory;
+  notes?:       string;
+}
+
 export interface DailySummaryDto {
   date:                string;
   totalTrackedSeconds: number;
@@ -35,6 +44,14 @@ export interface DailySummaryDto {
   coinsEarned:         number;
   topTask:             string | null;
   behaviorBreakdown:   BehaviorBreakdownItem[];
+  // Fallbacks for Prompt 5
+  totalMinutes?:       number;
+  totalCoins?:         number;
+  qualifiesForStreak?: boolean;
+  currentStreak?:      number;
+  untrackedMinutes?:   number;
+  sessions?:           TimeSessionDto[];
+  formattedTotalTime?: string;
 }
 
 export interface BehaviorBreakdownItem {

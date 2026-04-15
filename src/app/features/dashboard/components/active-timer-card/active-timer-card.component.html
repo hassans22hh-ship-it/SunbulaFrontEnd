@@ -13,7 +13,7 @@
   </div>
 
   <div class="timer-display">
-    {{ store.elapsedSeconds() | duration:'clock' }}
+    {{ (store.activeSessions().length > 0 ? store.activeSessions()[0].durationSeconds : 0) | duration:'clock' }}
   </div>
 
   <a routerLink="/timer" class="action-link">

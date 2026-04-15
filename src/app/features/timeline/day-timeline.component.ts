@@ -29,7 +29,7 @@ export class DayTimelineComponent {
   constructor() {
     this.titleService.setTitle('Timeline | Sunbula');
     if (this.tasksStore.tasks().length === 0) this.tasksStore.load();
-    if (this.timerStore.sessions().length === 0) this.timerStore.loadAll();
+    if (this.timerStore.sessions().length === 0) this.timerStore.loadByDate();
     if (this.foldersStore.folders().length === 0) this.foldersStore.load();
   }
 

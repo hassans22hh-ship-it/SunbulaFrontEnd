@@ -14,7 +14,7 @@ function todayStr(): string {
 }
 
 interface TimerState {
-  rawActiveSession:  any | null;
+  rawActiveSessions: any[];
   rawSessions:       any[];
   pagedResult:    PagedResult<any> | null;
   isLoading:      boolean;
@@ -24,7 +24,7 @@ interface TimerState {
 }
 
 const initialState: TimerState = {
-  rawActiveSession:  null,
+  rawActiveSessions: [],
   rawSessions:       [],
   pagedResult:    null,
   isLoading:      false,
@@ -45,9 +45,6 @@ export const TimerStore = signalStore(
       const allTasks = tasksStore.tasks();
       const task = (allTasks as any[]).find((t: any) => t.id === session.taskId);
 
-      // --- Timezone Bug: The backend appears to send local time strings ---
-      // Adding 'Z' was causing a drift. Let's keep it as-is so the browser
-      // treats it as local if no offset is present.
       let startTime = session.startTime;
       let endTime = session.endTime;
 
@@ -64,31 +61,27 @@ export const TimerStore = signalStore(
     };
 
     return {
-      activeSession: computed((): TimeSessionDto | null => {
-        const s = state.rawActiveSession();
-        if (!s) return null;
-        return enrichSession(s);
+      activeSessions: computed((): TimeSessionDto[] => {
+        const _ = state.ticker();
+        return state.rawActiveSessions().map(s => {
+          const e = enrichSession(s);
+          let elapsed = e.durationSeconds || 0;
+          if (!e.isPaused && e.startTime) {
+            const start = new Date(e.startTime).getTime();
+            const now = new Date().getTime();
+            elapsed = Math.floor((now - start) / 1000) + (e.durationSeconds || 0);
+          }
+          e.durationSeconds = elapsed;
+          return e;
+        });
       }),
       sessions: computed((): TimeSessionDto[] => {
         return state.rawSessions().map(enrichSession);
       }),
     };
   }),
-  withComputed(({ activeSession, sessions, rawActiveSession, rawSessions, ticker, selectedDate }) => ({
-    isRunning: computed(() => rawActiveSession() !== null),
-    isPaused:  computed(() => rawActiveSession()?.isPaused ?? false),
-
-    /** Drift-safe elapsed calculation from server startTime */
-    elapsedSeconds: computed(() => {
-      const session = activeSession();
-      const _tick = ticker(); // Access ticker to force re-computation
-      if (!session?.startTime) return 0;
-
-      // session.startTime is already normalized in enrichSession/activeSession computed.
-      const start = new Date(session.startTime).getTime();
-      const now = Date.now();
-      return Math.floor((now - start) / 1000);
-    }),
+  withComputed(({ activeSessions, sessions, rawActiveSessions, rawSessions, ticker, selectedDate }) => ({
+    isRunning: computed(() => rawActiveSessions().length > 0),
 
     dailyTotalSeconds: computed(() => {
       const today = new Date().toDateString();
@@ -96,21 +89,6 @@ export const TimerStore = signalStore(
         .filter((s: TimeSessionDto) => s.startTime && new Date(s.startTime).toDateString() === today)
         .reduce((acc: number, s: TimeSessionDto) => acc + (s.durationSeconds ?? 0), 0);
     }),
-
-    // BUG-07: Expose task info from active session
-    taskName: computed(() => {
-      const s = activeSession();
-      return s?.taskTitle ?? s?.title ?? 'Focus Session';
-    }),
-    taskEmoji: computed(() => {
-      const s = activeSession();
-      return (s as any)?.taskEmoji ?? (s as any)?.emoji ?? '';
-    }),
-    behaviorType: computed(() => {
-      const s = activeSession();
-      return s?.taskBehavior ?? (s as any)?.behaviorType ?? null;
-    }),
-    activeTaskId: computed(() => activeSession()?.taskId ?? null),
 
     // BUG-04: Date navigation
     canGoNext: computed(() => selectedDate() < todayStr()),
@@ -134,12 +112,13 @@ export const TimerStore = signalStore(
     const auth = inject(AuthService);
     const toast = inject(ToastService);
 
-    // Define local functions first to allow recursion and clean calling
     const startTicker = () => {
       if (_tickerInterval) return;
       _tickerInterval = setInterval(() => {
-        if (store.activeSession()) {
+        if (store.rawActiveSessions().length > 0) {
           patchState(store, { ticker: store.ticker() + 1 });
+        } else {
+          stopTicker();
         }
       }, 1000);
     };
@@ -167,38 +146,20 @@ export const TimerStore = signalStore(
       }
     };
 
-    const resumeTimer = async (): Promise<void> => {
-      const session = store.activeSession();
-      if (!session) return;
-
+    const resumeTimer = async (sessionId: string): Promise<void> => {
       patchState(store, { isLoading: true });
       try {
-        const res: any = await firstValueFrom(api.resume(session.id));
+        const res: any = await firstValueFrom(api.resume(sessionId));
         const resumed = res?.data ?? res;
-        patchState(store, { rawActiveSession: resumed, isLoading: false });
+        patchState(store, { 
+          rawActiveSessions: store.rawActiveSessions().map(s => s.id === sessionId ? resumed : s),
+          isLoading: false 
+        });
         startTicker();
         toast.success(`Timer resumed`);
       } catch (e: unknown) {
         patchState(store, { isLoading: false });
         toast.error((e as { message: string }).message ?? 'Failed to resume timer');
-      }
-    };
-
-    const switchTask = async (taskId: string): Promise<void> => {
-      patchState(store, { isLoading: true });
-      try {
-        stopTicker();
-        await firstValueFrom(api.stopActive());
-        const res: any = await firstValueFrom(api.start({ taskId } as StartSessionDto));
-        const session = res?.data ?? res;
-        patchState(store, { rawActiveSession: session, isLoading: false });
-        startTicker();
-        const enriched = store.activeSession()!;
-        toast.success(`Switched to ${enriched.taskTitle}`);
-        await auth.refreshUserProfile();
-      } catch (e: unknown) {
-        patchState(store, { isLoading: false });
-        toast.error((e as { message: string }).message ?? 'Failed to switch task');
       }
     };
 
@@ -208,37 +169,31 @@ export const TimerStore = signalStore(
       getById,
       loadByDate,
       resumeTimer,
-      switchTask,
 
       async initialize(): Promise<void> {
         try {
           const active: any = await firstValueFrom(api.getActive());
-          const session = active?.data ?? active;
-          if (session && !session.taskId) {
-             await firstValueFrom(api.stopActive());
-             patchState(store, { rawActiveSession: null });
-          } else if (session) {
-             patchState(store, { rawActiveSession: session });
-             startTicker();
+          let activeList = Array.isArray(active) ? active : active?.data ?? active;
+          if (!Array.isArray(activeList)) {
+            activeList = activeList ? [activeList] : [];
           }
+          activeList = activeList.filter((s: any) => s && s.taskId);
+          
+          patchState(store, { rawActiveSessions: activeList });
+          if (activeList.length > 0) startTicker();
         } catch {
           // No active session or error — ignore
         }
       },
 
       async start(taskId: string): Promise<void> {
-        const current = store.activeSession();
-        if (current && current.taskId === taskId) {
-          if (!current.isPaused) {
+        const currentRunning = store.activeSessions().find(s => s.taskId === taskId);
+        if (currentRunning) {
+          if (!currentRunning.isPaused) {
             toast.info('This task is already being tracked');
             return;
           }
-          await resumeTimer();
-          return;
-        }
-
-        if (current) {
-          await switchTask(taskId);
+          await resumeTimer(currentRunning.id);
           return;
         }
 
@@ -246,55 +201,81 @@ export const TimerStore = signalStore(
         try {
           const res: any = await firstValueFrom(api.start({ taskId } as StartSessionDto));
           const session = res?.data ?? res;
-          patchState(store, { rawActiveSession: session, isLoading: false });
+          patchState(store, { 
+            rawActiveSessions: [...store.rawActiveSessions(), session],
+            isLoading: false 
+          });
           startTicker();
-          const enriched = store.activeSession()!;
-          toast.success(`Timer started for ${enriched.taskTitle}`);
+          const enriched = store.activeSessions().find(s => s.id === session.id);
+          if (enriched) {
+             toast.success(`Timer started for ${enriched.taskTitle}`);
+          }
         } catch (e: unknown) {
           patchState(store, { isLoading: false });
-          const err = e as { status?: number; message?: string };
-          if (err.status === 409 || (err.message && err.message.toLowerCase().includes('active session'))) {
-            toast.warning('Another session is running. Stopping it first...');
-            await switchTask(taskId);
-          } else {
-            toast.error(err.message ?? 'Failed to start timer');
-          }
+          toast.error((e as { message: string }).message ?? 'Failed to start timer');
         }
       },
 
-      async stop(): Promise<void> {
-        const session = store.activeSession();
-        if (!session) return;
-
+      async stop(sessionId: string): Promise<void> {
         patchState(store, { isLoading: true });
         try {
-          const res: any = await firstValueFrom(api.stop(session.id));
+          const res: any = await firstValueFrom(api.stop(sessionId));
           const stopped = res?.data ?? res;
-          stopTicker();
-          patchState(store, { rawActiveSession: null, isLoading: false });
+          patchState(store, { 
+            rawActiveSessions: store.rawActiveSessions().filter(s => s.id !== sessionId),
+            isLoading: false 
+          });
+          if (store.rawActiveSessions().length === 0) stopTicker();
           toast.success(`Timer stopped — earned ${stopped.coinsEarned?.toFixed(1) ?? 0} 🪙`);
           await auth.refreshUserProfile();
           await loadByDate(store.selectedDate());
         } catch (e: unknown) {
-          patchState(store, { isLoading: false });
-          toast.error((e as { message: string }).message ?? 'Failed to stop timer');
+           patchState(store, { isLoading: false });
+           toast.error((e as { message: string }).message ?? 'Failed to stop timer');
         }
       },
 
-      async pauseTimer(): Promise<void> {
-        const session = store.activeSession();
-        if (!session) return;
-
+      async stopAll(): Promise<void> {
         patchState(store, { isLoading: true });
         try {
-          const res: any = await firstValueFrom(api.pause(session.id));
-          const paused = res?.data ?? res;
+          await firstValueFrom(api.stopActive());
+          patchState(store, { rawActiveSessions: [], isLoading: false });
           stopTicker();
-          patchState(store, { rawActiveSession: paused, isLoading: false });
+          toast.success(`All timers stopped`);
+          await auth.refreshUserProfile();
+          await loadByDate(store.selectedDate());
+        } catch (e: unknown) {
+          patchState(store, { isLoading: false });
+          toast.error((e as { message: string }).message ?? 'Failed to stop all timers');
+        }
+      },
+
+      async pauseTimer(sessionId: string): Promise<void> {
+        patchState(store, { isLoading: true });
+        try {
+          const res: any = await firstValueFrom(api.pause(sessionId));
+          const paused = res?.data ?? res;
+          patchState(store, { 
+            rawActiveSessions: store.rawActiveSessions().map(s => s.id === sessionId ? paused : s),
+            isLoading: false 
+          });
           toast.success(`Timer paused`);
         } catch (e: unknown) {
           patchState(store, { isLoading: false });
           toast.error((e as { message: string }).message ?? 'Failed to pause timer');
+        }
+      },
+
+      async addManualSession(dto: any): Promise<void> {
+        patchState(store, { isLoading: true });
+        try {
+          await firstValueFrom(api.manual(dto));
+          toast.success('Manual session added');
+          await loadByDate(store.selectedDate());
+          await auth.refreshUserProfile();
+        } catch (e: unknown) {
+          patchState(store, { isLoading: false });
+          toast.error((e as { message: string }).message ?? 'Failed to add manual session');
         }
       },
 
@@ -345,37 +326,10 @@ export const TimerStore = signalStore(
         loadByDate(dateStr);
       },
 
-      async loadAll(): Promise<void> {
-        patchState(store, { isLoading: true });
-        try {
-          const response: any = await firstValueFrom(api.getHistory());
-          const rawSessions = Array.isArray(response) ? response : (response.data ?? response.items ?? []);
-          patchState(store, { rawSessions, isLoading: false });
-        } catch (e: unknown) {
-          patchState(store, { isLoading: false, error: (e as { message: string }).message });
-        }
-      },
-
-      async loadPaged(page = 1, pageSize = 20): Promise<void> {
-        patchState(store, { isLoading: true });
-        try {
-          const response: any = await firstValueFrom(api.getPaged(page, pageSize));
-          const raw = response.data ?? response.items ?? response;
-          const rawSessions = Array.isArray(raw) ? raw : (raw.items ?? []);
-          patchState(store, { pagedResult: response, rawSessions, isLoading: false });
-        } catch (e: unknown) {
-          try {
-            const history: any = await firstValueFrom(api.getHistory());
-            patchState(store, { rawSessions: history, isLoading: false });
-          } catch {
-            patchState(store, { isLoading: false, error: (e as { message: string }).message });
-          }
-        }
-      },
-
       updateTicker(): void {
         patchState(store, { ticker: store.ticker() + 1 });
       },
     };
   }),
 );
+

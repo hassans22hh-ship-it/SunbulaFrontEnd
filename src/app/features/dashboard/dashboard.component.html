@@ -46,16 +46,18 @@
 
   <!-- Active Timer Card -->
   @if (timer.isRunning()) {
-  <sb-card padding="lg">
-    <div class="active-timer">
-      <div class="active-timer__pulse"></div>
-      <div class="active-timer__info">
-        <span class="active-timer__label">Currently tracking</span>
-        <span class="active-timer__task">{{ timer.activeSession()?.taskTitle }}</span>
+    @for (session of timer.activeSessions(); track session.id) {
+    <sb-card padding="lg" [class]="'mb-4'">
+      <div class="active-timer">
+        <div class="active-timer__pulse"></div>
+        <div class="active-timer__info">
+          <span class="active-timer__label">Currently tracking</span>
+          <span class="active-timer__task">{{ session.taskTitle }}</span>
+        </div>
+        <sb-button variant="danger" size="sm" (click)="timer.stop(session.id)">Stop</sb-button>
       </div>
-      <sb-button variant="danger" size="sm" (click)="timer.stop()">Stop</sb-button>
-    </div>
-  </sb-card>
+    </sb-card>
+    }
   }
 
   <!-- Behavior Breakdown -->

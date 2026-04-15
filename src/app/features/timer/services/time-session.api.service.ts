@@ -22,9 +22,9 @@ export class TimeSessionApiService {
   getRange(from: string, to: string): Observable<TimeSessionDto[]> {
     return this.http.get<TimeSessionDto[]>(`${this.BASE}/range`, { params: { from, to } });
   }
-  getActive(): Observable<TimeSessionDto | null> {
-    return this.http.get<TimeSessionDto>(`${this.BASE}/active`).pipe(
-      catchError(err => err.status === 204 ? of(null) : throwError(() => err)),
+  getActive(): Observable<TimeSessionDto[]> {
+    return this.http.get<TimeSessionDto[]>(`${this.BASE}/active`).pipe(
+      catchError(err => err.status === 204 ? of([]) : throwError(() => err)),
     );
   }
 

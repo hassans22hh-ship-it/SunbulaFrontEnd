@@ -10,62 +10,79 @@
   <!-- Live Timer Display -->
   <div class="timer-hero">
     @if (timer.isRunning()) {
-      <div class="timer-active-card animate-scaleIn">
+    <div class="active-sessions-grid">
+      @for (session of timer.activeSessions(); track session.id) {
+      <div class="timer-active-card active-session-card animate-scaleIn">
         <svg class="timer-progress-svg" viewBox="0 0 200 200">
           <circle class="timer-progress-bg" cx="100" cy="100" r="90" />
           <circle class="timer-progress-fill" cx="100" cy="100" r="90"
-                  [style.stroke-dashoffset]="calculateOffset(timer.elapsedSeconds())" />
+            [style.stroke-dashoffset]="calculateOffset(getElapsed(session))" />
         </svg>
-        
-        <div class="timer-display">{{ formatElapsed(timer.elapsedSeconds()) }}</div>
-        
-        <!-- BUG-07: Show task emoji + name + behavior badge -->
+
+        <div class="timer-display">{{ formatElapsed(getElapsed(session)) }}</div>
+
         <div class="timer-task">
-          @if (timer.taskEmoji(); as emoji) {
-            <span class="timer-task-emoji">{{ emoji }}</span>
+          @if (session.taskEmoji) {
+          <span class="timer-task-emoji">{{ session.taskEmoji }}</span>
           }
-          <span class="timer-task-color" [style.background]="timer.activeSession()?.taskColor" [style.color]="timer.activeSession()?.taskColor"></span>
-          <span class="timer-task-title">{{ timer.taskName() }}</span>
-          @if (timer.behaviorType() !== null) {
-            <sb-behavior-badge [behavior]="timer.behaviorType()!" />
+          <span class="timer-task-color" [style.background]="session.taskColor"
+            [style.color]="session.taskColor"></span>
+          <span class="timer-task-title">{{ session.taskTitle }}</span>
+          @if (session.taskBehavior !== null) {
+          <sb-behavior-badge [behavior]="session.taskBehavior" />
           }
         </div>
 
-        <app-timer-controls 
-          [isPaused]="timer.isPaused()"
-          [isLoading]="timer.isLoading()"
-          (onPause)="timer['pauseTimer']()"
-          (onResume)="timer['resumeTimer']()"
-          (onStop)="stopTimer()" />
+        <app-timer-controls [isPaused]="session.isPaused ?? false" [isLoading]="timer.isLoading()"
+          (onPause)="pauseTimer(session.id)" (onResume)="resumeTimer(session.id)" (onStop)="stopTimer(session.id)" />
       </div>
+      }
+    </div>
+    @if (timer.activeSessions().length > 1) {
+    <div class="stop-all-container">
+      <button class="stop-all-btn" (click)="stopAllTimers()">⏹️ Stop All Tasks</button>
+    </div>
+    }
     } @else {
-      <div class="timer-idle animate-fadeIn">
-        <div class="timer-display timer-display--idle">00:00:00</div>
-        <p class="timer-idle-text">Ready to focus? Select a task below to begin.</p>
-      </div>
+    <div class="timer-idle animate-fadeIn">
+      <div class="timer-display timer-display--idle">00:00:00</div>
+      <p class="timer-idle-text">Ready to focus? Select a task below to begin.</p>
+    </div>
     }
   </div>
 
   <!-- Quick Task Select -->
   <section class="task-select-section">
-    <h2 class="subsection-title">✨ Start Timer</h2>
+    <div class="section-header-row">
+      <h2 class="subsection-title">✨ Start Timer</h2>
+      <sb-button variant="ghost" size="sm" (click)="openAddModal()">
+        <span class="mr-2">➕</span> Add Manual Session
+      </sb-button>
+    </div>
+
     @if (tasks.activeTasks().length === 0) {
-      <sb-empty-state icon="✅" heading="No active tasks" message="Create a task first to start tracking time" />
-    } @else {
-      <div class="task-grid">
-        @for (task of tasks.activeTasks(); track task.id) {
-          <sb-card [hoverable]="true" class="task-select-card" (click)="startTimer(task.id)">
-            <div class="quick-task">
-              <span class="quick-task-color" [style.background]="task.color"></span>
-              <div class="quick-task-info">
-                @if (task.emoji) { <span class="text-xl">{{ task.emoji }}</span> }
-                <span class="quick-task-title">{{ task.title }}</span>
-              </div>
-              <sb-behavior-badge [behavior]="task.behaviorType" />
-            </div>
-          </sb-card>
-        }
-      </div>
+    <sb-empty-state icon="" heading="No active tasks" message="Create a task first to start tracking time" />
+    } @else {✅
+    <div class="task-grid">
+      @for (task of tasks.activeTasks(); track task.id) {
+      @let isTracking = timer.activeSessions().find(s => s.taskId === task.id);
+      <sb-card [hoverable]="true" class="task-select-card" (click)="startTimer(task.id)">
+        <div class="quick-task">
+          <span class="quick-task-color" [style.background]="task.color"></span>
+          <div class="quick-task-info">
+            @if (task.emoji) { <span class="text-xl">{{ task.emoji }}</span> }
+            <span class="quick-task-title">{{ task.title }}</span>
+          </div>
+          <sb-behavior-badge [behavior]="task.behaviorType" />
+          @if (isTracking) {
+          <div class="tracking-indicator" title="Already tracking">
+            <span class="pulse-dot"></span>
+          </div>
+          }
+        </div>
+      </sb-card>
+      }
+    </div>
     }
   </section>
 
@@ -82,99 +99,192 @@
     </div>
 
     @if (timer.isLoading()) {
-      <div class="flex justify-center p-8">
-        <sb-spinner size="md" />
-      </div>
+    <div class="flex justify-center p-8">
+      <sb-spinner size="md" />
+    </div>
     } @else if (timer.sessions().length === 0) {
-      <sb-empty-state icon="📊" heading="No sessions" message="No tracked sessions for this day" />
+    <sb-empty-state icon="📊" heading="No sessions" message="No tracked sessions for this day" />
     } @else {
-      <div class="session-list">
-        @for (session of timer.sessions(); track session.id) {
-          <sb-card padding="sm" class="session-card">
-            <div class="session-row">
-              <span class="session-color" [style.background]="session.taskColor"></span>
-              <div class="session-info">
-                <span class="session-title">{{ session.taskTitle }}</span>
-                <span class="session-date">{{ session.startTime | relativeDate }}</span>
-              </div>
-              <span class="session-duration">{{ session.durationSeconds | duration:'words' }}</span>
-              @if (session.coinsEarned !== null) {
-                <span class="coin-badge">
-                  <span>{{ session.coinsEarned | number:'1.1-1' }}</span>
-                  <span class="coin-icon"><sb-icon-coin size="14" /></span>
-                </span>
-              }
+    <div class="session-list">
+      @for (session of timer.sessions(); track session.id) {
+      <sb-card padding="sm" class="session-card">
+        <div class="session-row">
+          <span class="session-color" [style.background]="session.taskColor"></span>
+          <div class="session-info">
+            <span class="session-title">
+              @if (session.taskEmoji) { <span class="mr-1">{{ session.taskEmoji }}</span> }
+              {{ session.taskTitle }}
+            </span>
+            <span class="session-date session-time-range">{{ session.startTime | date:'HH:mm' }} &rarr; {{
+              (session.endTime ? (session.endTime | date:'HH:mm') : 'Now') }}</span>
+          </div>
+          <sb-behavior-badge [behavior]="session.taskBehavior" />
+          <span class="session-duration">{{ session.durationSeconds | duration:'words' }}</span>
+          @if (session.coinsEarned !== null) {
+          <span class="coin-badge">
+            <span>{{ session.coinsEarned | number:'1.1-1' }}</span>
+            <span class="coin-icon"><sb-icon-coin size="14" /></span>
+          </span>
+          }
 
-              <div class="session-actions">
-                <button class="action-btn action-btn--edit" (click)="editSession(session)" title="Edit Session">✏️</button>
-                <button class="action-btn action-btn--delete" (click)="deleteSession(session.id)" title="Delete Session">🗑️</button>
-              </div>
-            </div>
-          </sb-card>
-        }
-      </div>
+          <div class="session-actions">
+            <button class="action-btn action-btn--start" (click)="startTimer(session.taskId)"
+              title="Start Timer">▶️</button>
+            <button class="action-btn action-btn--edit" (click)="editSession(session)" title="Edit Session">✏️</button>
+            <button class="action-btn action-btn--delete" (click)="deleteSession(session.id)"
+              title="Delete Session">🗑️</button>
+          </div>
+        </div>
+      </sb-card>
+      }
+    </div>
     }
   </section>
 
   <!-- Edit Session Modal -->
   @if (isEditModalOpen()) {
-    <sb-modal title="Edit Focus Session" (close)="closeEditModal()">
-      <div class="edit-modal-content">
-        <!-- Visual Time Dial (Clock-like) -->
-        <div class="time-dial-container">
-          <div class="dial-info">
-            <span class="dial-label">Session Summary</span>
-            <div class="flex items-center justify-center gap-3">
-              <span class="dial-current-duration text-primary font-bold text-3xl">
-                {{ editDuration() | duration:'words' }}
+  <sb-modal title="Edit Focus Session" (close)="closeEditModal()">
+    <div class="edit-modal-content">
+      <!-- Visual Time Dial (Clock-like) -->
+      <div class="time-dial-container">
+        <div class="dial-info">
+          <span class="dial-label">Session Summary</span>
+          <div class="flex items-center justify-center gap-3">
+            <span class="dial-current-duration text-primary font-bold text-3xl">
+              {{ editDuration() | duration:'words' }}
+            </span>
+            <div class="h-8 w-px bg-border"></div>
+            <div class="flex items-center gap-1.5">
+              <svg class="coin-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" fill="url(#coinGradient)" stroke="#D97706" stroke-width="1.5" />
+                <circle cx="12" cy="12" r="7" stroke="#D97706" stroke-width="1" stroke-dasharray="2 2" />
+                <path d="M12 7V17M12 7L9 10M12 7L15 10M12 17L9 14M12 17L15 14" stroke="#D97706" stroke-width="1.5"
+                  stroke-linecap="round" stroke-linejoin="round" />
+                <defs>
+                  <linearGradient id="coinGradient" x1="4" y1="4" x2="20" y2="20" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#FBBF24" />
+                    <stop offset="1" stop-color="#F59E0B" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <span class="font-bold text-2xl text-amber-600">
+                {{ sessionToEdit()?.coinsEarned | number:'1.1-1' }}
               </span>
-              <div class="h-8 w-px bg-border"></div>
-              <div class="flex items-center gap-1.5">
-                <svg class="coin-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <circle cx="12" cy="12" r="10" fill="url(#coinGradient)" stroke="#D97706" stroke-width="1.5"/>
-                  <circle cx="12" cy="12" r="7" stroke="#D97706" stroke-width="1" stroke-dasharray="2 2"/>
-                  <path d="M12 7V17M12 7L9 10M12 7L15 10M12 17L9 14M12 17L15 14" stroke="#D97706" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                  <defs>
-                    <linearGradient id="coinGradient" x1="4" y1="4" x2="20" y2="20" gradientUnits="userSpaceOnUse">
-                      <stop stop-color="#FBBF24"/>
-                      <stop offset="1" stop-color="#F59E0B"/>
-                    </linearGradient>
-                  </defs>
-                </svg>
-                <span class="font-bold text-2xl text-amber-600">
-                  {{ sessionToEdit()?.coinsEarned | number:'1.1-1' }}
-                </span>
-              </div>
             </div>
-          </div>
-        </div>
-
-        <div class="edit-form">
-          <div class="form-group pb-4">
-            <label>Associated Task</label>
-            <div class="flex items-center gap-2 p-3 bg-surface-2 rounded-xl border border-border">
-              <span class="text-lg">{{ sessionToEdit()?.taskEmoji }}</span>
-              <span class="font-bold">{{ sessionToEdit()?.taskTitle }}</span>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-4 mb-6">
-            <div class="form-group">
-              <label>From</label>
-              <input type="datetime-local" class="input-field" [ngModel]="editStartTime()" (ngModelChange)="editStartTime.set($event)">
-            </div>
-            <div class="form-group">
-              <label>To</label>
-              <input type="datetime-local" class="input-field" [ngModel]="editEndTime()" (ngModelChange)="editEndTime.set($event)">
-            </div>
-          </div>
-
-          <div class="flex justify-end gap-3 pt-4 border-t border-border">
-            <sb-button variant="ghost" (click)="closeEditModal()">Cancel</sb-button>
-            <sb-button variant="primary" (click)="saveEdit()">Save Changes</sb-button>
           </div>
         </div>
       </div>
-    </sb-modal>
+
+      <div class="edit-form">
+        <div class="form-group pb-4">
+          <label>Associated Task</label>
+          <div class="flex items-center gap-2 p-3 bg-surface-2 rounded-xl border border-border">
+            <span class="text-lg">{{ sessionToEdit()?.taskEmoji }}</span>
+            <span class="font-bold">{{ sessionToEdit()?.taskTitle }}</span>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div class="form-group">
+            <label>From</label>
+            <input type="datetime-local" class="input-field" [ngModel]="editStartTime()"
+              (ngModelChange)="editStartTime.set($event)">
+          </div>
+          <div class="form-group">
+            <label>To</label>
+            <input type="datetime-local" class="input-field" [ngModel]="editEndTime()"
+              (ngModelChange)="editEndTime.set($event)">
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-4 border-t border-border">
+          <sb-button variant="ghost" (click)="closeEditModal()">Cancel</sb-button>
+          <sb-button variant="primary" (click)="saveEdit()">Save Changes</sb-button>
+        </div>
+      </div>
+    </div>
+  </sb-modal>
+  }
+
+  <!-- Add Manual Session Modal -->
+  @if (isAddModalOpen()) {
+  <sb-modal title="Add Manual Session" (close)="closeAddModal()">
+    <div class="edit-modal-content">
+      <!-- Visual Time Dial for Creation -->
+      <div class="time-dial-container">
+        <div class="dial-info">
+          <span class="dial-label">Preview</span>
+          <div class="flex items-center justify-center gap-3">
+            <span class="dial-current-duration text-primary font-bold text-3xl">
+              {{ addDuration() | duration:'words' }}
+            </span>
+            <div class="h-8 w-px bg-border"></div>
+            <div class="flex items-center gap-1.5">
+              <svg class="coin-svg" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="12" cy="12" r="10" fill="url(#coinGradientNew)" stroke="#D97706" stroke-width="1.5" />
+                <circle cx="12" cy="12" r="7" stroke="#D97706" stroke-width="1" stroke-dasharray="2 2" />
+                <path d="M12 7V17M12 7L9 10M12 7L15 10M12 17L9 14M12 17L15 14" stroke="#D97706" stroke-width="1.5"
+                  stroke-linecap="round" stroke-linejoin="round" />
+                <defs>
+                  <linearGradient id="coinGradientNew" x1="4" y1="4" x2="20" y2="20" gradientUnits="userSpaceOnUse">
+                    <stop stop-color="#FBBF24" />
+                    <stop offset="1" stop-color="#F59E0B" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <span class="font-bold text-2xl" [class]="addCoinPreview() < 0 ? 'text-red-500' : 'text-amber-600'">
+                {{ addCoinPreview() > 0 ? '+' : '' }}{{ addCoinPreview() | number:'1.1-1' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="edit-form">
+        <div class="form-group pb-4">
+          <label>Task</label>
+          <select class="input-field" [ngModel]="addTaskId()" (ngModelChange)="addTaskId.set($event)">
+            @for (task of tasks.activeTasks(); track task.id) {
+            <option [value]="task.id">{{ task.emoji ? task.emoji + ' ' : '' }}{{ task.title }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div class="form-group">
+            <label>From</label>
+            <input type="datetime-local" class="input-field" [ngModel]="addStartTime()"
+              (ngModelChange)="addStartTime.set($event)">
+          </div>
+          <div class="form-group">
+            <label>To</label>
+            <input type="datetime-local" class="input-field" [ngModel]="addEndTime()"
+              (ngModelChange)="addEndTime.set($event)">
+          </div>
+        </div>
+
+        <div class="form-group mb-4">
+          <label>Behavior</label>
+          <select class="input-field" [ngModel]="addBehaviorType()" (ngModelChange)="addBehaviorType.set($event)">
+            <option [value]="0">🟢 Positive Focus</option>
+            <option [value]="1">🔵 Neutral / Routine</option>
+            <option [value]="3">🟡 Productive Rest</option>
+            <option [value]="2">🔴 Negative / Distraction</option>
+          </select>
+        </div>
+
+        <div class="form-group mb-6">
+          <label>Notes (optional)</label>
+          <textarea class="input-field min-h-[80px]" placeholder="What did you get done?" [ngModel]="addNotes()"
+            (ngModelChange)="addNotes.set($event)"></textarea>
+        </div>
+
+        <div class="flex justify-end gap-3 pt-4 border-t border-border">
+          <sb-button variant="ghost" (click)="closeAddModal()">Cancel</sb-button>
+          <sb-button variant="primary" (click)="saveManualSession()" [disabled]="!addTaskId()">Save Data</sb-button>
+        </div>
+      </div>
+    </div>
+  </sb-modal>
   }
 </div>

@@ -76,7 +76,7 @@ export class DashboardComponent implements OnInit {
       this.startTicker();
       
       // Sequential loading to avoid DB concurrency issues
-      await this.timer.loadPaged(1, 10);
+      await this.timer['loadByDate']();
       await this.tasks.load();
       await this.loadDailyData();
       

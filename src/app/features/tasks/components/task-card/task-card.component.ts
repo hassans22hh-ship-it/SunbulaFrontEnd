@@ -22,11 +22,17 @@ export class TaskCardComponent {
   duplicateClicked = output<void>();
   editClicked = output<void>();
 
-  readonly isActive = computed(() => this.timer.activeTaskId() === this.task().id);
+  readonly isActive = computed(() => this.timer.activeSessions().some((s: any) => s.taskId === this.task().id));
+  
+  readonly isPaused = computed(() => {
+    const session = this.timer.activeSessions().find((s: any) => s.taskId === this.task().id);
+    return session ? session.isPaused : false;
+  });
   
   readonly displayElapsed = computed(() => {
-    if (this.isActive()) {
-      return this.timer.elapsedSeconds();
+    const session = this.timer.activeSessions().find((s: any) => s.taskId === this.task().id);
+    if (session) {
+      return session.durationSeconds || 0;
     }
     return this.task().totalTrackedSeconds ?? 0;
   });
@@ -49,10 +55,13 @@ export class TaskCardComponent {
   toggleTimer(event: Event): void {
     event.stopPropagation();
     if (this.isActive()) {
-      if (this.timer.isRunning() && !this.timer.isPaused()) {
-         this.timer.pauseTimer();
-      } else {
-         this.timer.resumeTimer();
+      const session = this.timer.activeSessions().find((s: any) => s.taskId === this.task().id);
+      if (session) {
+        if (!session.isPaused) {
+           this.timer.pauseTimer(session.id);
+        } else {
+           this.timer.resumeTimer(session.id);
+        }
       }
     } else {
       this.timer.start(this.task().id);
