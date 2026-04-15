@@ -1,14 +1,17 @@
 export type DebtType   = 'OWED_TO_ME' | 'OWED_BY_ME';
-export type DebtStatus = 'OUTSTANDING' | 'PAID' | 'OVERDUE';
 
 export interface DebtDto {
-  id:           string;
-  type:         DebtType;
-  amount:       number;
-  personEntity: string;
-  dueDate:      string | null;
-  status:       DebtStatus;
-  createdAt:    string;
+  id:              string;
+  creditorName:    string | null;
+  amount:          number;
+  remainingAmount: number;
+  dueDate:         string;
+  isPaid:          boolean;
+  isOverdue:       boolean;
+  debtType:        DebtType | null;
+  notes:           string | null;
+  createdAt:       string;
+  updatedAt:       string | null;
 }
 
 export interface DebtWithPaymentsDto extends DebtDto {
@@ -16,35 +19,35 @@ export interface DebtWithPaymentsDto extends DebtDto {
 }
 
 export interface DebtPaymentDto {
-  id:         string;
-  debtId:     string;
-  amount:     number;
-  walletId:   string;
-  walletName: string;
-  paidAt:     string;
+  id:          string;
+  debtId:      string;
+  amount:      number;
+  paymentDate: string;
+  notes:       string | null;
 }
 
 export interface DebtSummaryDto {
-  totalOwedToMe: number;
-  totalOwedByMe: number;
-  netPosition:   number;
+  totalDebtsCount:   number;
+  unpaidDebtsCount:  number;
+  overdueDebtsCount: number;
 }
 
 export interface CreateDebtDto {
-  type:         DebtType;
+  creditorName: string;
   amount:       number;
-  personEntity: string;
-  dueDate?:     string;
+  debtType:     DebtType;
+  dueDate:      string;
+  notes?:       string | null;
 }
 
 export interface RecordPaymentDto {
-  amount:   number;
-  walletId: string;
+  amount:      number;
+  paymentDate: string;
+  notes?:      string | null;
 }
 
 export interface UpdateDebtDto {
-  type:         DebtType;
-  amount:       number;
-  personEntity: string;
-  dueDate?:     string;
+  creditorName: string;
+  dueDate:      string;
+  notes?:       string | null;
 }

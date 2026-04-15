@@ -1,5 +1,8 @@
-<div class="sb-modal-backdrop animate-fadeIn" (click)="onBackdropClick()">
+<div class="sb-modal-backdrop animate-fadeIn"
+     style="background: rgba(0,0,0,0.5)"
+     (click)="onBackdropClick()">
   <div [class]="'sb-modal-content sb-modal--' + size() + ' animate-scaleIn'"
+       style="background: #FFFFFF; background: var(--color-surface, #FFFFFF)"
        (click)="onContentClick($event)">
     <div class="sb-modal-header">
       <h2 class="sb-modal-title">{{ title() }}</h2>
@@ -13,3 +16,4 @@
     </div>
   </div>
 </div>
+

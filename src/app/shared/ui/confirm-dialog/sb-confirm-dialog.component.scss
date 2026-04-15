@@ -1,16 +1,22 @@
+:host {
+  display: contents;
+}
+
 .sb-confirm-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.5) !important;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1100;
   padding: 1rem;
+  isolation: isolate;
 }
 
 .sb-confirm {
-  background: var(--color-surface);
+  background: var(--color-surface) !important;
+  background-color: var(--color-surface) !important;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xl);
   padding: 1.5rem;

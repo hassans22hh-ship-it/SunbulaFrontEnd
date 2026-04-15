@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { DebtsStore } from './store/debts.store';
 import { AuthService } from '@core/auth/auth.service';
 import { SbCardComponent } from '@shared/ui/card/sb-card.component';
@@ -10,7 +11,7 @@ import { SbBadgeComponent } from '@shared/ui/badge/sb-badge.component';
 import { SbConfirmDialogComponent } from '@shared/ui/confirm-dialog/sb-confirm-dialog.component';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { DebtDto, DebtType, CreateDebtDto } from '@shared/models/debt.models';
-import { DecimalPipe } from '@angular/common';
+import { DecimalPipe, DatePipe } from '@angular/common';
 import { PageTransitionDirective } from '@core/animation/page-transition.directive';
 
 const DEBT_TYPE_META: Record<DebtType, { label: string; variant: 'danger' | 'success' }> = {
@@ -21,7 +22,7 @@ const DEBT_TYPE_META: Record<DebtType, { label: string; variant: 'danger' | 'suc
 @Component({
   selector: 'sb-debts',
   standalone: true,
-  imports: [SbCardComponent, SbButtonComponent, SbModalComponent, SbSpinnerComponent, SbEmptyStateComponent, SbBadgeComponent, SbConfirmDialogComponent, ReactiveFormsModule, DecimalPipe, PageTransitionDirective],
+  imports: [SbButtonComponent, SbModalComponent, SbSpinnerComponent, SbEmptyStateComponent, SbBadgeComponent, SbConfirmDialogComponent, ReactiveFormsModule, DecimalPipe, DatePipe, PageTransitionDirective],
   providers: [DebtsStore],
   templateUrl: './debts.component.html',
   styleUrl: './debts.component.scss',
@@ -37,23 +38,27 @@ export class DebtsComponent implements OnInit {
   readonly showPayment = signal(false);
   readonly showDelete = signal(false);
   readonly selectedDebt = signal<DebtDto | null>(null);
-  
+  readonly selectedDebtId = signal<string | null>(null);
+
+  toggleDebtDetail(id: string): void {
+    this.selectedDebtId.update(current => current === id ? null : id);
+  }
+
   readonly debtTypes: DebtType[] = ['OWED_TO_ME', 'OWED_BY_ME'];
   readonly debtMeta = DEBT_TYPE_META;
   
   readonly createForm = this.fb.nonNullable.group({
-    personName: ['', Validators.required],
-    type: this.fb.nonNullable.control<DebtType>('OWED_TO_ME'),
+    creditorName: ['', Validators.required],
+    debtType: this.fb.nonNullable.control<DebtType>('OWED_TO_ME'),
     amount: [0, [Validators.required, Validators.min(0.01)]],
-    description: [''],
-    dueDate: ['']
+    notes: [''],
+    dueDate: ['', Validators.required]
   });
   
-  // walletId is required for RecordPaymentDto
   readonly paymentForm = this.fb.nonNullable.group({
     amount: [0, [Validators.required, Validators.min(0.01)]],
-    note: [''],
-    walletId: ['cash', Validators.required] 
+    paymentDate: ['', Validators.required],
+    notes: ['']
   });
 
   ngOnInit(): void { this.store.loadAll(); }
@@ -62,19 +67,21 @@ export class DebtsComponent implements OnInit {
     if (this.createForm.invalid) return; 
     const val = this.createForm.getRawValue();
     const dto: CreateDebtDto = {
-      type: val.type,
+      debtType: val.debtType,
       amount: val.amount,
-      personEntity: val.personName,
-      dueDate: val.dueDate || undefined
+      creditorName: val.creditorName,
+      dueDate: val.dueDate,
+      notes: val.notes || null
     };
     this.store.create(dto); 
     this.showCreate.set(false);
-    this.createForm.reset({ personName: '', type: 'OWED_TO_ME', amount: 0, description: '', dueDate: '' });
+    this.createForm.reset({ creditorName: '', debtType: 'OWED_TO_ME', amount: 0, notes: '', dueDate: '' });
   }
 
   openPayment(debt: DebtDto): void { 
     this.selectedDebt.set(debt);
-    this.paymentForm.reset({ amount: 0, note: '', walletId: 'cash' }); 
+    const today = new Date().toISOString().substring(0, 10);
+    this.paymentForm.reset({ amount: debt.remainingAmount, paymentDate: today, notes: '' }); 
     this.showPayment.set(true); 
   }
 

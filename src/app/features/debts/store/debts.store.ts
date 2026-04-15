@@ -10,8 +10,8 @@ interface DebtsState { debts: DebtDto[]; summary: DebtSummaryDto | null; isLoadi
 export const DebtsStore = signalStore(
   withState<DebtsState>({ debts: [], summary: null, isLoading: false, error: null }),
   withComputed(({ debts }) => ({
-    activeDebts:  computed(() => debts().filter(d => d.status === 'OUTSTANDING' || d.status === 'OVERDUE')),
-    settledDebts: computed(() => debts().filter(d => d.status === 'PAID')),
+    activeDebts:  computed(() => debts().filter(d => !d.isPaid)),
+    settledDebts: computed(() => debts().filter(d => d.isPaid)),
   })),
   withMethods((store, api = inject(DebtsApiService), toast = inject(ToastService)) => ({
     async loadAll(): Promise<void> {

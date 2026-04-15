@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output, ViewEncapsulation } from '@angular/core';
 
 @Component({
   selector: 'sb-modal',
   standalone: true,
   templateUrl: './sb-modal.component.html',
   styleUrl: './sb-modal.component.scss',
+  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SbModalComponent {
