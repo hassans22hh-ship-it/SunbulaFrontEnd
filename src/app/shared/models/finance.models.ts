@@ -33,11 +33,13 @@ export interface FinanceSummaryDto {
 export interface FinancialCategoryDto {
   id:        string;
   name:      string;
+  icon:      string;
   createdAt: string;
 }
 
 export interface CreateFinancialCategoryDto {
   name: string;
+  icon: string;
 }
 
 export interface FinancialTransactionDto {
@@ -48,6 +50,7 @@ export interface FinancialTransactionDto {
   destinationWalletName: string | null;
   financialCategoryId:   string | null;
   categoryName:          string | null;
+  categoryIcon:          string | null;
   type:                  TransactionType;
   amount:                number;
   currency:              string;

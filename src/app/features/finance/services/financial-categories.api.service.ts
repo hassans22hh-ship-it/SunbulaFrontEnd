@@ -15,5 +15,8 @@ export class FinancialCategoriesApiService {
   rename(id: string, newName: string): Observable<FinancialCategoryDto> {
     return this.http.put<FinancialCategoryDto>(`${this.BASE}/${id}/rename`, null, { params: { newName } });
   }
+  updateIcon(id: string, icon: string): Observable<FinancialCategoryDto> {
+    return this.http.patch<FinancialCategoryDto>(`${this.BASE}/${id}/icon`, null, { params: { icon } });
+  }
   delete(id: string): Observable<void> { return this.http.delete<void>(`${this.BASE}/${id}`); }
 }

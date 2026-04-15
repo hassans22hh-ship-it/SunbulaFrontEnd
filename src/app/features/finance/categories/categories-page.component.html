@@ -1,0 +1,116 @@
+<div class="categories-page" sbPageTransition>
+  <!-- ═══ HEADER ═══ -->
+  <div class="page-header">
+    <a routerLink="/finance" class="back-link">← Back</a>
+    <h1 class="page-title">Financial Categories</h1>
+  </div>
+
+  @if (store.isLoading()) {
+    <div class="loading-wrap">
+      <sb-spinner size="lg" />
+    </div>
+  } @else {
+    @if (store.categories().length === 0) {
+      <sb-empty-state icon="🏷️" heading="No categories" message="Click + to add a new category" />
+    } @else {
+      <div class="cat-grid">
+        @for (cat of store.categories(); track cat.id) {
+          <div
+            class="cat-card"
+            (contextmenu)="openContextMenu($event, cat)"
+            (click)="openContextMenu($event, cat)"
+          >
+            <span class="cat-card-emoji">{{ cat.icon || '📁' }}</span>
+            <span class="cat-card-name">{{ cat.name }}</span>
+          </div>
+
+          <!-- Context Menu -->
+          @if (contextMenuCat()?.id === cat.id) {
+            <div class="context-overlay" (click)="closeContextMenu()">
+              <div class="context-menu" (click)="$event.stopPropagation()">
+                <button class="context-item" (click)="openRename()">✏️ Rename</button>
+                <button class="context-item" (click)="openChangeIcon()">🎨 Change Icon</button>
+                <button class="context-item context-item--danger" (click)="openDelete()">🗑️ Delete</button>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    }
+  }
+
+  <!-- ═══ FAB ═══ -->
+  <button class="fab" (click)="openAddForm()" aria-label="Add Category">
+    <span class="fab-icon">+</span>
+  </button>
+
+  <!-- ═══ ADD CATEGORY MODAL ═══ -->
+  @if (showAddForm()) {
+    <sb-modal title="New Category" size="sm" (close)="showAddForm.set(false)">
+      <div class="add-cat-modal">
+        <div class="form-group">
+          <label class="form-lbl">Name</label>
+          <input
+            class="input-field"
+            placeholder="e.g., Food"
+            [value]="newCatName()"
+            (input)="newCatName.set($any($event.target).value)"
+            maxlength="50"
+            minlength="2"
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-lbl">Icon</label>
+          <sb-emoji-picker [value]="newCatIcon()" (selected)="newCatIcon.set($event)" />
+        </div>
+        <div class="form-actions">
+          <sb-button variant="ghost" (click)="showAddForm.set(false)">Cancel</sb-button>
+          <sb-button (click)="addCategory()" [disabled]="newCatName().trim().length < 2">Add</sb-button>
+        </div>
+      </div>
+    </sb-modal>
+  }
+
+  <!-- ═══ RENAME MODAL ═══ -->
+  @if (showRenameModal()) {
+    <sb-modal title="Rename" size="sm" (close)="showRenameModal.set(false)">
+      <div class="add-cat-modal">
+        <div class="form-group">
+          <label class="form-lbl">New Name</label>
+          <input
+            class="input-field"
+            [value]="renameName()"
+            (input)="renameName.set($any($event.target).value)"
+            maxlength="50"
+          />
+        </div>
+        <div class="form-actions">
+          <sb-button variant="ghost" (click)="showRenameModal.set(false)">Cancel</sb-button>
+          <sb-button (click)="submitRename()">Save</sb-button>
+        </div>
+      </div>
+    </sb-modal>
+  }
+
+  <!-- ═══ CHANGE ICON MODAL ═══ -->
+  @if (showIconModal()) {
+    <sb-modal title="Change Icon" size="sm" (close)="showIconModal.set(false)">
+      <div class="add-cat-modal">
+        <sb-emoji-picker [value]="changeIcon()" (selected)="submitChangeIcon($event)" />
+      </div>
+    </sb-modal>
+  }
+
+  <!-- ═══ DELETE CONFIRM ═══ -->
+  @if (showDeleteConfirm()) {
+    <sb-confirm-dialog
+      title="Delete Category"
+      message="Are you sure you want to delete this category?"
+      confirmText="Delete"
+      cancelText="Cancel"
+      variant="danger"
+      (confirmed)="confirmDelete()"
+      (cancelled)="cancelDelete()"
+    />
+  }
+</div>

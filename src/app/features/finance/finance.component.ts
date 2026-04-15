@@ -1,20 +1,25 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal, computed } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { FinanceStore } from './store/finance.store';
 import { SbCardComponent } from '@shared/ui/card/sb-card.component';
 import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
-import { SbModalComponent } from '@shared/ui/modal/sb-modal.component';
 import { SbSpinnerComponent } from '@shared/ui/spinner/sb-spinner.component';
 import { SbEmptyStateComponent } from '@shared/ui/empty-state/sb-empty-state.component';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { WalletType, TransactionType, WALLET_TYPE_META, TRANSACTION_TYPE_META } from '@shared/models/enums';
-import { RelativeDatePipe } from '@shared/pipes/relative-date.pipe';
-import { DecimalPipe } from '@angular/common';
+import { SbConfirmDialogComponent } from '@shared/ui/confirm-dialog/sb-confirm-dialog.component';
+import { TransactionFormComponent } from './transactions/transaction-form/transaction-form.component';
+import { DecimalPipe, DatePipe } from '@angular/common';
 import { PageTransitionDirective } from '@core/animation/page-transition.directive';
+import { FinancialTransactionDto } from '@shared/models/finance.models';
+import { TransactionType, TRANSACTION_TYPE_META } from '@shared/models/enums';
 
 @Component({
   selector: 'sb-finance',
   standalone: true,
-  imports: [SbCardComponent, SbButtonComponent, SbModalComponent, SbSpinnerComponent, SbEmptyStateComponent, ReactiveFormsModule, RelativeDatePipe, DecimalPipe, PageTransitionDirective],
+  imports: [
+    RouterLink, SbSpinnerComponent,
+    SbEmptyStateComponent, SbConfirmDialogComponent, TransactionFormComponent,
+    DecimalPipe, DatePipe, PageTransitionDirective,
+  ],
   providers: [FinanceStore],
   templateUrl: './finance.component.html',
   styleUrl: './finance.component.scss',
@@ -22,22 +27,86 @@ import { PageTransitionDirective } from '@core/animation/page-transition.directi
 })
 export class FinanceComponent implements OnInit {
   protected readonly store = inject(FinanceStore);
-  private readonly fb = inject(FormBuilder);
-  readonly tab = signal<'wallets' | 'transactions' | 'categories'>('wallets');
-  readonly showWalletForm = signal(false);
-  readonly showTxForm = signal(false);
-  readonly showCatForm = signal(false);
-  protected readonly walletTypes = [WalletType.Cash, WalletType.Bank, WalletType.Card];
-  protected readonly txTypes = [TransactionType.Income, TransactionType.Expense, TransactionType.Transfer];
-  protected readonly walletMeta = WALLET_TYPE_META;
   protected readonly txMeta = TRANSACTION_TYPE_META;
+  protected readonly TransactionType = TransactionType;
 
-  readonly walletForm = this.fb.nonNullable.group({ name: ['', Validators.required], type: [WalletType.Cash], currency: ['SAR'], openingBalance: [0] });
-  readonly txForm = this.fb.nonNullable.group({ walletId: ['', Validators.required], type: [TransactionType.Income], amount: [0, [Validators.required, Validators.min(0.01)]], description: [''], financialCategoryId: [''], destinationWalletId: [''], transactionDate: [''] });
-  readonly catForm = this.fb.nonNullable.group({ name: ['', Validators.required] });
+  readonly showTxForm = signal(false);
+  readonly editingTx = signal<FinancialTransactionDto | null>(null);
+  readonly showDeleteConfirm = signal(false);
+  readonly deletingTxId = signal<string | null>(null);
 
-  ngOnInit(): void { this.store.loadAll(); }
-  createWallet(): void { if (this.walletForm.invalid) return; this.store.createWallet(this.walletForm.getRawValue()); this.showWalletForm.set(false); }
-  createTx(): void { if (this.txForm.invalid) return; this.store.createTransaction(this.txForm.getRawValue()); this.showTxForm.set(false); }
-  createCat(): void { if (this.catForm.invalid) return; this.store.createCategory(this.catForm.getRawValue()); this.showCatForm.set(false); }
+  readonly selectedMonth = signal(new Date().toISOString().slice(0, 7)); // "YYYY-MM"
+
+  readonly sortedTransactions = computed(() => {
+    const txs = this.store.transactions();
+    return [...txs].sort((a, b) =>
+      new Date(b.transactionDate).getTime() - new Date(a.transactionDate).getTime()
+    );
+  });
+
+  ngOnInit(): void {
+    this.store.loadAll('SAR');
+  }
+
+  openAddTx(): void {
+    this.editingTx.set(null);
+    this.showTxForm.set(true);
+  }
+
+  openEditTx(tx: FinancialTransactionDto): void {
+    this.editingTx.set(tx);
+    this.showTxForm.set(true);
+    this.store.setSelectedTransaction(null);
+  }
+
+  closeTxForm(): void {
+    this.showTxForm.set(false);
+    this.editingTx.set(null);
+  }
+
+  onTxFormSaved(dto: any): void {
+    const editing = this.editingTx();
+    if (editing) {
+      this.store.updateTransaction(editing.id, dto);
+    } else {
+      this.store.createTransaction(dto);
+    }
+    this.closeTxForm();
+  }
+
+  selectTransaction(tx: FinancialTransactionDto): void {
+    const current = this.store.selectedTransaction();
+    if (current?.id === tx.id) {
+      this.store.setSelectedTransaction(null);
+    } else {
+      this.store.setSelectedTransaction(tx);
+    }
+  }
+
+  confirmDeleteTx(id: string): void {
+    this.deletingTxId.set(id);
+    this.showDeleteConfirm.set(true);
+  }
+
+  onDeleteConfirmed(): void {
+    const id = this.deletingTxId();
+    if (id) {
+      this.store.removeTransaction(id);
+    }
+    this.showDeleteConfirm.set(false);
+    this.deletingTxId.set(null);
+  }
+
+  onDeleteCancelled(): void {
+    this.showDeleteConfirm.set(false);
+    this.deletingTxId.set(null);
+  }
+
+  getTypeColor(type: TransactionType): string {
+    switch (type) {
+      case TransactionType.Income: return 'var(--color-success)';
+      case TransactionType.Expense: return 'var(--color-danger)';
+      case TransactionType.Transfer: return 'var(--color-info)';
+    }
+  }
 }

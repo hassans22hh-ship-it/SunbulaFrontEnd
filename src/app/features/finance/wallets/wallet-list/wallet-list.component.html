@@ -1,0 +1,94 @@
+<div class="wallets-page" sbPageTransition>
+  <!-- ═══ HEADER ═══ -->
+  <div class="page-header">
+    <a routerLink="/finance" class="back-link">← Back</a>
+    <div class="header-row">
+      <div>
+        <h1 class="page-title">My Wallets</h1>
+        <p class="total-balance">
+          <span class="total-label">Total Balance:</span>
+          {{ formatCurrency(store.totalBalance()) }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  @if (store.isLoading() && store.wallets().length === 0) {
+    <div class="loading-wrap">
+      <sb-spinner size="lg" />
+    </div>
+  } @else if (store.wallets().length === 0) {
+    <sb-empty-state
+      icon="💳"
+      heading="No wallets"
+      message="Create a wallet to start tracking your money"
+    />
+  } @else {
+    <div class="wallet-grid">
+      @for (w of store.wallets(); track w.id) {
+        <sb-wallet-card
+          [wallet]="w"
+          [selected]="w.id === selectedWalletId()"
+          (clicked)="selectWallet(w)"
+          (editClicked)="openForm(w)"
+          (deleteClicked)="requestDelete(w)"
+        />
+      }
+    </div>
+
+    <!-- ═══ WALLET TRANSACTIONS ═══ -->
+    @if (selectedWalletId()) {
+      <div class="wallet-tx-section">
+        <h3 class="wallet-tx-title">Wallet Transactions</h3>
+        @if (walletTransactions().length === 0) {
+          <p class="no-tx-text">No transactions for this wallet</p>
+        } @else {
+          <div class="wallet-tx-list">
+            @for (tx of walletTransactions(); track tx.id) {
+              <div class="wallet-tx-item">
+                <div class="wallet-tx-icon" [style.background]="getTypeColor(tx.type) + '1a'">
+                  {{ tx.categoryIcon || txMeta[tx.type].sign }}
+                </div>
+                <div class="wallet-tx-info">
+                  <span class="wallet-tx-desc">{{ tx.categoryName || txMeta[tx.type].label }}</span>
+                  <span class="wallet-tx-date">{{ tx.transactionDate | date:'MMM d, y':'':'en-US' }}</span>
+                </div>
+                <span class="wallet-tx-amount" [style.color]="getTypeColor(tx.type)">
+                  {{ txMeta[tx.type].sign }}{{ tx.amount | number:'1.2-2' }}
+                </span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+
+  <!-- ═══ FAB ═══ -->
+  <button class="fab" (click)="openForm()" aria-label="Add Wallet">
+    <span class="fab-icon">+</span>
+  </button>
+
+  <!-- ═══ WALLET FORM ═══ -->
+  @if (showForm()) {
+    <sb-wallet-form
+      [wallet]="editingWallet()"
+      (saved)="onFormSave($event)"
+      (cancelled)="closeForm()"
+      (deleteRequested)="requestDelete($event)"
+    />
+  }
+
+  <!-- ═══ DELETE CONFIRM ═══ -->
+  @if (showDeleteConfirm()) {
+    <sb-confirm-dialog
+      title="Delete Wallet"
+      [message]="'Are you sure you want to delete ' + (deletingWallet()?.name || '') + '? Associated transactions may be removed.'"
+      confirmText="Delete"
+      cancelText="Cancel"
+      variant="danger"
+      (confirmed)="confirmDelete()"
+      (cancelled)="cancelDelete()"
+    />
+  }
+</div>

@@ -1,0 +1,70 @@
+<sb-modal
+  [title]="wallet() ? 'Edit Wallet' : 'New Wallet'"
+  (close)="cancelled.emit()"
+>
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="wallet-form">
+
+    <!-- Name -->
+    <div class="form-group">
+      <label class="form-lbl">Wallet Name</label>
+      <input class="input-field" type="text" formControlName="name" placeholder="e.g., Main Wallet" />
+      @if (form.get('name')?.touched && form.get('name')?.hasError('required')) {
+        <span class="error-text">Name is required</span>
+      }
+    </div>
+
+    <!-- Wallet Type -->
+    <div class="form-group">
+      <label class="form-lbl">Wallet Type</label>
+      <div class="type-grid">
+        @for (t of typeOptions; track t.value) {
+          <button
+            type="button"
+            class="type-btn"
+            [class.type-btn--selected]="form.value.type === t.value"
+            (click)="form.patchValue({ type: t.value })"
+          >
+            {{ t.meta.icon }} {{ t.meta.label }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Initial Balance & Currency (Create only) -->
+    @if (!wallet()) {
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-lbl">Initial Balance</label>
+          <input class="input-field" type="number" formControlName="initialBalance" placeholder="0.00" />
+        </div>
+        <div class="form-group">
+          <label class="form-lbl">Currency</label>
+          <select class="input-field" formControlName="currency">
+            <option value="SAR">SAR</option>
+            <option value="USD">USD ($)</option>
+            <option value="EUR">EUR (€)</option>
+            <option value="GBP">GBP (£)</option>
+          </select>
+        </div>
+      </div>
+    }
+
+    <!-- Actions -->
+    <div class="form-bottom">
+      @if (wallet()) {
+        <button type="button" class="delete-link" (click)="onDeleteRequest()">
+          Delete Wallet
+        </button>
+      } @else {
+        <span></span>
+      }
+
+      <div class="form-actions">
+        <sb-button variant="ghost" (click)="cancelled.emit()">Cancel</sb-button>
+        <sb-button type="submit" [disabled]="form.invalid">
+          {{ wallet() ? 'Save' : 'Create' }}
+        </sb-button>
+      </div>
+    </div>
+  </form>
+</sb-modal>

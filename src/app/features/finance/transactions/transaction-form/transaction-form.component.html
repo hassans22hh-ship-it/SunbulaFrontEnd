@@ -1,0 +1,146 @@
+<sb-modal
+  [title]="transaction() ? 'Edit Transaction' : 'Add'"
+  (close)="cancelled.emit()"
+>
+  <!-- ═══ SEGMENTED CONTROL ═══ -->
+  <div class="segment-control">
+    <button
+      class="segment-btn"
+      [class.segment-btn--active]="activeType() === TransactionType.Expense"
+      [class.segment-btn--expense]="activeType() === TransactionType.Expense"
+      (click)="setType(TransactionType.Expense)"
+    >Expense</button>
+    <button
+      class="segment-btn"
+      [class.segment-btn--active]="activeType() === TransactionType.Income"
+      [class.segment-btn--income]="activeType() === TransactionType.Income"
+      (click)="setType(TransactionType.Income)"
+    >Income</button>
+    <button
+      class="segment-btn"
+      [class.segment-btn--active]="activeType() === TransactionType.Transfer"
+      [class.segment-btn--transfer]="activeType() === TransactionType.Transfer"
+      (click)="setType(TransactionType.Transfer)"
+    >Transfer</button>
+  </div>
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate class="tx-form">
+
+    <!-- ═══ CATEGORY GRID (Income/Expense only) ═══ -->
+    @if (!isTransfer()) {
+      <div class="category-section">
+        <label class="form-lbl">Category</label>
+        <div class="category-grid">
+          @for (cat of categories(); track cat.id) {
+            <button
+              type="button"
+              class="cat-cell"
+              [class.cat-cell--selected]="selectedCategoryId() === cat.id"
+              (click)="selectCategory(cat.id)"
+            >
+              <span class="cat-emoji">{{ cat.icon || '📁' }}</span>
+              <span class="cat-name">{{ cat.name }}</span>
+            </button>
+          }
+          <!-- Add Category Cell -->
+          <button type="button" class="cat-cell cat-cell--add" (click)="showAddCategory.set(true)">
+            <span class="cat-emoji">➕</span>
+            <span class="cat-name">Add</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ═══ INLINE ADD CATEGORY ═══ -->
+      @if (showAddCategory()) {
+        <div class="add-cat-form">
+          <div class="add-cat-row">
+            <button type="button" class="cat-icon-preview" (click)="showAddCategory.set(true)">{{ newCatIcon() }}</button>
+            <input
+              class="input-field add-cat-input"
+              placeholder="Category Name"
+              [value]="newCatName()"
+              (input)="newCatName.set($any($event.target).value)"
+              maxlength="50"
+            />
+            <button type="button" class="add-cat-save" (click)="addCategory()">Save</button>
+            <button type="button" class="add-cat-cancel" (click)="showAddCategory.set(false)">✕</button>
+          </div>
+          <sb-emoji-picker [value]="newCatIcon()" (selected)="newCatIcon.set($event)" />
+        </div>
+      }
+    }
+
+    <!-- ═══ FORM FIELDS ═══ -->
+    <div class="form-fields">
+      @if (isTransfer()) {
+        <!-- Transfer: From Wallet -->
+        <div class="form-group">
+          <label class="form-lbl">From Wallet</label>
+          <select class="input-field" formControlName="walletId">
+            @for (w of wallets(); track w.id) {
+              <option [value]="w.id">{{ w.name }} ({{ w.balance }})</option>
+            }
+          </select>
+        </div>
+        <!-- Transfer: To Wallet -->
+        <div class="form-group">
+          <label class="form-lbl">To Wallet</label>
+          <select class="input-field" formControlName="destinationWalletId">
+            @for (w of wallets(); track w.id) {
+              <option [value]="w.id" [disabled]="w.id === form.value.walletId">{{ w.name }}</option>
+            }
+          </select>
+        </div>
+      } @else {
+        <!-- Income/Expense: Wallet -->
+        <div class="form-group">
+          <label class="form-lbl">Wallet</label>
+          <select class="input-field" formControlName="walletId">
+            @for (w of wallets(); track w.id) {
+              <option [value]="w.id">{{ w.name }} ({{ w.balance }})</option>
+            }
+          </select>
+        </div>
+      }
+
+      <!-- Amount -->
+      <div class="form-group">
+        <label class="form-lbl">Amount</label>
+        <input
+          class="input-field amount-input"
+          type="number"
+          formControlName="amount"
+          placeholder="0.00"
+          step="0.01"
+          inputmode="decimal"
+        />
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label class="form-lbl">Description <span class="optional-tag">(Optional)</span></label>
+        <input
+          class="input-field"
+          type="text"
+          formControlName="description"
+          placeholder="What is this transaction for?"
+          maxlength="500"
+        />
+      </div>
+
+      <!-- Date -->
+      <div class="form-group">
+        <label class="form-lbl">Date</label>
+        <input class="input-field" type="date" formControlName="transactionDate" />
+      </div>
+    </div>
+
+    <!-- ═══ ACTIONS ═══ -->
+    <div class="form-actions">
+      <sb-button variant="ghost" (click)="cancelled.emit()">Cancel</sb-button>
+      <sb-button type="submit" [disabled]="form.invalid">
+        {{ transaction() ? 'Save Changes' : 'Record' }}
+      </sb-button>
+    </div>
+  </form>
+</sb-modal>

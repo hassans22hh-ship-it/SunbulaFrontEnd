@@ -11,7 +11,11 @@ export class WalletsApiService {
 
   getAll(): Observable<WalletDto[]> { return this.http.get<WalletDto[]>(this.BASE); }
   getById(id: string): Observable<WalletDto> { return this.http.get<WalletDto>(`${this.BASE}/${id}`); }
-  getSummary(): Observable<FinanceSummaryDto> { return this.http.get<FinanceSummaryDto>(`${this.BASE}/summary`); }
+  getSummary(currency?: string): Observable<FinanceSummaryDto> {
+    const params: Record<string, string> = {};
+    if (currency) params['currency'] = currency;
+    return this.http.get<FinanceSummaryDto>(`${this.BASE}/summary`, { params });
+  }
   create(dto: CreateWalletDto): Observable<WalletDto> { return this.http.post<WalletDto>(this.BASE, dto); }
   update(id: string, dto: UpdateWalletDto): Observable<WalletDto> { return this.http.put<WalletDto>(`${this.BASE}/${id}`, dto); }
   delete(id: string): Observable<void> { return this.http.delete<void>(`${this.BASE}/${id}`); }

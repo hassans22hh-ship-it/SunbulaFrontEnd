@@ -1,95 +1,51 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { Title } from '@angular/platform-browser';
 import { FinanceStore } from '@features/finance/store/finance.store';
-import { WalletDto, CreateWalletDto, UpdateWalletDto } from '@shared/models/finance.models';
+import { WalletDto, CreateWalletDto, UpdateWalletDto, FinancialTransactionDto } from '@shared/models/finance.models';
+import { TransactionType, TRANSACTION_TYPE_META } from '@shared/models/enums';
 import { WalletCardComponent } from '../wallet-card/wallet-card.component';
 import { WalletFormComponent } from '../wallet-form/wallet-form.component';
 import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
 import { SbSpinnerComponent } from '@shared/ui/spinner/sb-spinner.component';
 import { SbEmptyStateComponent } from '@shared/ui/empty-state/sb-empty-state.component';
-import { AnimateDirective } from '@shared/directives/animate.directive';
+import { SbConfirmDialogComponent } from '@shared/ui/confirm-dialog/sb-confirm-dialog.component';
+import { PageTransitionDirective } from '@core/animation/page-transition.directive';
+import { DatePipe, DecimalPipe } from '@angular/common';
 
 @Component({
   selector: 'sb-wallet-list',
   standalone: true,
-  imports: [WalletCardComponent, WalletFormComponent, SbButtonComponent, SbSpinnerComponent, SbEmptyStateComponent, AnimateDirective],
+  imports: [
+    RouterLink, WalletCardComponent, WalletFormComponent,
+    SbSpinnerComponent, SbEmptyStateComponent, SbConfirmDialogComponent,
+    PageTransitionDirective, DatePipe, DecimalPipe,
+  ],
+  providers: [FinanceStore],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div class="h-full flex flex-col pt-6 pb-2" sbPage>
-      
-      <!-- Header Area -->
-      <div class="flex justify-between items-end mb-6" sbAnimate="slideIn">
-        <div>
-          <h2 class="section-title">My Wallets</h2>
-          <div class="mt-2 text-2xl font-bold text-text font-display tracking-tight">
-            <span class="text-sm font-medium text-subtle mr-2 tracking-normal uppercase relative -top-1">Total Balance</span>
-            {{ formatCurrency(store.totalBalance()) }}
-          </div>
-        </div>
-        
-        <sb-button variant="outline" (clicked)="openForm()">+ Add Wallet</sb-button>
-      </div>
-
-      <!-- List Area -->
-      <div class="flex-1 overflow-y-auto pb-4 custom-scrollbar" sbAnimate="fadeInUp">
-        @if (store.isLoading() && store.wallets().length === 0) {
-          <div class="py-12 flex justify-center"><sb-spinner /></div>
-        } @else if (store.wallets().length === 0) {
-          <sb-empty-state 
-            title="No Wallets" 
-            message="Create a wallet to start tracking your finances." 
-            icon="💳" 
-          />
-        } @else {
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            @for (w of store.wallets(); track w.id) {
-              <sb-wallet-card 
-                [wallet]="w" 
-                [selected]="w.id === selectedWalletId()"
-                (clicked)="selectedWalletId.set(w.id)"
-                (editClicked)="openForm(w)"
-              />
-            }
-          </div>
-        }
-      </div>
-
-      <!-- Form logic -->
-      @if (showForm()) {
-        <sb-wallet-form
-          [wallet]="editingWallet()"
-          (saved)="onFormSave($event)"
-          (cancelled)="closeForm()"
-          (deleteRequested)="onDeleteRequest($event)"
-        />
-      }
-
-    </div>
-  `,
-  styles: [`
-    .text-text { color: var(--color-text); }
-    .text-subtle { color: var(--color-text-muted); }
-    .font-display { font-family: var(--font-display); }
-  `]
+  templateUrl: './wallet-list.component.html',
+  styleUrl: './wallet-list.component.scss',
 })
 export class WalletListComponent implements OnInit {
   protected readonly store = inject(FinanceStore);
   private readonly titleService = inject(Title);
+  protected readonly TransactionType = TransactionType;
+  protected readonly txMeta = TRANSACTION_TYPE_META;
 
   showForm = signal(false);
   editingWallet = signal<WalletDto | null>(null);
   selectedWalletId = signal<string | null>(null);
+  walletTransactions = signal<FinancialTransactionDto[]>([]);
+  showDeleteConfirm = signal(false);
+  deletingWallet = signal<WalletDto | null>(null);
 
   ngOnInit(): void {
     this.titleService.setTitle('Wallets | Sunbula');
-    if (this.store.wallets().length === 0) {
-      this.store.loadAll();
-    }
+    this.store.loadAll();
   }
 
-  formatCurrency(value: number): string {
-    // Assuming a global base currency for the aggregate view initially
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(value);
+  formatCurrency(value: number, currency: string = 'SAR'): string {
+    return new Intl.NumberFormat('ar-SA', { style: 'currency', currency }).format(value);
   }
 
   openForm(wallet: WalletDto | null = null): void {
@@ -102,7 +58,20 @@ export class WalletListComponent implements OnInit {
     this.editingWallet.set(null);
   }
 
-  onFormSave(event: { dto: CreateWalletDto | UpdateWalletDto, isEdit: boolean }): void {
+  async selectWallet(wallet: WalletDto): Promise<void> {
+    if (this.selectedWalletId() === wallet.id) {
+      this.selectedWalletId.set(null);
+      this.walletTransactions.set([]);
+      return;
+    }
+    this.selectedWalletId.set(wallet.id);
+    await this.store.loadTransactionsByWallet(wallet.id);
+    this.walletTransactions.set(
+      this.store.transactions().filter(t => t.walletId === wallet.id)
+    );
+  }
+
+  onFormSave(event: { dto: CreateWalletDto | UpdateWalletDto; isEdit: boolean }): void {
     if (event.isEdit && this.editingWallet()) {
       this.store.updateWallet(this.editingWallet()!.id, event.dto as UpdateWalletDto);
     } else {
@@ -111,10 +80,34 @@ export class WalletListComponent implements OnInit {
     this.closeForm();
   }
 
-  onDeleteRequest(wallet: WalletDto): void {
-    if (confirm(`Are you sure you want to delete ${wallet.name}? This might remove associated transactions.`)) {
-      this.store.deleteWallet(wallet.id);
-      this.closeForm();
+  requestDelete(wallet: WalletDto): void {
+    this.deletingWallet.set(wallet);
+    this.showDeleteConfirm.set(true);
+  }
+
+  confirmDelete(): void {
+    const w = this.deletingWallet();
+    if (w) {
+      this.store.deleteWallet(w.id);
+      if (this.selectedWalletId() === w.id) {
+        this.selectedWalletId.set(null);
+        this.walletTransactions.set([]);
+      }
+    }
+    this.showDeleteConfirm.set(false);
+    this.closeForm();
+  }
+
+  cancelDelete(): void {
+    this.showDeleteConfirm.set(false);
+    this.deletingWallet.set(null);
+  }
+
+  getTypeColor(type: TransactionType): string {
+    switch (type) {
+      case TransactionType.Income: return 'var(--color-success)';
+      case TransactionType.Expense: return 'var(--color-danger)';
+      case TransactionType.Transfer: return 'var(--color-info)';
     }
   }
 }

@@ -1,0 +1,223 @@
+.tx-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* ═══ SEGMENTED CONTROL ═══ */
+.segment-control {
+  display: flex;
+  gap: 0;
+  background: var(--color-surface-2);
+  border-radius: var(--radius-lg);
+  padding: 0.25rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid var(--color-border);
+}
+
+.segment-btn {
+  flex: 1;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+
+.segment-btn:hover {
+  color: var(--color-text);
+}
+
+.segment-btn--active {
+  color: #fff;
+  box-shadow: var(--shadow-sm);
+}
+
+.segment-btn--expense.segment-btn--active {
+  background: var(--color-danger);
+  border-color: var(--color-danger);
+}
+
+.segment-btn--income.segment-btn--active {
+  background: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.segment-btn--transfer.segment-btn--active {
+  background: var(--color-info);
+  border-color: var(--color-info);
+}
+
+/* ═══ CATEGORY SECTION ═══ */
+.category-section {
+  margin-bottom: 0.5rem;
+}
+
+.category-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.375rem;
+}
+
+.cat-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.625rem 0.25rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+
+.cat-cell:hover {
+  border-color: var(--color-primary-light);
+  background: var(--color-surface-2);
+}
+
+.cat-cell--selected {
+  border-color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+.cat-cell--add {
+  border-style: dashed;
+  color: var(--color-text-muted);
+}
+
+.cat-cell--add:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.cat-emoji {
+  font-size: 1.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-2);
+}
+
+.cat-cell--selected .cat-emoji {
+  background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+}
+
+.cat-name {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  color: var(--color-text);
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* ═══ ADD CATEGORY INLINE ═══ */
+.add-cat-form {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.add-cat-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.cat-icon-preview {
+  width: 2.25rem;
+  height: 2.25rem;
+  font-size: 1.25rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.add-cat-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.add-cat-save {
+  padding: 0.375rem 0.75rem;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.add-cat-save:hover { opacity: 0.9; }
+
+.add-cat-cancel {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+/* ═══ FORM FIELDS ═══ */
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3125rem;
+}
+
+.form-lbl {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.optional-tag {
+  font-weight: 400;
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+}
+
+.amount-input {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* ═══ FORM ACTIONS ═══ */
+.form-actions {
+  display: flex;
+  justify-content: flex-start;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}

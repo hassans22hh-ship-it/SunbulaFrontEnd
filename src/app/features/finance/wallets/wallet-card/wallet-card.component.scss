@@ -1,0 +1,115 @@
+.wallet-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: transform var(--duration-fast), box-shadow var(--duration-fast), border-color var(--duration-fast);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-height: 10rem;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+}
+
+.wallet-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.wallet-card--selected {
+  outline-color: var(--color-primary);
+}
+
+.wallet-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.wallet-type-info {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+}
+
+.wallet-type-icon {
+  font-size: 1.125rem;
+}
+
+.wallet-type-label {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.wallet-actions {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.icon-btn {
+  width: 1.75rem;
+  height: 1.75rem;
+  font-size: 0.75rem;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-surface-2);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.5;
+  transition: all var(--duration-fast);
+}
+
+.icon-btn:hover {
+  opacity: 1;
+  background: var(--color-border);
+}
+
+.icon-btn--danger:hover {
+  background: color-mix(in srgb, var(--color-danger) 15%, transparent);
+}
+
+.wallet-name {
+  font-size: 1.125rem;
+  font-weight: 700;
+  font-family: var(--font-display);
+  color: var(--color-text);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.wallet-balance-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+  margin-top: auto;
+}
+
+.wallet-balance-label {
+  font-size: 0.625rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.wallet-balance {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  text-align: start;
+}
+
+.wallet-currency {
+  font-size: 0.6875rem;
+  color: var(--color-text-subtle);
+  font-weight: 500;
+}

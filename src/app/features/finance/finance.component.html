@@ -1,85 +1,133 @@
-<div class="page" sbPageTransition>
-  <div class="page-header"><h1 class="section-title">💰 Finance</h1></div>
-  <div class="tabs">
-    <button class="tab" [class.tab--active]="tab() === 'wallets'" (click)="tab.set('wallets')">Wallets</button>
-    <button class="tab" [class.tab--active]="tab() === 'transactions'" (click)="tab.set('transactions')">Transactions</button>
-    <button class="tab" [class.tab--active]="tab() === 'categories'" (click)="tab.set('categories')">Categories</button>
-  </div>
-  @if (store.isLoading()) { <sb-spinner size="lg" /> } @else {
-    @if (tab() === 'wallets') {
-      <div class="page-actions"><sb-button (click)="showWalletForm.set(true)">+ New Wallet</sb-button></div>
-      @if (store.wallets().length === 0) { <sb-empty-state icon="💵" heading="No wallets" /> } @else {
-        <div class="wallet-grid">
-          @for (w of store.wallets(); track w.id) {
-            <sb-card [hoverable]="true"><div class="wallet-card">
-              <span class="wallet-icon">{{ walletMeta[w.type].icon }}</span>
-              <div class="wallet-info"><h3 class="wallet-name">{{ w.name }}</h3><span class="wallet-type">{{ walletMeta[w.type].label }}</span></div>
-              <span class="wallet-balance">{{ w.balance | number:'1.2-2' }} {{ w.currency }}</span>
-              <button class="action-btn action-btn--danger" (click)="store.deleteWallet(w.id)">🗑️</button>
-            </div></sb-card>
-          }
+<div class="finance-page" sbPageTransition>
+  <!-- ═══ TOP NAV TABS ═══ -->
+  <nav class="nav-tabs">
+    <a class="nav-tab nav-tab--active">Transactions</a>
+    <a class="nav-tab" routerLink="categories">Categories</a>
+    <a class="nav-tab" routerLink="wallets">Wallets</a>
+  </nav>
+
+  @if (store.isLoading()) {
+    <div class="loading-wrap">
+      <sb-spinner size="lg" />
+    </div>
+  } @else {
+    <!-- ═══ SUMMARY CARD ═══ -->
+    @if (store.summary(); as summary) {
+      <div class="summary-card">
+        <div class="summary-item">
+          <span class="summary-label">Income</span>
+          <span class="summary-value summary-value--income">{{ summary.totalIncome | number:'1.2-2' }}</span>
         </div>
-      }
+        <div class="summary-divider"></div>
+        <div class="summary-item">
+          <span class="summary-label">Expenses</span>
+          <span class="summary-value summary-value--expense">{{ summary.totalExpenses | number:'1.2-2' }}</span>
+        </div>
+        <div class="summary-divider"></div>
+        <div class="summary-item">
+          <span class="summary-label">Balance</span>
+          <span class="summary-value summary-value--balance">{{ summary.totalBalance | number:'1.2-2' }}</span>
+          <span class="summary-currency">{{ summary.currency }}</span>
+        </div>
+      </div>
     }
-    @if (tab() === 'transactions') {
-      <div class="page-actions"><sb-button (click)="showTxForm.set(true)">+ New Transaction</sb-button></div>
-      @if (store.transactions().length === 0) { <sb-empty-state icon="💸" heading="No transactions" /> } @else {
+
+    <!-- ═══ TRANSACTION LIST ═══ -->
+    <div class="tx-section">
+      <h2 class="tx-section-title">Recent Transactions</h2>
+
+      @if (sortedTransactions().length === 0) {
+        <sb-empty-state icon="💸" heading="No transactions" message="Click + to add a new transaction" />
+      } @else {
         <div class="tx-list">
-          @for (t of store.transactions(); track t.id) {
-            <sb-card padding="sm"><div class="tx-row">
-              <span [class]="'tx-sign ' + txMeta[t.type].colorClass">{{ txMeta[t.type].sign }}</span>
-              <div class="tx-info"><span class="tx-desc">{{ t.description || txMeta[t.type].label }}</span><span class="tx-date">{{ t.transactionDate | relativeDate }}</span></div>
-              <span class="tx-amount" [class]="txMeta[t.type].colorClass">{{ t.amount | number:'1.2-2' }} {{ t.currency }}</span>
-              <button class="action-btn action-btn--danger" (click)="store.removeTransaction(t.id)">🗑️</button>
-            </div></sb-card>
+          @for (tx of sortedTransactions(); track tx.id) {
+            <div class="tx-item" [class.tx-item--selected]="store.selectedTransaction()?.id === tx.id" (click)="selectTransaction(tx)">
+              <div class="tx-icon-wrap" [style.background]="getTypeColor(tx.type) + '1a'">
+                <span class="tx-icon">{{ tx.categoryIcon || (txMeta[tx.type].sign) }}</span>
+              </div>
+              <div class="tx-info">
+                <span class="tx-category">{{ tx.categoryName || txMeta[tx.type].label }}</span>
+                <span class="tx-date">{{ tx.transactionDate | date:'MMM d':'':'en-US' }}</span>
+              </div>
+              <span class="tx-amount" [style.color]="getTypeColor(tx.type)">
+                {{ txMeta[tx.type].sign }}{{ tx.amount | number:'1.2-2' }}
+              </span>
+            </div>
+
+            <!-- ═══ TRANSACTION DETAIL (inline slide) ═══ -->
+            @if (store.selectedTransaction()?.id === tx.id) {
+              <div class="tx-detail">
+                <div class="tx-detail-header">
+                  <span class="tx-detail-icon">{{ tx.categoryIcon || '💰' }}</span>
+                  <div class="tx-detail-title-wrap">
+                    <span class="tx-detail-category">{{ tx.categoryName || txMeta[tx.type].label }}</span>
+                    <span class="tx-detail-badge" [class]="'badge-' + txMeta[tx.type].colorClass">{{ txMeta[tx.type].label }}</span>
+                  </div>
+                </div>
+                <div class="tx-detail-rows">
+                  <div class="tx-detail-row">
+                    <span class="tx-detail-label">Wallet</span>
+                    <span class="tx-detail-value">{{ tx.walletName || '—' }}</span>
+                  </div>
+                  @if (tx.type === TransactionType.Transfer && tx.destinationWalletName) {
+                    <div class="tx-detail-row">
+                      <span class="tx-detail-label">To Wallet</span>
+                      <span class="tx-detail-value">{{ tx.destinationWalletName }}</span>
+                    </div>
+                  }
+                  <div class="tx-detail-row">
+                    <span class="tx-detail-label">Amount</span>
+                    <span class="tx-detail-value tx-detail-amount" [style.color]="getTypeColor(tx.type)">{{ tx.amount | number:'1.2-2' }} {{ tx.currency }}</span>
+                  </div>
+                  <div class="tx-detail-row">
+                    <span class="tx-detail-label">Date</span>
+                    <span class="tx-detail-value">{{ tx.transactionDate | date:'yyyy-MM-dd':'':'en-US' }}</span>
+                  </div>
+                  @if (tx.description) {
+                    <div class="tx-detail-row">
+                      <span class="tx-detail-label">Description</span>
+                      <span class="tx-detail-value">{{ tx.description }}</span>
+                    </div>
+                  }
+                </div>
+                <div class="tx-detail-actions">
+                  <button class="detail-action-btn detail-action-btn--edit" (click)="openEditTx(tx); $event.stopPropagation()">✏️ Edit</button>
+                  <button class="detail-action-btn detail-action-btn--delete" (click)="confirmDeleteTx(tx.id); $event.stopPropagation()">🗑️ Delete</button>
+                </div>
+              </div>
+            }
           }
         </div>
       }
-    }
-    @if (tab() === 'categories') {
-      <div class="page-actions"><sb-button (click)="showCatForm.set(true)">+ New Category</sb-button></div>
-      @if (store.categories().length === 0) { <sb-empty-state icon="🏷️" heading="No categories" /> } @else {
-        <div class="cat-list">
-          @for (c of store.categories(); track c.id) {
-            <sb-card padding="sm"><div class="cat-row">
-              <span class="cat-name">{{ c.name }}</span>
-              <button class="action-btn action-btn--danger" (click)="store.deleteCategory(c.id)">🗑️</button>
-            </div></sb-card>
-          }
-        </div>
-      }
-    }
+    </div>
+  }
+
+  <!-- ═══ FAB ═══ -->
+  <button class="fab" (click)="openAddTx()" aria-label="Add Transaction">
+    <span class="fab-icon">+</span>
+  </button>
+
+  <!-- ═══ ADD/EDIT TRANSACTION MODAL ═══ -->
+  @if (showTxForm()) {
+    <sb-transaction-form
+      [transaction]="editingTx()"
+      [wallets]="store.wallets()"
+      [categories]="store.categories()"
+      (saved)="onTxFormSaved($event)"
+      (cancelled)="closeTxForm()"
+    />
+  }
+
+  <!-- ═══ DELETE CONFIRM DIALOG ═══ -->
+  @if (showDeleteConfirm()) {
+    <sb-confirm-dialog
+      title="Delete Transaction"
+      message="Are you sure you want to delete this transaction? Wallet balance will be updated automatically."
+      confirmText="Delete"
+      cancelText="Cancel"
+      variant="danger"
+      (confirmed)="onDeleteConfirmed()"
+      (cancelled)="onDeleteCancelled()"
+    />
   }
 </div>
-
-@if (showWalletForm()) {
-  <sb-modal title="New Wallet" (close)="showWalletForm.set(false)">
-    <form [formGroup]="walletForm" (ngSubmit)="createWallet()" class="modal-form">
-      <div class="form-group"><label class="form-label">Name</label><input formControlName="name" class="input-field" placeholder="My Wallet"></div>
-      <div class="form-group"><label class="form-label">Type</label><select formControlName="type" class="input-field">@for (t of walletTypes; track t) { <option [value]="t">{{ walletMeta[t].icon }} {{ walletMeta[t].label }}</option> }</select></div>
-      <div class="form-group"><label class="form-label">Currency</label><input formControlName="currency" class="input-field" value="SAR"></div>
-      <div class="form-group"><label class="form-label">Opening Balance</label><input type="number" formControlName="openingBalance" class="input-field"></div>
-      <div modal-footer><sb-button variant="ghost" (click)="showWalletForm.set(false)">Cancel</sb-button><sb-button type="submit" [disabled]="walletForm.invalid">Create</sb-button></div>
-    </form>
-  </sb-modal>
-}
-@if (showTxForm()) {
-  <sb-modal title="New Transaction" (close)="showTxForm.set(false)">
-    <form [formGroup]="txForm" (ngSubmit)="createTx()" class="modal-form">
-      <div class="form-group"><label class="form-label">Wallet</label><select formControlName="walletId" class="input-field">@for (w of store.wallets(); track w.id) { <option [value]="w.id">{{ w.name }}</option> }</select></div>
-      <div class="form-group"><label class="form-label">Type</label><select formControlName="type" class="input-field">@for (t of txTypes; track t) { <option [value]="t">{{ txMeta[t].label }}</option> }</select></div>
-      <div class="form-group"><label class="form-label">Amount</label><input type="number" formControlName="amount" class="input-field" step="0.01"></div>
-      <div class="form-group"><label class="form-label">Description</label><input formControlName="description" class="input-field"></div>
-      <div class="form-group"><label class="form-label">Category</label><select formControlName="financialCategoryId" class="input-field"><option value="">None</option>@for (c of store.categories(); track c.id) { <option [value]="c.id">{{ c.name }}</option> }</select></div>
-      <div modal-footer><sb-button variant="ghost" (click)="showTxForm.set(false)">Cancel</sb-button><sb-button type="submit" [disabled]="txForm.invalid">Create</sb-button></div>
-    </form>
-  </sb-modal>
-}
-@if (showCatForm()) {
-  <sb-modal title="New Category" size="sm" (close)="showCatForm.set(false)">
-    <form [formGroup]="catForm" (ngSubmit)="createCat()" class="modal-form">
-      <div class="form-group"><label class="form-label">Name</label><input formControlName="name" class="input-field" placeholder="Food"></div>
-      <div modal-footer><sb-button variant="ghost" (click)="showCatForm.set(false)">Cancel</sb-button><sb-button type="submit" [disabled]="catForm.invalid">Create</sb-button></div>
-    </form>
-  </sb-modal>
-}
