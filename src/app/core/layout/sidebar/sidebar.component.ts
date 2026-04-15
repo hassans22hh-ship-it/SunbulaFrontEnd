@@ -20,6 +20,7 @@ const NAV_ITEMS: NavItem[] = [
   { path: '/plant-store', label: 'Plant Store', icon: 'plant' },
   { path: '/finance', label: 'Finance', icon: 'finance' },
   { path: '/debts', label: 'Debts', icon: 'debts' },
+  { path: '/reports', label: 'Reports', icon: 'reports' },
   { path: '/settings', icon: 'settings', label: 'Settings' },
 ];
 

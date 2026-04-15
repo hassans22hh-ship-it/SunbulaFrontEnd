@@ -17,6 +17,50 @@
       <sb-card><div class="stat"><span class="stat-icon">🔥</span><div class="stat-info"><span class="stat-value">{{ streak() }}</span><span class="stat-label">Current streak</span></div></div></sb-card>
     </div>
 
+    <!-- Heatmap & Analytics Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-10">
+      <div class="lg:col-span-3">
+        <div class="flex items-center justify-between mb-6">
+          <h2 class="text-xl font-display font-bold text-text flex items-center gap-2">
+            <i class="fa-solid fa-fire text-amber-500 text-base"></i> Contribution Heatmap
+          </h2>
+          <div class="flex items-center gap-4 text-xs font-bold text-text-muted">
+             <span class="uppercase tracking-widest">Select Year</span>
+             <div class="flex bg-surface-2 p-1 rounded-lg">
+                <button (click)="changeYear(2026)" [class.bg-surface]="selectedYear() === 2026" [class.text-primary]="selectedYear() === 2026" class="px-3 py-1 rounded-md transition-all">2026</button>
+                <button (click)="changeYear(2025)" [class.bg-surface]="selectedYear() === 2025" [class.text-primary]="selectedYear() === 2025" class="px-3 py-1 rounded-md transition-all">2025</button>
+             </div>
+          </div>
+        </div>
+        
+        @if (isYearlyLoading()) {
+           <div class="h-[200px] flex items-center justify-center bg-surface-2 rounded-2xl border border-dashed border-border/30">
+              <sb-spinner />
+           </div>
+        } @else {
+           <sb-heatmap [data]="yearlyTrend()" [year]="selectedYear()" />
+        }
+      </div>
+
+      <div class="lg:col-span-1 space-y-6">
+         <h2 class="text-xl font-display font-bold text-text">Highlights</h2>
+         <div class="space-y-4">
+            <sb-card padding="sm">
+               <div class="flex flex-col">
+                  <span class="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Peak Productivity</span>
+                  <span class="text-lg font-bold text-text">{{ peakDay || 'N/A' | date:'longDate' }}</span>
+               </div>
+            </sb-card>
+            <sb-card padding="sm">
+               <div class="flex flex-col">
+                  <span class="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Top Focus Category</span>
+                  <span class="text-lg font-bold text-text">Positive</span>
+               </div>
+            </sb-card>
+         </div>
+      </div>
+    </div>
+
     @let stats = summary() ? summary()?.behaviorBreakdown : report()?.behaviorBreakdown;
     @if (stats?.length) {
       <h2 class="subsection-title">{{ range() === 'today' ? "Today's" : "Range" }} Breakdown</h2>

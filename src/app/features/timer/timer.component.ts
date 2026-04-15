@@ -26,7 +26,7 @@ import { AuthService } from '@core/auth/auth.service';
     CommonModule, FormsModule, DatePipe,
     SbCardComponent, SbEmptyStateComponent, SbSpinnerComponent, SbModalComponent, SbButtonComponent,
     SbBehaviorBadgeComponent, DurationPipe, DecimalPipe, RelativeDatePipe, PageTransitionDirective,
-    TimerControlsComponent, SbIconCoinComponent
+    TimerControlsComponent, SbIconCoinComponent, SbStreakCalendarComponent, SbBehaviorDonutComponent
   ],
   templateUrl: './timer.component.html',
   styleUrl: './timer.component.scss',
@@ -39,6 +39,12 @@ export class TimerComponent implements OnInit {
 
   readonly history7Days = signal<any[]>([]);
   readonly currentStreak = signal<number>(0);
+
+  readonly todayBreakdown = computed(() => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const todayData = this.history7Days().find(h => h.date && h.date.startsWith(todayStr));
+    return todayData?.behaviorBreakdown || [];
+  });
 
   readonly isEditModalOpen = signal(false);
   readonly sessionToEdit = signal<any>(null);

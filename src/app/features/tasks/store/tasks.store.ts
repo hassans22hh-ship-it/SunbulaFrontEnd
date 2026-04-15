@@ -11,6 +11,24 @@ interface TasksState {
   isLoading: boolean;
   error:     string | null;
   filter:    TaskQueryParams;
+
+  // Pagination
+  totalCount:      number;
+  pageNumber:      number;
+  pageSize:        number;
+  totalPages:      number;
+  hasNextPage:     boolean;
+  hasPreviousPage: boolean;
+
+  // Archived (dedicated)
+  archivedItems:       TaskDto[];
+  archivedLoading:     boolean;
+  archivedPageNumber:  number;
+  archivedPageSize:    number;
+  archivedTotalCount:  number;
+  archivedTotalPages:  number;
+  archivedHasNext:     boolean;
+  archivedHasPrevious: boolean;
 }
 
 const initialState: TasksState = {
@@ -18,6 +36,22 @@ const initialState: TasksState = {
   isLoading: false,
   error:     null,
   filter:    {},
+
+  totalCount:      0,
+  pageNumber:      1,
+  pageSize:        10,
+  totalPages:      0,
+  hasNextPage:     false,
+  hasPreviousPage: false,
+
+  archivedItems:       [],
+  archivedLoading:     false,
+  archivedPageNumber:  1,
+  archivedPageSize:    10,
+  archivedTotalCount:  0,
+  archivedTotalPages:  0,
+  archivedHasNext:     false,
+  archivedHasPrevious: false,
 };
 
 export const TasksStore = signalStore(
@@ -42,11 +76,11 @@ export const TasksStore = signalStore(
     };
   }),
   withMethods((store, api = inject(TasksApiService), toast = inject(ToastService)) => ({
+
+    // ─── Load all tasks ─────────────────────────────────
     async load(params?: TaskQueryParams): Promise<void> {
       patchState(store, { isLoading: true, error: null, filter: params ?? {} });
       try {
-        // If behaviorType is set, we use the specialized endpoint for better accuracy
-        // or merge it into params.
         const effectiveParams = { ...params } as any;
         if (params?.behaviorType !== undefined) {
           effectiveParams.behavior = params.behaviorType;
@@ -54,11 +88,122 @@ export const TasksStore = signalStore(
         
         const response: any = await firstValueFrom(api.getAll(effectiveParams));
         const tasks = Array.isArray(response) ? response : (response.items ?? []);
-        patchState(store, { tasks, isLoading: false });
+        patchState(store, {
+          tasks,
+          isLoading:       false,
+          totalCount:      response.totalCount ?? tasks.length,
+          pageNumber:      response.pageNumber ?? 1,
+          totalPages:      response.totalPages ?? 1,
+          hasNextPage:     response.hasNextPage ?? false,
+          hasPreviousPage: response.hasPreviousPage ?? false,
+        });
       } catch (e: unknown) {
         patchState(store, { isLoading: false, error: (e as { message: string }).message });
       }
     },
+
+    // ─── Load archived tasks (paginated) ────────────────
+    async loadArchived(page: number = 1, pageSize: number = 10): Promise<void> {
+      patchState(store, { archivedLoading: true });
+      try {
+        const res = await firstValueFrom(api.getArchived({ PageNumber: page, PageSize: pageSize }));
+        patchState(store, {
+          archivedItems:       res.items,
+          archivedLoading:     false,
+          archivedPageNumber:  res.pageNumber,
+          archivedPageSize:    res.pageSize,
+          archivedTotalCount:  res.totalCount,
+          archivedTotalPages:  res.totalPages,
+          archivedHasNext:     res.hasNextPage,
+          archivedHasPrevious: res.hasPreviousPage,
+        });
+      } catch (e: unknown) {
+        patchState(store, { archivedLoading: false });
+        toast.error((e as { message: string }).message);
+      }
+    },
+
+    // ─── Search with pagination ─────────────────────────
+    async searchTasks(query: string, page: number = 1, pageSize: number = 10): Promise<void> {
+      patchState(store, { isLoading: true });
+      try {
+        const res = await firstValueFrom(api.search(query, { PageNumber: page, PageSize: pageSize }));
+        patchState(store, {
+          tasks:           res.items,
+          isLoading:       false,
+          totalCount:      res.totalCount,
+          pageNumber:      res.pageNumber,
+          totalPages:      res.totalPages,
+          hasNextPage:     res.hasNextPage,
+          hasPreviousPage: res.hasPreviousPage,
+        });
+      } catch (e: unknown) {
+        patchState(store, { isLoading: false });
+        toast.error((e as { message: string }).message);
+      }
+    },
+
+    // ─── Load by folder (paginated) ─────────────────────
+    async loadByFolder(folderId: string, page: number = 1, pageSize: number = 10): Promise<void> {
+      patchState(store, { isLoading: true });
+      try {
+        const res = await firstValueFrom(api.getByFolder(folderId, { PageNumber: page, PageSize: pageSize }));
+        patchState(store, {
+          tasks:           res.items,
+          isLoading:       false,
+          totalCount:      res.totalCount,
+          pageNumber:      res.pageNumber,
+          totalPages:      res.totalPages,
+          hasNextPage:     res.hasNextPage,
+          hasPreviousPage: res.hasPreviousPage,
+        });
+      } catch (e: unknown) {
+        patchState(store, { isLoading: false });
+        toast.error((e as { message: string }).message);
+      }
+    },
+
+    // ─── Load by category (paginated) ───────────────────
+    async loadByCategory(categoryId: string, page: number = 1, pageSize: number = 10): Promise<void> {
+      patchState(store, { isLoading: true });
+      try {
+        const res = await firstValueFrom(api.getByCategory(categoryId, { PageNumber: page, PageSize: pageSize }));
+        patchState(store, {
+          tasks:           res.items,
+          isLoading:       false,
+          totalCount:      res.totalCount,
+          pageNumber:      res.pageNumber,
+          totalPages:      res.totalPages,
+          hasNextPage:     res.hasNextPage,
+          hasPreviousPage: res.hasPreviousPage,
+        });
+      } catch (e: unknown) {
+        patchState(store, { isLoading: false });
+        toast.error((e as { message: string }).message);
+      }
+    },
+
+    // ─── Load by behavior (paginated) ───────────────────
+    async loadByBehavior(behaviorType: number, page: number = 1, pageSize: number = 10): Promise<void> {
+      patchState(store, { isLoading: true });
+      try {
+        const res = await firstValueFrom(api.getByBehavior(behaviorType, { PageNumber: page, PageSize: pageSize }));
+        patchState(store, {
+          tasks:           res.items,
+          isLoading:       false,
+          totalCount:      res.totalCount,
+          pageNumber:      res.pageNumber,
+          totalPages:      res.totalPages,
+          hasNextPage:     res.hasNextPage,
+          hasPreviousPage: res.hasPreviousPage,
+        });
+      } catch (e: unknown) {
+        patchState(store, { isLoading: false });
+        toast.error((e as { message: string }).message);
+      }
+    },
+
+    // ─── CRUD Commands ──────────────────────────────────
     async create(dto: CreateTaskDto): Promise<void> {
       try {
         const task = await firstValueFrom(api.create(dto));
@@ -86,9 +231,13 @@ export const TasksStore = signalStore(
         toast.error((e as { message: string }).message);
       }
     },
+
+    // ─── PATCH actions (return 204 No Content) ──────────
     async complete(id: string): Promise<void> {
       try {
-        const updated = await firstValueFrom(api.complete(id));
+        await firstValueFrom(api.complete(id));
+        // 204 No Content — re-fetch task to get updated state
+        const updated = await firstValueFrom(api.getById(id));
         patchState(store, { tasks: store.tasks().map(t => t.id === id ? updated : t) });
         toast.success('Task completed ✅');
       } catch (e: unknown) {
@@ -97,8 +246,9 @@ export const TasksStore = signalStore(
     },
     async archive(id: string): Promise<void> {
       try {
-        const updated = await firstValueFrom(api.archive(id));
-        patchState(store, { tasks: store.tasks().map(t => t.id === id ? updated : t) });
+        await firstValueFrom(api.archive(id));
+        // Remove from active list after archiving
+        patchState(store, { tasks: store.tasks().filter(t => t.id !== id) });
         toast.success('Task archived');
       } catch (e: unknown) {
         toast.error((e as { message: string }).message);
@@ -106,8 +256,11 @@ export const TasksStore = signalStore(
     },
     async restore(id: string): Promise<void> {
       try {
-        const updated = await firstValueFrom(api.unarchive(id));
-        patchState(store, { tasks: store.tasks().map(t => t.id === id ? updated : t) });
+        await firstValueFrom(api.unarchive(id));
+        // Remove from archived list
+        patchState(store, {
+          archivedItems: store.archivedItems().filter(t => t.id !== id),
+        });
         toast.success('Task restored');
       } catch (e: unknown) {
         toast.error((e as { message: string }).message);
@@ -122,21 +275,33 @@ export const TasksStore = signalStore(
         toast.error((e as { message: string }).message);
       }
     },
+
+    // ─── Filter Helpers ─────────────────────────────────
     setSearch(query: string, behavior?: number): void {
-      const newFilter = { 
-        ...store.filter(), 
-        search: query || undefined,
-        behaviorType: behavior !== undefined ? behavior : store.filter().behaviorType
-      };
-      this.load(newFilter);
+      if (query) {
+        this.searchTasks(query, 1, store.pageSize());
+      } else {
+        const newFilter = { 
+          ...store.filter(), 
+          search: undefined,
+          behaviorType: behavior !== undefined ? behavior : store.filter().behaviorType
+        };
+        this.load(newFilter);
+      }
     },
     setBehavior(behavior: number | undefined): void {
-      const newFilter = { ...store.filter(), behaviorType: behavior };
-      this.load(newFilter);
+      if (behavior !== undefined) {
+        this.loadByBehavior(behavior);
+      } else {
+        this.load();
+      }
     },
     setFolder(folderId: string | undefined): void {
-      const newFilter = { ...store.filter(), folderId: folderId || undefined };
-      this.load(newFilter);
-    }
+      if (folderId) {
+        this.loadByFolder(folderId);
+      } else {
+        this.load();
+      }
+    },
   })),
 );

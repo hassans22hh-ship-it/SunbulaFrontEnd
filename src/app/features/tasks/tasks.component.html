@@ -128,7 +128,7 @@
       <div class="flex items-center gap-6">
         <div class="flex items-center gap-6 pr-6 border-r border-border/30">
           <a routerLink="/timer" class="text-sm font-bold text-primary hover:text-primary-light transition-colors">Focus Mode</a>
-          <button (click)="tab.set('archived')" class="text-sm font-bold text-text-muted hover:text-text transition-colors">Archive</button>
+          <a routerLink="/tasks/archived" class="text-sm font-bold text-text-muted hover:text-text transition-colors">Archive</a>
         </div>
         
         <div class="flex items-center gap-4">
@@ -188,7 +188,7 @@
         } @else {
           <div [class]="viewMode() === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-32' : 'flex flex-col gap-4 pb-32'">
             @for (task of currentTasks; track task.id) {
-              <sb-task-card [task]="task" (cardClicked)="viewTaskDetails(task.id)" (editClicked)="openEdit(task)" (menuClicked)="confirmDelete(task)" (duplicateClicked)="store.duplicate(task.id)"></sb-task-card>
+              <sb-task-card [task]="task" (cardClicked)="viewTaskDetails($event.id)" (editClicked)="openEdit(task)" (menuClicked)="confirmDelete(task)" (duplicateClicked)="store.duplicate(task.id)"></sb-task-card>
             }
           </div>
         }

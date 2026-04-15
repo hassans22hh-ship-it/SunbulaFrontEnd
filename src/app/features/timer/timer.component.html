@@ -75,9 +75,15 @@
           </div>
           <sb-behavior-badge [behavior]="task.behaviorType" />
           @if (isTracking) {
-          <div class="tracking-indicator" title="Already tracking">
-            <span class="pulse-dot"></span>
-          </div>
+            @if (isTracking.isPaused) {
+              <div class="tracking-indicator" title="Paused">
+                <div class="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
+              </div>
+            } @else {
+              <div class="tracking-indicator" title="Already tracking">
+                <span class="pulse-dot"></span>
+              </div>
+            }
           }
         </div>
       </sb-card>
@@ -87,6 +93,14 @@
   </section>
 
   <!-- BUG-04: Date-Navigated Session History -->
+  <!-- Visual Statistics -->
+  <section class="mt-8 mb-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
+      <sb-streak-calendar [currentStreak]="currentStreak()" [history]="history7Days()"></sb-streak-calendar>
+      <sb-behavior-donut [breakdown]="todayBreakdown()"></sb-behavior-donut>
+    </div>
+  </section>
+
   <section class="history-section">
     <div class="date-nav">
       <button class="date-nav-btn" (click)="timer['prevDay']()" title="Previous day">

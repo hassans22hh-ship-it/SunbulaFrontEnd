@@ -152,7 +152,7 @@ export const TimerStore = signalStore(
         const res: any = await firstValueFrom(api.resume(sessionId));
         const resumed = res?.data ?? res;
         patchState(store, { 
-          rawActiveSessions: store.rawActiveSessions().map(s => s.id === sessionId ? resumed : s),
+          rawActiveSessions: store.rawActiveSessions().map(s => s.id === sessionId ? { ...resumed, isPaused: false } : s),
           isLoading: false 
         });
         startTicker();
@@ -256,7 +256,7 @@ export const TimerStore = signalStore(
           const res: any = await firstValueFrom(api.pause(sessionId));
           const paused = res?.data ?? res;
           patchState(store, { 
-            rawActiveSessions: store.rawActiveSessions().map(s => s.id === sessionId ? paused : s),
+            rawActiveSessions: store.rawActiveSessions().map(s => s.id === sessionId ? { ...paused, isPaused: true } : s),
             isLoading: false 
           });
           toast.success(`Timer paused`);

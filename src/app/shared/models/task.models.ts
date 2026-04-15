@@ -12,7 +12,7 @@ export interface TaskDto {
   createdAt:    string;
   updatedAt:    string | null;
   categories:   CategoryDto[];
-  folder:       string | null;
+  folder:       FolderDto | null;
   totalTrackedSeconds?: number;
 }
 
@@ -57,7 +57,7 @@ export interface FolderDto {
   color:     string;
   createdAt: string;
   taskCount: number;
-  tasks:     TaskDto[];
+  tasks:     string[];
 }
 
 export interface CreateFolderDto {
@@ -76,4 +76,21 @@ export interface TaskQueryParams {
   archived?:     boolean;
   search?:       string;
   behaviorType?: BehaviorCategory;
+  PageNumber?:   number;
+  PageSize?:     number;
+}
+
+export interface PaginationParams {
+  PageNumber?: number;
+  PageSize?:   number;
+}
+
+export interface PaginatedResult<T> {
+  items:           T[];
+  totalCount:      number;
+  pageNumber:      number;
+  pageSize:        number;
+  totalPages:      number;
+  hasNextPage:     boolean;
+  hasPreviousPage: boolean;
 }
