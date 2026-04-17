@@ -1,14 +1,15 @@
-<div class="timer-controls-wrapper">
+<div class="timer-controls-group">
   @if (isPaused()) {
-    <sb-button variant="outline" (click)="onResume.emit()" [loading]="isLoading()">
-      ▶️ Resume
-    </sb-button>
+    <button class="control-btn resume-btn" (click)="onResume.emit()" [disabled]="isLoading()" title="Resume">
+      <i class="fa-solid fa-play"></i>
+    </button>
   } @else {
-    <sb-button variant="outline" (click)="onPause.emit()" [loading]="isLoading()">
-      ⏸️ Pause
-    </sb-button>
+    <button class="control-btn pause-btn" (click)="onPause.emit()" [disabled]="isLoading()" title="Pause">
+      <i class="fa-solid fa-pause"></i>
+    </button>
   }
-  <sb-button variant="danger" (click)="onStop.emit()" [loading]="isLoading()">
-    ⏹️ Stop Timer
-  </sb-button>
+  
+  <button class="control-btn stop-btn" (click)="onStop.emit()" [disabled]="isLoading()" title="Stop Timer">
+    <i class="fa-solid fa-stop"></i>
+  </button>
 </div>

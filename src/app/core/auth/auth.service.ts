@@ -6,6 +6,7 @@ import { Observable, firstValueFrom, of } from 'rxjs';
 import { environment } from '@env/environment';
 import { UserDto, AuthResponseDto } from '@shared/models/auth.models';
 import { AuthApiService } from '../../features/auth/services/auth.api.service';
+import { fetchEventSource } from '@microsoft/fetch-event-source';
 
 const REFRESH_TOKEN_KEY = 'sunbula_refresh_token';
 
@@ -18,8 +19,6 @@ export class AuthService {
   private readonly _user         = signal<UserDto | null>(null);
   private readonly _accessToken  = signal<string | null>(null);
   private readonly _refreshToken = signal<string | null>(null);
-
-  private coinEventSource: EventSource | null = null;
 
   readonly user            = this._user.asReadonly();
   readonly accessToken     = this._accessToken.asReadonly();
@@ -72,8 +71,16 @@ export class AuthService {
   setTokens(accessToken: string, refreshToken: string, expiresAt: string): void {
     this._accessToken.set(accessToken);
     this._refreshToken.set(refreshToken);
+
     if (isPlatformBrowser(this.platformId)) {
       localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+
+      // Re-establish connection with new token if already active
+      if (this.sseAbortController) {
+        this.sseAbortController.abort();
+        this.sseAbortController = null;
+      }
+      this.listenToCoinUpdates();
     }
   }
 
@@ -85,40 +92,46 @@ export class AuthService {
     this._user.update(u => u ? { ...u, coinBalance: newBalance } : null);
   }
 
+  private sseAbortController: AbortController | null = null;
+
   private listenToCoinUpdates(): void {
-    if (!isPlatformBrowser(this.platformId) || this.coinEventSource) return;
+    if (!isPlatformBrowser(this.platformId)) return;
+    if (this.sseAbortController) return;
     
-    // Connect to the SSE endpoint
     const url = `${environment.apiUrl}/api/v1/Authentication/coins/listen`;
-    
-    // Note: Standard EventSource does not support Authorization headers easily.
-    // If your backend relies on cookies for SSE it works. If it requires a bearer token in the headers,
-    // you typically append it to the query string e.g. ?token=... or use a polyfill.
-    // Assuming backend handles it via cookies or we pass the token in URL:
     const token = this._accessToken();
-    const sseUrl = token ? `${url}?access_token=${token}` : url;
-    
-    this.coinEventSource = new EventSource(sseUrl);
+    if (!token) return;
 
-    this.coinEventSource.onmessage = (event) => {
-      try {
-        const data = JSON.parse(event.data);
-        if (typeof data.coinBalance === 'number') {
-          this.updateCoinBalance(data.coinBalance);
+    this.sseAbortController = new AbortController();
+
+    fetchEventSource(url, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      signal: this.sseAbortController.signal,
+      onmessage: (event) => {
+        try {
+          const data = JSON.parse(event.data);
+          const newBalance = data.newBalance ?? data.coinBalance ?? data.balance ?? data.coins ?? data.totalBalance;
+          if (typeof newBalance === 'number') {
+            this.updateCoinBalance(newBalance);
+          }
+        } catch (e) {
+          // Heartbeat or malformed data
         }
-      } catch (e) {
-        console.error('Error parsing coin stream message:', e);
+      },
+      onerror: (error) => {
+        console.error('SSE Error for Coins:', error);
+        // Let fetchEventSource handle transient retries
+        // Throw an error or return a specific value if you want to stop retrying.
+      },
+      onclose: () => {
+        this.sseAbortController = null;
       }
-    };
-
-    this.coinEventSource.onerror = (error) => {
-      console.error('SSE Error for Coins:', error);
-      // Close to prevent infinite retry loops on hard auth errors
-      if (this.coinEventSource) {
-        this.coinEventSource.close();
-        this.coinEventSource = null;
-      }
-    };
+    }).catch(err => {
+      console.error('SSE Connection failed:', err);
+    });
   }
 
   refreshTokens(): Observable<AuthResponseDto> {
@@ -155,9 +168,9 @@ export class AuthService {
   }
 
   private clearTokens(): void {
-    if (this.coinEventSource) {
-      this.coinEventSource.close();
-      this.coinEventSource = null;
+    if (this.sseAbortController) {
+      this.sseAbortController.abort();
+      this.sseAbortController = null;
     }
     this._user.set(null);
     this._accessToken.set(null);

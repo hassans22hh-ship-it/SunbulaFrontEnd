@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { AuthService } from '@core/auth/auth.service';
 import { TimerStore } from '../timer/store/timer.store';
@@ -31,7 +31,7 @@ import { Router } from '@angular/router';
   styleUrl: './dashboard.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardComponent implements OnInit {
+export class DashboardComponent implements OnInit, OnDestroy {
   protected readonly auth  = inject(AuthService);
   protected readonly timer = inject(TimerStore);
   protected readonly tasks = inject(TasksStore);

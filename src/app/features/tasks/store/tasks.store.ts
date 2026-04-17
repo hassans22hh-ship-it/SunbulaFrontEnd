@@ -257,11 +257,13 @@ export const TasksStore = signalStore(
     async restore(id: string): Promise<void> {
       try {
         await firstValueFrom(api.unarchive(id));
-        // Remove from archived list
+        // Remove from archived list and re-fetch to put back into active list
+        const updated = await firstValueFrom(api.getById(id));
         patchState(store, {
           archivedItems: store.archivedItems().filter(t => t.id !== id),
+          tasks: [...store.tasks().filter(t => t.id !== id), updated]
         });
-        toast.success('Task restored');
+        toast.success('Task restored & moved to active list');
       } catch (e: unknown) {
         toast.error((e as { message: string }).message);
       }

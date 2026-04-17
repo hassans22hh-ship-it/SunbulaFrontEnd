@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
   template: `
     <div class="donut-container">
       <div class="donut-header">
-        <h3 class="donut-title">📊 Behavior Breakdown</h3>
+        <h3 class="donut-title">{{ title() }}</h3>
         <span class="donut-subtitle">{{ totalTimeLabel() }} total</span>
       </div>
 
@@ -184,6 +184,7 @@ import { CommonModule } from '@angular/common';
 })
 export class SbBehaviorDonutComponent {
   breakdown = input<any[]>([]); // BehaviorBreakdownItem[]
+  title = input<string>('Behavior Breakdown');
 
   totalSeconds = computed(() => {
     return this.breakdown().reduce((acc, curr) => acc + (curr.totalSeconds || 0), 0);

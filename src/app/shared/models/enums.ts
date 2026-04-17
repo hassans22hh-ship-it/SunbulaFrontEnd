@@ -126,11 +126,4 @@ export const STREAK_MILESTONES = [
   { days: 30, bonus: 700 },
 ];
 
-// ─── Paged Result ─────────────────────────────────────────────────────────────
-export interface PagedResult<T> {
-  data:       T[];
-  page:       number;
-  pageSize:   number;
-  totalCount: number;
-  totalPages: number;
-}
+// PagedResult is defined in timer.models.ts — do not duplicate here

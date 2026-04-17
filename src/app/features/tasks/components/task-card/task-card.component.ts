@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output, signal } from '@angular/core';
 import { TaskDto } from '@shared/models/task.models';
 import { RelativeDatePipe } from '@shared/pipes/relative-date.pipe';
 import { DurationPipe } from '@shared/pipes/duration.pipe';
@@ -18,9 +18,15 @@ export class TaskCardComponent {
 
   task = input.required<TaskDto>();
   cardClicked = output<TaskDto>();
-  menuClicked = output<void>();
+  deleteClicked = output<void>();
   duplicateClicked = output<void>();
   editClicked = output<void>();
+  completeClicked = output<void>();
+  activateClicked = output<void>();
+  archiveClicked = output<void>();
+  unarchiveClicked = output<void>();
+
+  showMenu = signal(false);
 
   readonly isActive = computed(() => this.timer.activeSessions().some((s: any) => s.taskId === this.task().id));
   
@@ -39,17 +45,51 @@ export class TaskCardComponent {
 
   onIconClick(e: MouseEvent): void {
     e.stopPropagation();
-    this.menuClicked.emit();
+    this.showMenu.set(!this.showMenu());
+  }
+
+  onDeleteClick(e: MouseEvent): void {
+    e.stopPropagation();
+    this.showMenu.set(false);
+    this.deleteClicked.emit();
   }
 
   onDuplicateClick(e: MouseEvent): void {
     e.stopPropagation();
+    this.showMenu.set(false);
     this.duplicateClicked.emit();
   }
 
   onEditClick(e: MouseEvent): void {
     e.stopPropagation();
+    this.showMenu.set(false);
     this.editClicked.emit();
+  }
+
+  onCompleteClick(e: MouseEvent): void {
+    e.stopPropagation();
+    this.showMenu.set(false);
+    this.completeClicked.emit();
+  }
+
+  onActivateClick(e: MouseEvent): void {
+    e.stopPropagation();
+    this.showMenu.set(false);
+    this.activateClicked.emit();
+  }
+
+  onArchiveToggleClick(e: MouseEvent): void {
+    e.stopPropagation();
+    this.showMenu.set(false);
+    if (this.task().isArchived) {
+      this.unarchiveClicked.emit();
+    } else {
+      this.archiveClicked.emit();
+    }
+  }
+
+  closeMenu(): void {
+    this.showMenu.set(false);
   }
 
   toggleTimer(event: Event): void {

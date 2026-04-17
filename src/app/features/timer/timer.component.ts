@@ -19,13 +19,15 @@ import { SbStreakCalendarComponent } from './components/streak-calendar/streak-c
 import { SbBehaviorDonutComponent } from './components/behavior-donut/behavior-donut.component';
 import { DailyTransactionApiService } from './services/daily-transaction.api.service';
 import { AuthService } from '@core/auth/auth.service';
+import { DailySummaryDto, TimeSessionDto, CreateManualSessionDto } from '@shared/models/timer.models';
+import { getSessionBehavior, getSessionCoins, getSessionDuration } from '@shared/utils/session.util';
 @Component({
   selector: 'sb-timer',
   standalone: true,
   imports: [
     CommonModule, FormsModule, DatePipe,
     SbCardComponent, SbEmptyStateComponent, SbSpinnerComponent, SbModalComponent, SbButtonComponent,
-    SbBehaviorBadgeComponent, DurationPipe, DecimalPipe, RelativeDatePipe, PageTransitionDirective,
+    SbBehaviorBadgeComponent, DurationPipe, DecimalPipe, PageTransitionDirective,
     TimerControlsComponent, SbIconCoinComponent, SbStreakCalendarComponent, SbBehaviorDonutComponent
   ],
   templateUrl: './timer.component.html',
@@ -37,20 +39,38 @@ export class TimerComponent implements OnInit {
   protected readonly tasks = inject(TasksStore);
   private readonly statsApi = inject(DailyTransactionApiService);
 
-  readonly history7Days = signal<any[]>([]);
+  readonly history7Days = signal<DailySummaryDto[]>([]);
   readonly currentStreak = signal<number>(0);
 
   readonly todayBreakdown = computed(() => {
-    const todayStr = new Date().toISOString().split('T')[0];
-    const todayData = this.history7Days().find(h => h.date && h.date.startsWith(todayStr));
-    return todayData?.behaviorBreakdown || [];
+    const sessions = this.timer.sessions();
+    if (sessions.length === 0) return [];
+
+    const total = sessions.reduce((sum, s) => sum + getSessionDuration(s), 0);
+    if (total === 0) return [];
+
+    const map = new Map<number, number>();
+    for (const s of sessions) {
+      const b = getSessionBehavior(s);
+      if (b !== undefined && b !== null) {
+        map.set(b, (map.get(b) || 0) + getSessionDuration(s));
+      }
+    }
+
+    return Array.from(map.entries()).map(([behaviorType, totalSeconds]) => ({
+      behaviorType,
+      totalSeconds,
+      percentage: (totalSeconds / total) * 100
+    }));
   });
 
   readonly isEditModalOpen = signal(false);
-  readonly sessionToEdit = signal<any>(null);
+  readonly sessionToEdit = signal<TimeSessionDto | null>(null);
   
   // Add Manual Session Modal State
-  readonly isAddModalOpen = signal(false);
+  protected readonly isAddModalOpen = signal(false);
+  protected readonly isConfirmDeleteOpen = signal(false);
+  protected readonly sessionIdToDelete = signal<string | null>(null);
   readonly addTaskId = signal('');
   readonly addStartTime = signal(this.toLocalISO(new Date()));
   readonly addEndTime = signal(this.toLocalISO(new Date()));
@@ -114,10 +134,10 @@ export class TimerComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Timer.initialize() already called by APP_INITIALIZER (BUG-02)
+    // Timer.initialize() already called by APP_INITIALIZER
     this.tasks.load();
-    // BUG-04: Load sessions for today by default
-    this.timer['loadByDate']();
+    // Load sessions for today by default
+    this.timer.loadByDate();
     this.loadStats();
   }
 
@@ -126,20 +146,42 @@ export class TimerComponent implements OnInit {
       const hist = await firstValueFrom(this.statsApi.getLastNDays(7));
       const streak = await firstValueFrom(this.statsApi.getStreak());
       this.history7Days.set((hist as any)?.data ?? hist ?? []);
-      this.currentStreak.set((streak as any)?.data ?? streak ?? 0);
+      
+      const s = (streak as any)?.data ?? streak;
+      if (typeof s === 'number') {
+        this.currentStreak.set(s);
+      } else if (s) {
+        this.currentStreak.set(s.streak ?? s.currentStreak ?? s.value ?? s.count ?? s.days ?? 0);
+      } else {
+        this.currentStreak.set(0);
+      }
     } catch (e) {
       console.error('Failed to load timer stats:', e);
     }
   }
 
   deleteSession(id: string): void {
-    this.timer['deleteSession'](id);
+    this.sessionIdToDelete.set(id);
+    this.isConfirmDeleteOpen.set(true);
   }
 
-  async editSession(session: any): Promise<void> {
+  async confirmDelete(): Promise<void> {
+    const id = this.sessionIdToDelete();
+    if (id) {
+      await this.timer.deleteSession(id);
+      this.closeConfirmDelete();
+    }
+  }
+
+  closeConfirmDelete(): void {
+    this.isConfirmDeleteOpen.set(false);
+    this.sessionIdToDelete.set(null);
+  }
+
+  async editSession(session: TimeSessionDto): Promise<void> {
     try {
-      // BUG-FIX: Always fetch fresh data before editing as requested
-      const s: any = await this.timer['getById'](session.id);
+      // Always fetch fresh data before editing
+      const s = await this.timer.getById(session.id);
       
       // Enrich with task info for display
       const t = this.tasks.tasks().find(task => task.id === s.taskId);
@@ -173,36 +215,42 @@ export class TimerComponent implements OnInit {
        // Optional: Add a toast warning here if end < start
     }
 
+    const startTime = new Date(this.editStartTime()).toISOString();
+    const endTime = this.editEndTime() ? new Date(this.editEndTime()).toISOString() : null;
+
+    // Recalculate duration and coins on the fly for the payload
+    const updatedSession = { ...session, startTime, endTime };
+    const coinsEarned = getSessionCoins(updatedSession);
+
     const payload = {
-      startTime: new Date(this.editStartTime()).toISOString(),
-      endTime: this.editEndTime() ? new Date(this.editEndTime()).toISOString() : null,
-      behaviorType: session.behaviorType,
-      coinsEarned: session.coinsEarned || 0,
-      notes: session.notes ?? ''
+      startTime,
+      endTime,
+      behaviorType: getSessionBehavior(session),
+      coinsEarned: coinsEarned
     };
 
-    await this.timer['updateSession'](session.id, payload);
+    await this.timer.updateSession(session.id, payload);
     this.closeEditModal();
   }
 
   startTimer(taskId: string): void {
-    this.timer['start'](taskId);
+    this.timer.start(taskId);
   }
 
   stopTimer(sessionId: string): void {
-    this.timer['stop'](sessionId);
+    this.timer.stop(sessionId);
   }
 
   stopAllTimers(): void {
-    this.timer['stopAll']();
+    this.timer.stopAll();
   }
 
   pauseTimer(sessionId: string): void {
-    this.timer['pauseTimer'](sessionId);
+    this.timer.pauseTimer(sessionId);
   }
 
   resumeTimer(sessionId: string): void {
-    this.timer['resumeTimer'](sessionId);
+    this.timer.resumeTimer(sessionId);
   }
 
   openAddModal(): void {
@@ -228,11 +276,11 @@ export class TimerComponent implements OnInit {
       notes: this.addNotes()
     };
 
-    await this.timer['addManualSession'](payload);
+    await this.timer.addManualSession(payload);
     this.closeAddModal();
   }
 
-  getElapsed(session: any): number {
+  getElapsed(session: TimeSessionDto): number {
     if (!session?.startTime) return 0;
     const start = new Date(session.startTime).getTime();
     const now = Date.now();

@@ -1,11 +1,30 @@
-.mini-timer-bar {
+.mini-timer-container {
   position: fixed;
-  bottom: 1.5rem;
+  bottom: 2rem;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 100;
+  z-index: 1000;
   width: 90%;
   max-width: 500px;
+  display: flex;
+  flex-direction: column-reverse; /* Newest on top? Or bottom-up? User asked for list. */
+  gap: 0.75rem;
+  pointer-events: none; /* Allow clicks through to page if not on a bar */
+}
+
+.mini-timer-bar {
+  width: 100%;
+  pointer-events: auto; /* Re-enable for the bar itself */
+  transition: all 0.3s ease;
+
+  &--primary {
+    transform: scale(1.02);
+    z-index: 2;
+    .mini-timer-content {
+      border-color: var(--color-primary);
+      box-shadow: 0 15px 35px -5px rgba(var(--color-primary-rgb), 0.2);
+    }
+  }
 }
 
 .animate-slideUp {
@@ -13,8 +32,8 @@
 }
 
 @keyframes slideUp {
-  0% { transform: translate(-50%, 150%); opacity: 0; }
-  100% { transform: translate(-50%, 0); opacity: 1; }
+  0% { transform: translateY(150%); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
 }
 
 .mini-timer-content {

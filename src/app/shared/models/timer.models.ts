@@ -17,6 +17,8 @@ export interface TimeSessionDto {
   // Fallbacks for backend variations
   title?:          string;
   duration?:       number;
+  totalSeconds?:   number;
+  durationMinutes?: number;
   coins?:          number;
   task?: { 
     title: string; 

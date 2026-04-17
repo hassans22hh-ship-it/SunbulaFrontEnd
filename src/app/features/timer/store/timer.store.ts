@@ -3,9 +3,9 @@ import { patchState, signalStore, withComputed, withMethods, withState } from '@
 import { TimeSessionApiService } from '../services/time-session.api.service';
 import { AuthService } from '@core/auth/auth.service';
 import { ToastService } from '@shared/ui/toast/toast.service';
-import { TimeSessionDto, StartSessionDto } from '@shared/models/timer.models';
+import { TimeSessionDto, StartSessionDto, PagedResult } from '@shared/models/timer.models';
+import { getSessionBehavior, getSessionCoins, getSessionDuration, normaliseTimestamp } from '@shared/utils/session.util';
 import { TasksStore } from '../../tasks/store/tasks.store';
-import { PagedResult } from '@shared/models/enums';
 import { firstValueFrom } from 'rxjs';
 
 function todayStr(): string {
@@ -14,9 +14,9 @@ function todayStr(): string {
 }
 
 interface TimerState {
-  rawActiveSessions: any[];
-  rawSessions:       any[];
-  pagedResult:    PagedResult<any> | null;
+  rawActiveSessions: TimeSessionDto[];
+  rawSessions:       TimeSessionDto[];
+  pagedResult:    PagedResult<TimeSessionDto> | null;
   isLoading:      boolean;
   error:          string | null;
   ticker:         number;
@@ -41,38 +41,49 @@ export const TimerStore = signalStore(
   withComputed((state) => {
     const tasksStore = inject(TasksStore);
 
-    const enrichSession = (session: any): TimeSessionDto => {
+    const enrichSession = (session: TimeSessionDto): TimeSessionDto => {
       const allTasks = tasksStore.tasks();
-      const task = (allTasks as any[]).find((t: any) => t.id === session.taskId);
+      const task = allTasks.find(t => t.id === session.taskId);
+      
+      const behavior = getSessionBehavior(session) ?? (task?.behaviorType as any) ?? 1;
 
-      let startTime = session.startTime;
-      let endTime = session.endTime;
+      const enriched: TimeSessionDto = {
+        ...session,
+        startTime: normaliseTimestamp(session.startTime) as string,
+        endTime: normaliseTimestamp(session.endTime),
+        taskTitle: task?.title || session.taskTitle || session.title || 'Focus Session',
+        taskColor: task?.color || session.taskColor || '#52B788',
+        taskBehavior: behavior,
+        taskEmoji: task?.emoji || session.taskEmoji || '',
+        durationSeconds: getSessionDuration(session),
+      };
 
       return {
-        ...session,
-        startTime,
-        endTime,
-        taskTitle: task?.title || session.taskTitle || session.taskName || session.title || 'Focus Session',
-        taskColor: task?.color || session.taskColor || '#52B788',
-        taskBehavior: task?.behaviorType ?? session.taskBehavior ?? session.behaviorType,
-        taskEmoji: task?.emoji || (session as any).taskEmoji || '',
-        durationSeconds: session.durationSeconds ?? session.duration ?? session.totalSeconds ?? (session.durationMinutes ? session.durationMinutes * 60 : 0),
+        ...enriched,
+        coinsEarned: getSessionCoins(enriched),
       };
     };
 
     return {
       activeSessions: computed((): TimeSessionDto[] => {
-        const _ = state.ticker();
+        const _tick = state.ticker(); 
+        const now = new Date().getTime();
+
         return state.rawActiveSessions().map(s => {
           const e = enrichSession(s);
-          let elapsed = e.durationSeconds || 0;
-          if (!e.isPaused && e.startTime) {
+          const isPaused = e.isPaused === true;
+          
+          let elapsed = getSessionDuration(e);
+          
+          if (!isPaused && e.startTime) {
             const start = new Date(e.startTime).getTime();
-            const now = new Date().getTime();
-            elapsed = Math.floor((now - start) / 1000) + (e.durationSeconds || 0);
+            elapsed = Math.max(0, Math.floor((now - start) / 1000) + (e.durationSeconds || 0));
+          } else {
+            // If paused, we just keep the base duration
+            elapsed = e.durationSeconds || getSessionDuration(e);
           }
-          e.durationSeconds = elapsed;
-          return e;
+
+          return { ...e, isPaused, durationSeconds: elapsed };
         });
       }),
       sessions: computed((): TimeSessionDto[] => {
@@ -90,7 +101,7 @@ export const TimerStore = signalStore(
         .reduce((acc: number, s: TimeSessionDto) => acc + (s.durationSeconds ?? 0), 0);
     }),
 
-    // BUG-04: Date navigation
+    // Date navigation
     canGoNext: computed(() => selectedDate() < todayStr()),
     dateLabel: computed(() => {
       const sel = selectedDate();
@@ -227,7 +238,9 @@ export const TimerStore = signalStore(
           });
           if (store.rawActiveSessions().length === 0) stopTicker();
           toast.success(`Timer stopped — earned ${stopped.coinsEarned?.toFixed(1) ?? 0} 🪙`);
-          await auth.refreshUserProfile();
+          
+          // Small delay ensures backend has finished processing coin transaction
+          setTimeout(() => auth.refreshUserProfile(), 600);
           await loadByDate(store.selectedDate());
         } catch (e: unknown) {
            patchState(store, { isLoading: false });
@@ -272,7 +285,7 @@ export const TimerStore = signalStore(
           await firstValueFrom(api.manual(dto));
           toast.success('Manual session added');
           await loadByDate(store.selectedDate());
-          await auth.refreshUserProfile();
+          setTimeout(() => auth.refreshUserProfile(), 600);
         } catch (e: unknown) {
           patchState(store, { isLoading: false });
           toast.error((e as { message: string }).message ?? 'Failed to add manual session');
@@ -289,6 +302,7 @@ export const TimerStore = signalStore(
             isLoading: false
           });
           toast.success('Session updated');
+          setTimeout(() => auth.refreshUserProfile(), 600);
         } catch (e: unknown) {
           patchState(store, { isLoading: false });
           toast.error((e as { message: string }).message ?? 'Failed to update session');
@@ -296,7 +310,6 @@ export const TimerStore = signalStore(
       },
 
       async deleteSession(id: string): Promise<void> {
-        if (!confirm('Are you sure you want to delete this session?')) return;
         patchState(store, { isLoading: true });
         try {
           await firstValueFrom(api.delete(id));
@@ -305,6 +318,7 @@ export const TimerStore = signalStore(
             isLoading: false
           });
           toast.success('Session deleted');
+          setTimeout(() => auth.refreshUserProfile(), 600);
         } catch (e: unknown) {
           patchState(store, { isLoading: false });
           toast.error((e as { message: string }).message ?? 'Failed to delete session');

@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy, input, computed, signal } from '@angular/core';
-import { CommonModule, DecimalPipe } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { DailyTrendDto } from '@shared/models/reports.models';
 
 export interface HeatmapDay {
@@ -12,7 +12,7 @@ export interface HeatmapDay {
 @Component({
   selector: 'sb-heatmap',
   standalone: true,
-  imports: [CommonModule, DecimalPipe],
+  imports: [CommonModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="heatmap-container">

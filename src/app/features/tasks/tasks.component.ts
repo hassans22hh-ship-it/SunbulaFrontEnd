@@ -16,6 +16,8 @@ import { AuthService } from '@core/auth/auth.service';
 import { TaskCardComponent } from './components/task-card/task-card.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
+import { CategoriesStore } from './store/categories.store';
+import { EmojiPickerComponent } from '@shared/ui/emoji-picker/emoji-picker.component';
 
 @Component({
   selector: 'sb-tasks',
@@ -24,7 +26,7 @@ import { Router, RouterLink } from '@angular/router';
     SbButtonComponent, SbModalComponent, SbEmptyStateComponent,
     SbSpinnerComponent, SbConfirmDialogComponent,
     ReactiveFormsModule, PageTransitionDirective, TaskCardComponent, CoinsPipe,
-    RouterLink,
+    RouterLink, EmojiPickerComponent
   ],
   templateUrl: './tasks.component.html',
   styleUrl: './tasks.component.scss',
@@ -35,17 +37,21 @@ export class TasksComponent implements OnInit {
   protected readonly folders = inject(FoldersStore);
   protected readonly auth    = inject(AuthService);
   protected readonly timer   = inject(TimerStore);
+  protected readonly categoriesStore = inject(CategoriesStore);
   private readonly fb        = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router     = inject(Router);
 
   readonly showForm       = signal(false);
   readonly showFolderForm = signal(false);
+  readonly showCategoryForm = signal(false);
+  readonly showEmojiPicker = signal(false);
   readonly showDelete     = signal(false);
   readonly editing        = signal<TaskDto | null>(null);
   readonly deleting       = signal<TaskDto | null>(null);
   readonly tab            = signal<'active' | 'completed' | 'archived' | 'all'>('active');
   readonly viewMode       = signal<'grid' | 'list'>('grid');
+  readonly showSidebar    = signal(false);
 
   protected readonly behaviors = [
     BehaviorCategory.Positive, BehaviorCategory.Neutral,
@@ -58,6 +64,7 @@ export class TasksComponent implements OnInit {
     color:        ['#52B788', Validators.required],
     behaviorType: [BehaviorCategory.Positive as BehaviorCategory, Validators.required],
     folderId:     [''],
+    categoryIds:  [[] as string[]],
   });
 
   readonly folderForm = this.fb.nonNullable.group({
@@ -65,20 +72,37 @@ export class TasksComponent implements OnInit {
     color: ['#52B788', Validators.required],
   });
 
+  readonly categoryForm = this.fb.nonNullable.group({
+    name:  ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+    color: ['#B1a', Validators.required],
+  });
+
   readonly searchCtrl = new FormControl('');
 
   ngOnInit(): void {
     this.store.load();
     this.folders.load();
+    this.categoriesStore.load();
 
     this.searchCtrl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
       this.store.setSearch(val ?? '', this.store.filter().behaviorType);
     });
   }
 
+  setTab(t: 'active' | 'completed' | 'archived' | 'all') {
+    this.tab.set(t);
+    this.showSidebar.set(false);
+    if (t === 'archived') {
+      this.store.loadArchived();
+    } else {
+      this.store.load();
+    }
+  }
+
   openCreate(): void {
     this.editing.set(null);
-    this.form.reset({ title: '', emoji: '', color: '#52B788', behaviorType: BehaviorCategory.Positive, folderId: '' });
+    this.form.reset({ title: '', emoji: '', color: '#52B788', behaviorType: BehaviorCategory.Positive, folderId: '', categoryIds: [] });
+    this.showEmojiPicker.set(false);
     this.showForm.set(true);
   }
 
@@ -87,7 +111,9 @@ export class TasksComponent implements OnInit {
     this.form.patchValue({
       title: task.title, emoji: task.emoji ?? '', color: task.color,
       behaviorType: task.behaviorType, folderId: task.folderId ?? '',
+      categoryIds: task.categories?.map(c => c.id) ?? []
     });
+    this.showEmojiPicker.set(false);
     this.showForm.set(true);
   }
 
@@ -134,6 +160,18 @@ export class TasksComponent implements OnInit {
     this.showDelete.set(false);
   }
 
+  markActive(task: TaskDto): void {
+    this.store.update(task.id, {
+      title: task.title,
+      emoji: task.emoji ?? '',
+      color: task.color,
+      behaviorType: task.behaviorType,
+      folderId: task.folderId ?? undefined,
+      categoryIds: task.categories?.map(c => c.id) ?? [],
+      status: 0 // TaskStatus.Active
+    } as any);
+  }
+
   selectFolder(folderId: string | undefined): void {
     this.store.setFolder(folderId);
   }
@@ -149,14 +187,38 @@ export class TasksComponent implements OnInit {
     this.showFolderForm.set(false);
   }
 
-  // BUG-09: Clear all filters
-  clearFilters(): void {
-    this.searchCtrl.setValue('');
-    this.tab.set('active');
-    this.store.load();
+  openCategoryCreate(): void {
+    this.categoryForm.reset({ name: '', color: '#B1a' });
+    this.showCategoryForm.set(true);
   }
 
-  // BUG-09: Format elapsed for timer badge in header
+  onSaveCategory(): void {
+    if (this.categoryForm.invalid) return;
+    this.categoriesStore.create(this.categoryForm.getRawValue());
+    this.showCategoryForm.set(false);
+  }
+
+  onEmojiSelected(emoji: string): void {
+    this.form.patchValue({ emoji });
+    this.showEmojiPicker.set(false);
+  }
+
+  toggleCategory(categoryId: string): void {
+    const current = this.form.get('categoryIds')?.value ?? [];
+    if (current.includes(categoryId)) {
+      this.form.patchValue({ categoryIds: current.filter(id => id !== categoryId) });
+    } else {
+      this.form.patchValue({ categoryIds: [...current, categoryId] });
+    }
+  }
+
+  // Clear all filters
+  clearFilters(): void {
+    this.searchCtrl.setValue('');
+    this.setTab('active');
+  }
+
+  // Format elapsed for timer badge in header
   formatElapsed(seconds: number): string {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);

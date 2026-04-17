@@ -23,7 +23,7 @@ function initApp(): () => Promise<void> {
   return async () => {
     theme.init();
     await auth.initialize();
-    // BUG-02: Restore active session on app boot
+    // Restore active session on app boot
     await timer.initialize();
   };
 }
@@ -34,7 +34,6 @@ export const appConfig: ApplicationConfig = {
     provideRouter(APP_ROUTES, withComponentInputBinding(), withViewTransitions()),
     provideHttpClient(withInterceptors([authInterceptor, errorInterceptor])),
     provideAnimationsAsync(),
-    { provide: LOCALE_ID, useValue: 'ar-EG' },
     {
       provide: APP_INITIALIZER,
       useFactory: initApp,

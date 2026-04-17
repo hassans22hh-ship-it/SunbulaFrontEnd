@@ -11,11 +11,63 @@
     <sb-spinner size="lg" />
   } @else {
     <div class="stats-grid">
-      <sb-card><div class="stat"><span class="stat-icon">⏱️</span><div class="stat-info"><span class="stat-value">{{ totalTrackedAllTime | duration }}</span><span class="stat-label">Total tracked</span></div></div></sb-card>
-      <sb-card><div class="stat"><span class="stat-icon">📋</span><div class="stat-info"><span class="stat-value">{{ sessions().length }}</span><span class="stat-label">Total sessions</span></div></div></sb-card>
-      <sb-card><div class="stat"><span class="stat-icon">🪙</span><div class="stat-info"><span class="stat-value">{{ totalCoinsAllTime | coins }}</span><span class="stat-label">Total coins earned</span></div></div></sb-card>
-      <sb-card><div class="stat"><span class="stat-icon">🔥</span><div class="stat-info"><span class="stat-value">{{ streak() }}</span><span class="stat-label">Current streak</span></div></div></sb-card>
+      <sb-card><div class="stat"><div class="stat-icon flex items-center justify-center p-3 bg-primary/10 rounded-xl"><i class="fa-solid fa-stopwatch text-primary text-xl"></i></div><div class="stat-info"><span class="stat-value">{{ totalTrackedAllTime() | duration }}</span><span class="stat-label">Total tracked</span></div></div></sb-card>
+      <sb-card><div class="stat"><div class="stat-icon flex items-center justify-center p-3 bg-primary/10 rounded-xl"><i class="fa-solid fa-clipboard-list text-primary text-xl"></i></div><div class="stat-info"><span class="stat-value">{{ sessions().length }}</span><span class="stat-label">Total sessions</span></div></div></sb-card>
+      <sb-card><div class="stat"><div class="stat-icon flex items-center justify-center p-3 bg-amber-500/10 rounded-xl"><i class="fa-solid fa-coins text-amber-500 text-xl"></i></div><div class="stat-info"><span class="stat-value">{{ totalCoinsAllTime() | coins }}</span><span class="stat-label">Total coins earned</span></div></div></sb-card>
+      <sb-card><div class="stat"><div class="stat-icon flex items-center justify-center p-3 bg-orange-500/10 rounded-xl"><i class="fa-solid fa-fire text-orange-500 text-xl"></i></div><div class="stat-info"><span class="stat-value">{{ streak() }}</span><span class="stat-label">Current streak</span></div></div></sb-card>
     </div>
+ 
+    @if (taskSummary()) {
+      <div class="flex items-center justify-between mt-4 mb-4">
+        <h2 class="subsection-title mb-0">🏗️ Tasks Overview</h2>
+      </div>
+      <div class="stats-grid mb-10">
+        <sb-card>
+          <div class="stat">
+            <div class="stat-icon flex items-center justify-center p-3 bg-blue-500/10 rounded-xl">
+              <i class="fa-solid fa-list-check text-blue-500 text-xl"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value">{{ taskSummary()?.totalTasks }}</span>
+              <span class="stat-label">Total tasks</span>
+            </div>
+          </div>
+        </sb-card>
+        <sb-card>
+          <div class="stat">
+            <div class="stat-icon flex items-center justify-center p-3 bg-green-500/10 rounded-xl">
+              <i class="fa-solid fa-check-double text-green-500 text-xl"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value">{{ taskSummary()?.completedTasks }}</span>
+              <span class="stat-label">Completed</span>
+            </div>
+          </div>
+        </sb-card>
+        <sb-card>
+          <div class="stat">
+            <div class="stat-icon flex items-center justify-center p-3 bg-indigo-500/10 rounded-xl">
+              <i class="fa-solid fa-hourglass-half text-indigo-500 text-xl"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value">{{ taskSummary()?.activeTasks }}</span>
+              <span class="stat-label">Active focus</span>
+            </div>
+          </div>
+        </sb-card>
+        <sb-card>
+          <div class="stat">
+            <div class="stat-icon flex items-center justify-center p-3 bg-purple-500/10 rounded-xl">
+              <i class="fa-solid fa-box-archive text-purple-500 text-xl"></i>
+            </div>
+            <div class="stat-info">
+              <span class="stat-value">{{ taskSummary()?.archivedTasks }}</span>
+              <span class="stat-label">Archived</span>
+            </div>
+          </div>
+        </sb-card>
+      </div>
+    }
 
     <!-- Heatmap & Analytics Section -->
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-10">
@@ -48,7 +100,7 @@
             <sb-card padding="sm">
                <div class="flex flex-col">
                   <span class="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Peak Productivity</span>
-                  <span class="text-lg font-bold text-text">{{ peakDay || 'N/A' | date:'longDate' }}</span>
+                  <span class="text-lg font-bold text-text">{{ peakDay() ? (peakDay() | date:'longDate':'':'en-US') : 'N/A' }}</span>
                </div>
             </sb-card>
             <sb-card padding="sm">
@@ -61,30 +113,25 @@
       </div>
     </div>
 
-    @let stats = summary() ? summary()?.behaviorBreakdown : report()?.behaviorBreakdown;
-    @if (stats?.length) {
-      <h2 class="subsection-title">{{ range() === 'today' ? "Today's" : "Range" }} Breakdown</h2>
-      <div class="behavior-grid">
-        @for (item of stats; track item.behaviorType) {
-          <sb-card padding="sm">
-            <div class="behavior-item">
-              <span class="behavior-label">{{ behaviorMeta[item.behaviorType].emoji }} {{ behaviorMeta[item.behaviorType].label }}</span>
-              <span class="behavior-time">{{ item.totalSeconds | duration }}</span>
-              <div class="bar"><div class="bar-fill" [style.width.%]="item.percentage" [style.background]="'var(' + behaviorMeta[item.behaviorType].colorVar + ')'"></div></div>
-              <span class="behavior-pct">{{ item.percentage | number:'1.0-0' }}%</span>
-            </div>
-          </sb-card>
-        }
+    @let stats = (summary() ? summary()?.behaviorBreakdown : rangeReport()?.behaviorBreakdown) || [];
+    @if (stats.length) {
+      <div class="mb-8">
+        <sb-behavior-donut 
+          [breakdown]="stats" 
+          [title]="range() === 'today' ? 'Today Productivity' : 'Range Breakdown'" />
       </div>
     }
 
-    @if (report()?.topTasks?.length) {
+    @if (rangeReport()?.topTasks?.length) {
       <h2 class="subsection-title">Top Tasks in Period</h2>
       <div class="behavior-grid">
-        @for (task of report()!.topTasks; track task.taskId) {
+        @for (task of rangeReport()!.topTasks; track task.taskId) {
           <sb-card padding="sm">
             <div class="behavior-item">
-              <span class="behavior-label">{{ task.taskTitle }}</span>
+              <div class="task-info">
+                @if (task.taskEmoji) { <span class="task-icon">{{ task.taskEmoji }}</span> }
+                <span class="behavior-label">{{ task.taskTitle }}</span>
+              </div>
               <span class="behavior-time">{{ task.totalSeconds | duration }}</span>
               <div class="bar"><div class="bar-fill" [style.width.%]="task.percentage" [style.background]="task.taskColor"></div></div>
               <span class="behavior-pct">{{ task.percentage | number:'1.0-0' }}%</span>
@@ -94,18 +141,8 @@
       </div>
     }
 
-    <h2 class="subsection-title">All-Time Behavior Distribution</h2>
-    <div class="behavior-grid">
-      @for (item of behaviorDistribution; track item.behavior) {
-        <sb-card padding="sm">
-          <div class="behavior-item">
-            <span class="behavior-label">{{ behaviorMeta[item.behavior].emoji }} {{ behaviorMeta[item.behavior].label }}</span>
-            <span class="behavior-time">{{ item.seconds | duration }}</span>
-            <div class="bar"><div class="bar-fill" [style.width.%]="item.pct" [style.background]="'var(' + behaviorMeta[item.behavior].colorVar + ')'"></div></div>
-            <span class="behavior-pct">{{ item.pct }}%</span>
-          </div>
-        </sb-card>
-      }
+    <div class="mb-8">
+      <sb-behavior-donut [breakdown]="behaviorDistribution()" title="All-Time Behavior Distribution" />
     </div>
   }
 </div>

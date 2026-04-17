@@ -1,7 +1,22 @@
 <div class="min-h-screen bg-bg flex flex-col lg:flex-row shadow-2xl rounded-3xl overflow-hidden mr-4 my-4 ml-0 border border-border/30" sbPageTransition>
   
+  <!-- Side Filter Sidebar Overlay (Mobile) -->
+  @if (showSidebar()) {
+    <div class="fixed inset-0 bg-black/50 z-40 lg:hidden" (click)="showSidebar.set(false)"></div>
+  }
+
   <!-- Side Filter Sidebar -->
-  <aside class="w-full lg:w-72 bg-surface p-8 border-r border-border/30 flex flex-col gap-10">
+  <aside 
+    [class.translate-x-0]="showSidebar()"
+    [class.-translate-x-full]="!showSidebar()"
+    class="fixed inset-y-0 left-0 z-50 w-72 lg:static lg:translate-x-0 bg-surface p-8 border-r border-border/30 flex flex-col gap-10 transition-transform duration-300 ease-in-out">
+    
+    <!-- Mobile Close Button -->
+    <button (click)="showSidebar.set(false)" class="lg:hidden absolute top-4 right-4 text-text-subtle">
+      <svg viewBox="0 0 24 24" fill="none" class="w-6 h-6" stroke="currentColor" stroke-width="2.5">
+        <line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
     <!-- Behavior Filter -->
     <div class="space-y-4">
       <h5 class="text-[10px] font-bold uppercase tracking-[0.2em] text-text-subtle">Behavior</h5>
@@ -92,15 +107,19 @@
       <h5 class="text-[10px] font-bold uppercase tracking-[0.2em] text-text-subtle">Status</h5>
       <div class="flex flex-col gap-1">
         <label class="flex items-center gap-3 px-3 py-2 rounded-xl text-text font-bold text-sm cursor-pointer hover:bg-surface-2">
-          <input type="radio" name="status" [checked]="tab() === 'active'" (change)="tab.set('active')" class="w-4 h-4 text-primary focus:ring-primary">
+          <input type="radio" name="status" [checked]="tab() === 'active'" (change)="setTab('active')" class="w-4 h-4 text-primary focus:ring-primary">
           Active
         </label>
         <label class="flex items-center gap-3 px-3 py-2 rounded-xl text-text-muted font-medium text-sm cursor-pointer hover:bg-surface-2">
-          <input type="radio" name="status" [checked]="tab() === 'archived'" (change)="tab.set('archived')" class="w-4 h-4 text-primary focus:ring-primary">
+          <input type="radio" name="status" [checked]="tab() === 'archived'" (change)="setTab('archived')" class="w-4 h-4 text-primary focus:ring-primary">
           Archived
         </label>
         <label class="flex items-center gap-3 px-3 py-2 rounded-xl text-text-muted font-medium text-sm cursor-pointer hover:bg-surface-2">
-          <input type="radio" name="status" [checked]="tab() === 'all'" (change)="tab.set('all')" class="w-4 h-4 text-primary focus:ring-primary">
+          <input type="radio" name="status" [checked]="tab() === 'completed'" (change)="setTab('completed')" class="w-4 h-4 text-primary focus:ring-primary">
+          Completed
+        </label>
+        <label class="flex items-center gap-3 px-3 py-2 rounded-xl text-text-muted font-medium text-sm cursor-pointer hover:bg-surface-2">
+          <input type="radio" name="status" [checked]="tab() === 'all'" (change)="setTab('all')" class="w-4 h-4 text-primary focus:ring-primary">
           All
         </label>
       </div>
@@ -114,21 +133,30 @@
   <!-- Main Content Area -->
   <main class="flex-1 flex flex-col bg-surface">
     <!-- Header -->
-    <header class="p-6 border-b border-border/30 flex items-center justify-between bg-surface/50 backdrop-blur-xl sticky top-0 z-20">
-      <div class="relative w-96 group">
-        <div class="absolute left-4 top-1/2 -translate-y-1/2 text-text-subtle group-focus-within:text-primary transition-colors">
-          <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="2.5">
-            <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+    <header class="p-4 lg:p-6 border-b border-border/30 flex flex-wrap items-center justify-between gap-4 bg-surface/50 backdrop-blur-xl sticky top-0 z-20">
+      <div class="flex items-center gap-4 flex-1 min-w-[300px]">
+        <!-- Mobile Sidebar Toggle -->
+        <button (click)="showSidebar.set(true)" class="lg:hidden p-2 hover:bg-surface-2 rounded-xl text-text-subtle transition-colors">
+          <svg viewBox="0 0 24 24" fill="none" class="w-6 h-6" stroke="currentColor" stroke-width="2.5">
+            <line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line>
           </svg>
+        </button>
+
+        <div class="relative flex-1 group">
+          <div class="absolute left-4 top-1/2 -translate-y-1/2 text-text-subtle group-focus-within:text-primary transition-colors">
+            <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="2.5">
+              <circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+          <input type="text" placeholder="Search tasks..." [formControl]="searchCtrl"
+                 class="w-full h-11 bg-surface-2 border-transparent focus:bg-surface rounded-2xl pl-12 text-sm font-medium transition-all group-focus-within:shadow-lg group-focus-within:shadow-primary/5">
         </div>
-        <input type="text" placeholder="Search tasks..." [formControl]="searchCtrl"
-               class="w-full h-11 bg-surface-2 border-transparent focus:bg-surface rounded-2xl pl-12 text-sm font-medium transition-all group-focus-within:shadow-lg group-focus-within:shadow-primary/5">
       </div>
 
-      <div class="flex items-center gap-6">
-        <div class="flex items-center gap-6 pr-6 border-r border-border/30">
-          <a routerLink="/timer" class="text-sm font-bold text-primary hover:text-primary-light transition-colors">Focus Mode</a>
-          <a routerLink="/tasks/archived" class="text-sm font-bold text-text-muted hover:text-text transition-colors">Archive</a>
+      <div class="flex items-center gap-3 lg:gap-6">
+        <div class="hidden sm:flex items-center gap-3 lg:gap-6 px-3 lg:pr-6 border-r border-border/30">
+          <a routerLink="/timer" class="text-xs lg:text-sm font-bold text-primary hover:text-primary-light transition-colors whitespace-nowrap">Focus Mode</a>
+          <button (click)="setTab('archived')" class="text-xs lg:text-sm font-bold text-text-muted hover:text-text transition-colors whitespace-nowrap">Archive</button>
         </div>
         
         <div class="flex items-center gap-4">
@@ -151,7 +179,7 @@
     </header>
 
     <!-- Tasks Toolbar & Grid -->
-    <div class="flex-1 p-10 overflow-auto">
+    <div class="flex-1 p-4 sm:p-10 overflow-auto">
       <div class="flex items-center justify-between mb-10">
         <div class="flex items-baseline gap-3">
           <h2 class="text-4xl font-display font-bold text-text tracking-tight">Tasks</h2>
@@ -177,18 +205,26 @@
         </div>
       </div>
 
-      @if (store.isLoading()) {
+      @if (store.isLoading() || (tab() === 'archived' && store.archivedLoading())) {
         <div class="flex h-64 items-center justify-center">
           <sb-spinner size="lg" />
         </div>
       } @else {
-        @let currentTasks = tab() === 'active' ? store.activeTasks() : tab() === 'completed' ? store.completedTasks() : tab() === 'all' ? store.tasks() : store.archivedTasks();
+        @let currentTasks = tab() === 'active' ? store.activeTasks() : tab() === 'completed' ? store.completedTasks() : tab() === 'archived' ? store.archivedItems() : store.tasks();
         @if (currentTasks.length === 0) {
           <sb-empty-state icon="✅" heading="No tasks found" message="Try adjusting your filters or create a new task." class="mt-20" />
         } @else {
           <div [class]="viewMode() === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-32' : 'flex flex-col gap-4 pb-32'">
             @for (task of currentTasks; track task.id) {
-              <sb-task-card [task]="task" (cardClicked)="viewTaskDetails($event.id)" (editClicked)="openEdit(task)" (menuClicked)="confirmDelete(task)" (duplicateClicked)="store.duplicate(task.id)"></sb-task-card>
+              <sb-task-card [task]="task" 
+                            (cardClicked)="viewTaskDetails($event.id)" 
+                            (editClicked)="openEdit(task)" 
+                            (deleteClicked)="confirmDelete(task)" 
+                            (duplicateClicked)="store.duplicate(task.id)"
+                            (completeClicked)="store.complete(task.id)"
+                            (archiveClicked)="store.archive(task.id)"
+                            (unarchiveClicked)="store.restore(task.id)"
+                            (activateClicked)="markActive(task)" />
             }
           </div>
         }
@@ -217,9 +253,18 @@
       </div>
 
       <div class="grid grid-cols-2 gap-4">
-        <div class="space-y-1.5">
+        <div class="space-y-1.5 relative">
           <label class="text-xs font-bold text-text-muted uppercase tracking-wider">Emoji Icon</label>
-          <input formControlName="emoji" class="input-field" placeholder="📝">
+          <div class="input-field flex items-center justify-between cursor-pointer" (click)="showEmojiPicker.set(!showEmojiPicker())">
+            <span class="text-lg">{{ form.get('emoji')?.value || '🌱' }}</span>
+            <span class="text-xs text-text-subtle">Pick</span>
+          </div>
+          
+          @if (showEmojiPicker()) {
+            <div class="absolute top-16 left-0 z-50 bg-surface shadow-2xl border border-border/50 rounded-xl p-2 w-72">
+              <sb-emoji-picker [value]="$any(form.value.emoji)" (selected)="onEmojiSelected($event)" />
+            </div>
+          }
         </div>
         <div class="space-y-1.5">
           <label class="text-xs font-bold text-text-muted uppercase tracking-wider">Theme Color</label>
@@ -241,20 +286,78 @@
         <p class="text-[10px] text-text-subtle italic">This determines how this task affects your coins and mood.</p>
       </div>
 
-      <div class="space-y-1.5">
-        <label class="text-xs font-bold text-text-muted uppercase tracking-wider">Assign to Folder</label>
-        <select formControlName="folderId" class="input-field cursor-pointer">
-          <option value="">No folder</option>
-          @for (f of folders.folders(); track f.id) {
-            <option [value]="f.id">{{ f.name }}</option>
-          }
-        </select>
+      <div class="grid grid-cols-2 gap-4">
+        <div class="space-y-1.5">
+          <label class="text-xs font-bold text-text-muted uppercase tracking-wider">Assign to Folder</label>
+          <select formControlName="folderId" class="input-field cursor-pointer">
+            <option value="">No folder</option>
+            @for (f of folders.folders(); track f.id) {
+              <option [value]="f.id">{{ f.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="space-y-1.5">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold text-text-muted uppercase tracking-wider">Categories</label>
+            <button type="button" class="text-[10px] text-primary font-bold tracking-wider hover:underline" (click)="openCategoryCreate()">+ NEW</button>
+          </div>
+          
+          <div class="flex flex-wrap gap-2 max-h-24 overflow-y-auto p-1">
+            @for (c of categoriesStore.categories(); track c.id) {
+              <button type="button" 
+                      (click)="toggleCategory(c.id)"
+                      class="px-2.5 py-1 text-xs font-bold rounded-lg border-2 transition-all cursor-pointer"
+                      [class.border-primary]="$any(form.value.categoryIds)?.includes(c.id)"
+                      [class.bg-primary]="$any(form.value.categoryIds)?.includes(c.id)"
+                      [class.text-white]="$any(form.value.categoryIds)?.includes(c.id)"
+                      [class.border-border]="!$any(form.value.categoryIds)?.includes(c.id)"
+                      [class.text-text-subtle]="!$any(form.value.categoryIds)?.includes(c.id)">
+                {{ c.name }}
+              </button>
+            }
+            @if(categoriesStore.categories().length === 0) {
+              <span class="text-xs text-text-muted italic">No categories</span>
+            }
+          </div>
+        </div>
       </div>
 
       <div modal-footer class="pt-4 flex items-center justify-end gap-3">
         <sb-button variant="ghost" (click)="showForm.set(false)">Cancel</sb-button>
         <sb-button type="submit" [disabled]="form.invalid" class="min-w-[120px]">
           {{ editing() ? 'Update Task' : 'Create Task' }}
+        </sb-button>
+      </div>
+    </form>
+  </sb-modal>
+}
+
+<!-- Create Category Modal -->
+@if (showCategoryForm()) {
+  <sb-modal title="New Category" (close)="showCategoryForm.set(false)" size="sm">
+    <form [formGroup]="categoryForm" (ngSubmit)="onSaveCategory()" class="flex flex-col gap-6 py-2">
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-text-muted uppercase tracking-wider">Category Name</label>
+        <input formControlName="name" class="input-field" placeholder="e.g. Code, Design, Health...">
+      </div>
+      
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-text-muted uppercase tracking-wider">Category Color</label>
+        <div class="flex items-center gap-4 p-3 bg-surface-2 rounded-xl border border-border/30">
+          <input formControlName="color" type="color" 
+                 class="w-12 h-10 border-2 border-border/50 rounded-lg cursor-pointer p-0 overflow-hidden">
+          <div class="flex-1">
+            <span class="text-sm font-bold text-text block">Preview Color</span>
+            <span class="text-[10px] text-text-subtle font-mono">{{ categoryForm.get('color')?.value }}</span>
+          </div>
+        </div>
+      </div>
+
+      <div modal-footer class="pt-4 flex items-center justify-end gap-3">
+        <sb-button variant="ghost" (click)="showCategoryForm.set(false)">Cancel</sb-button>
+        <sb-button type="submit" [disabled]="categoryForm.invalid" class="w-full">
+          Create Category
         </sb-button>
       </div>
     </form>

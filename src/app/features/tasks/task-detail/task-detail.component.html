@@ -22,7 +22,7 @@
               <sb-behavior-badge [behavior]="task()!.behaviorType" class="scale-90 origin-left" />
               <div class="h-1 w-1 rounded-full bg-border"></div>
               <span class="text-xs font-medium text-text-muted uppercase tracking-wider">
-                Created {{ task()!.createdAt | date:'longDate' }}
+                Created {{ task()!.createdAt | date:'MMM d, yyyy':'':'en-US' }}
               </span>
             </div>
           </div>
@@ -129,9 +129,12 @@
       </div>
       
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mt-6">
-        <!-- Heatmap -->
+        <!-- Donut Chart -->
         <div class="bg-surface rounded-2xl p-6 shadow-sm border border-border/50">
-          <sb-heatmap [data]="dailyTrend()" />
+          <h3 class="text-sm font-bold text-text-muted uppercase tracking-wider mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-chart-pie"></i> Behavior Distribution
+          </h3>
+          <sb-behavior-donut [breakdown]="behaviorBreakdown()" />
         </div>
         
         <!-- Streak Table -->
@@ -151,7 +154,7 @@
                 @for (day of dailyTrendTable().slice(0, 7); track day.date) {
                   <tr class="group hover:bg-surface-2 transition-colors">
                     <td class="py-3 px-4 text-sm font-medium text-text">
-                      {{ day.date | date:'MMM d, yyyy' }}
+                      {{ day.date | date:'MMM d, yyyy':'':'en-US' }}
                     </td>
                     <td class="py-3 px-4 text-sm font-bold text-primary text-right">
                       {{ day.totalSeconds | duration:'words' }}
@@ -197,10 +200,10 @@
                 </div>
                 <div>
                   <p class="font-bold text-text leading-tight mb-1">
-                    {{ session.startTime | date:'MMM d, yyyy' }}
+                    {{ session.startTime | date:'MMM d, yyyy':'':'en-US' }}
                   </p>
                   <p class="text-xs text-text-muted font-medium">
-                    {{ session.startTime | date:'shortTime' }} - {{ session.endTime ? (session.endTime | date:'shortTime') : 'Now' }}
+                    {{ session.startTime | date:'shortTime':'':'en-US' }} - {{ session.endTime ? (session.endTime | date:'shortTime':'':'en-US') : 'Now' }}
                   </p>
                 </div>
               </div>

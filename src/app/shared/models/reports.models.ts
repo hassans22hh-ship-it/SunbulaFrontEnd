@@ -13,6 +13,7 @@ export interface TimeDistributionDto {
   taskId:       string;
   taskTitle:    string;
   taskColor:    string;
+  taskEmoji?:   string;
   behaviorType: BehaviorCategory;
   totalSeconds: number;
   percentage:   number;
@@ -68,4 +69,23 @@ export interface TimeReportDto {
   behaviorBreakdown: BehaviorStatsDto[];
   dailyTrend:        DailyTrendDto[];
   topTasks:          TimeDistributionDto[];
+}
+
+export interface TaskReportDto {
+  totalTasks:           number;
+  completedTasks:       number;
+  activeTasks:          number;
+  archivedTasks:        number;
+  tasksByBehavior:      Record<string, number>;
+  tasksByCategory:      Record<string, number>;
+  totalTimeSpentMinutes: number;
+  totalCoinsEarned:     number;
+  last7DaysProgress:    DailyReportDetailDto[];
+}
+
+export interface DailyReportDetailDto {
+  date:           string;
+  tasksCompleted: number;
+  minutesSpent:   number;
+  coinsEarned:    number;
 }

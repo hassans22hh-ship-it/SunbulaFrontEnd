@@ -3,8 +3,8 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '@env/environment';
-import { TimeSessionDto, StartSessionDto } from '@shared/models/timer.models';
-import { PagedResult } from '@shared/models/enums';
+import { TimeSessionDto, CreateManualSessionDto, StartSessionDto } from '@shared/models/timer.models';
+import { PagedResult } from '@shared/models/timer.models';
 
 @Injectable({ providedIn: 'root' })
 export class TimeSessionApiService {
