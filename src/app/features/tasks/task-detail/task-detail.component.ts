@@ -103,7 +103,7 @@ export class TaskDetailComponent implements OnInit {
     const map = new Map<number, number>();
     this.sessions().forEach(s => {
        const type = (s as any).behaviorType ?? this.task()?.behaviorType ?? 1;
-       const sec = s.durationSeconds ?? s.duration ?? ((s as any).durationMinutes ? (s as any).durationMinutes * 60 : 0) ?? 0;
+       const sec = s.durationSeconds ?? s.duration ?? ((s as any).durationMinutes ? (s as any).durationMinutes * 60 : 0);
        map.set(type, (map.get(type) || 0) + sec);
     });
     return Array.from(map.entries()).map(([type, totalSeconds]) => ({
