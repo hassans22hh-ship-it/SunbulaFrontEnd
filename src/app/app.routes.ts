@@ -9,8 +9,7 @@ export const APP_ROUTES: Routes = [
     component: ShellComponent,
     canActivate: [authGuard],
     children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { path: 'dashboard', loadChildren: () => import('@features/dashboard/dashboard.routes').then(m => m.DASHBOARD_ROUTES) },
+      { path: '', redirectTo: 'tasks', pathMatch: 'full' },
       { path: 'tasks', loadChildren: () => import('@features/tasks/tasks.routes').then(m => m.TASKS_ROUTES) },
       { path: 'folders', loadChildren: () => import('@features/folders/folders.routes').then(m => m.FOLDERS_ROUTES) },
       { path: 'timer', loadChildren: () => import('@features/timer/timer.routes').then(m => m.TIMER_ROUTES) },

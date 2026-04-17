@@ -19,38 +19,6 @@
   </sb-card>
 
   <sb-card padding="lg">
-    <h2 class="subsection-title">Preferences</h2>
-    <form [formGroup]="userSettingsForm" (ngSubmit)="saveSettings()" class="settings-form">
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Time Zone</label>
-          <input formControlName="timeZone" class="input-field" placeholder="e.g. UTC, America/New_York">
-        </div>
-        <div class="form-group">
-          <label class="form-label">Default Currency</label>
-          <select formControlName="defaultCurrency" class="input-field">
-            <option value="USD">USD ($)</option>
-            <option value="EUR">EUR (€)</option>
-            <option value="GBP">GBP (£)</option>
-            <option value="SAR">SAR (﷼)</option>
-            <option value="EGP">EGP (ج.م)</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group-inline">
-        <input type="checkbox" formControlName="coinSystemEnabled" id="chkCoins">
-        <label for="chkCoins" class="form-label">Enable Coin System</label>
-      </div>
-      <div class="form-group-inline">
-        <input type="checkbox" formControlName="streakRewardsEnabled" id="chkStreak">
-        <label for="chkStreak" class="form-label">Enable Streak Rewards</label>
-      </div>
-      <sb-button type="submit" [loading]="settingsStore.isLoading()" [disabled]="userSettingsForm.invalid">Save
-        Preferences</sb-button>
-    </form>
-  </sb-card>
-
-  <sb-card padding="lg">
     <h2 class="subsection-title">Appearance</h2>
     <div class="theme-toggle">
       <span>Theme: {{ theme.isDark() ? 'Dark' : 'Light' }}</span>

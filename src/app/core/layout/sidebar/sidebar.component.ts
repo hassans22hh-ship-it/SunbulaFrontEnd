@@ -14,7 +14,6 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { path: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
   { path: '/tasks', label: 'Tasks', icon: 'tasks' },
   { path: '/timer', label: 'Timer', icon: 'timer' },
   { path: '/plant-store', label: 'Plant Store', icon: 'plant' },
