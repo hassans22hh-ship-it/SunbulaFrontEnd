@@ -22,54 +22,8 @@ import { AnimateDirective } from '@shared/directives/animate.directive';
     AnimateDirective
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div class="h-full flex flex-col pt-6 pb-2" sbPage>
-      
-      <div class="mb-6" sbAnimate="slideIn">
-        <h2 class="section-title">Plant Store</h2>
-        <p class="text-subtle mt-1 text-sm">Use your earned 🪙 coins to buy new plants for your virtual garden.</p>
-      </div>
-
-      <div class="mb-6" sbAnimate="fadeInUp">
-         <sb-plant-level-filter [selected]="selectedLevel()" (changed)="selectedLevel.set($event)" />
-      </div>
-
-      <div class="flex-1 overflow-y-auto custom-scrollbar pr-2 pb-4" sbAnimate="fadeInUp" style="animation-delay: 0.1s;">
-        @if (store.isLoading() && store.available().length === 0) {
-          <div class="py-12 flex justify-center"><sb-spinner /></div>
-        } @else if (filteredPlants().length === 0) {
-          <sb-empty-state 
-            icon="🌱" 
-            title="No plants found" 
-            message="There are no plants available in the store right now for this level." 
-          />
-        } @else {
-          <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            @for (plant of filteredPlants(); track plant.id) {
-              <sb-plant-card 
-                [plant]="plant"
-                (clicked)="inspectPlant(plant)"
-              />
-            }
-          </div>
-        }
-      </div>
-
-      <sb-plant-detail-modal 
-        [plant]="inspectingPlant()"
-        [purchasing]="isPurchasing()"
-        (closed)="inspectingPlant.set(null)"
-        (purchase)="onPurchase($event)"
-      />
-
-    </div>
-  `,
-  styles: [`
-    .text-subtle { color: var(--color-text-muted); }
-    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
-  `]
+  templateUrl: './plant-catalog.component.html',
+  styleUrl: './plant-catalog.component.scss'
 })
 export class PlantCatalogComponent implements OnInit {
   protected readonly store = inject(PlantStoreStore);

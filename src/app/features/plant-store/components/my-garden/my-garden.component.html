@@ -1,0 +1,94 @@
+<div class="h-full flex flex-col pt-6 pb-2" sbPage>
+
+  <div class="mb-8" sbAnimate="slideIn">
+    <h2 class="section-title">My Garden</h2>
+    <p class="text-subtle mt-1 text-sm">Plant your seeds and water them to grow your virtual garden.</p>
+  </div>
+
+  @if (store.seedInventory().length > 0) {
+    <div class="mb-10" sbAnimate="fadeInUp">
+      <div class="flex items-center gap-2 mb-4">
+        <i class="fa-solid fa-seedling text-primary"></i>
+        <h3 class="font-semibold text-lg" style="color: var(--color-text);">Seed Inventory</h3>
+        <span class="seed-count-badge">{{ store.seedInventory().length }}</span>
+      </div>
+      <div class="seed-scroll custom-scrollbar">
+        @for (seed of store.seedInventory(); track seed.id) {
+          <div class="seed-card shrink-0">
+            <div class="seed-icon">
+              <i class="fa-solid fa-seedling"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold text-sm truncate" style="color: var(--color-text);" [title]="seed.plantName">{{ seed.plantName }}</div>
+              <div class="text-[10px] mb-2" style="color: var(--color-text-muted);">{{ getLevelMeta(seed).label }}</div>
+              <sb-button size="sm" [fullWidth]="true" (clicked)="waterPlantPrompt(seed.id, true)">
+                <i class="fa-solid fa-plant-wilt mr-1"></i> Plant
+              </sb-button>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <div class="flex-1" sbAnimate="fadeInUp" style="animation-delay: 0.1s;">
+    <h3 class="font-semibold text-lg mb-4" style="color: var(--color-text);">Planted Garden</h3>
+
+    @if (store.plantedPlants().length === 0) {
+      <div class="garden-empty">
+        <div class="garden-empty-icon">
+          <i class="fa-solid fa-plant-wilt"></i>
+        </div>
+        <h3>Empty Garden</h3>
+        <p>Buy seeds from the store or plant from your inventory.</p>
+      </div>
+    } @else {
+      <div class="garden-grid">
+        @for (plant of store.plantedPlants(); track plant.id) {
+
+          <div class="garden-plot group">
+            <div class="plot-scene">
+              <div class="plot-sky"></div>
+
+              <div class="plant-figure group-hover:-translate-y-3 transition-transform duration-500">
+                @if (plant.plantImageUrl) {
+                  <img [src]="plant.plantImageUrl" [alt]="plant.plantName"
+                       class="max-w-full max-h-full object-contain" />
+                } @else {
+                  <div class="plant-icon-fallback">
+                    <i class="fa-solid fa-seedling"></i>
+                  </div>
+                }
+              </div>
+
+              <div class="plot-ground">
+                <div class="ground-top"></div>
+                <div class="ground-shadow"></div>
+              </div>
+            </div>
+
+            <div class="plot-info">
+              <h4 class="font-semibold text-sm truncate" style="color: var(--color-text);" [title]="plant.plantName">
+                {{ plant.plantName }}
+              </h4>
+              <div class="flex justify-between items-center mt-1 px-1">
+                <span class="stage-label" style="color: var(--color-primary);">{{ getStageMeta(plant).label }}</span>
+                <span class="water-count">
+                  <i class="fa-solid fa-droplet text-blue-400"></i>
+                  {{ plant.stageCoinsAccumulated }}
+                </span>
+              </div>
+              <div class="mt-2">
+                <sb-button variant="outline" size="sm" [fullWidth]="true" (clicked)="waterPlantPrompt(plant.id, false)">
+                  <i class="fa-solid fa-droplet mr-1"></i> Water
+                </sb-button>
+              </div>
+            </div>
+          </div>
+
+        }
+      </div>
+    }
+  </div>
+
+</div>

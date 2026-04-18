@@ -1,0 +1,80 @@
+<div class="tx-panel">
+
+  <div class="flex justify-between items-center mb-6">
+    <h3 class="panel-title">
+      @if (selectedWalletId()) {
+        Recent Transactions
+      } @else {
+        All Transactions
+      }
+    </h3>
+
+    <sb-button size="sm" (clicked)="showForm.set(true)" [disabled]="store.wallets().length === 0">
+      <i class="fa-solid fa-plus mr-1"></i> Record
+    </sb-button>
+  </div>
+
+  <div class="flex-1 overflow-y-auto custom-scrollbar pr-2">
+    @if (filteredTransactions().length === 0) {
+      <div class="tx-empty">
+        <div class="tx-empty-icon">
+          <i class="fa-solid fa-receipt"></i>
+        </div>
+        <span>No transactions found</span>
+      </div>
+    } @else {
+      <div class="tx-list">
+        @for (t of filteredTransactions(); track t.id) {
+          <div class="tx-row group">
+
+            <div class="tx-type-icon"
+                 [class.income]="t.type === TransactionType.Income"
+                 [class.expense]="t.type === TransactionType.Expense"
+                 [class.transfer]="t.type === TransactionType.Transfer">
+              @if (t.type === TransactionType.Income) {
+                <i class="fa-solid fa-arrow-down"></i>
+              } @else if (t.type === TransactionType.Expense) {
+                <i class="fa-solid fa-arrow-up"></i>
+              } @else {
+                <i class="fa-solid fa-right-left"></i>
+              }
+            </div>
+
+            <div class="tx-info">
+              <div class="tx-desc">{{ t.description || getLabelForType(t.type) }}</div>
+              <div class="tx-meta">
+                {{ t.transactionDate | date:'MMM d, y' }}
+                @if (!selectedWalletId()) {
+                  &bull; {{ getWalletName(t.walletId) }}
+                }
+              </div>
+            </div>
+
+            <div class="flex flex-col items-end">
+              <span class="tx-amount"
+                    [class.income]="t.type === TransactionType.Income"
+                    [class.neutral]="t.type === TransactionType.Expense || t.type === TransactionType.Transfer">
+                {{ t.type === TransactionType.Expense ? '-' : (t.type === TransactionType.Income ? '+' : '') }}{{ t.amount | currency }}
+              </span>
+              <button class="tx-delete" (click)="onDelete(t)">
+                <i class="fa-solid fa-trash-can"></i> Delete
+              </button>
+            </div>
+
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  @if (showForm()) {
+    <sb-transaction-form
+      [wallets]="store.wallets()"
+      [categories]="store.categories()"
+      [defaultWalletId]="selectedWalletId()"
+      (saved)="onFormSave($event)"
+      (cancelled)="showForm.set(false)"
+    />
+  }
+
+</div>

@@ -1,0 +1,27 @@
+<div class="folder-card p-4 relative" [style.border-top-color]="folder().color">
+  <div class="card-glow" [style.background]="folder().color"></div>
+  <div class="flex items-start justify-between relative z-10">
+    <div class="flex items-center gap-3">
+      <div class="folder-icon-wrap" [style.background]="folder().color + '22'">
+        <i class="fa-solid fa-folder" [style.color]="folder().color"></i>
+      </div>
+      <div>
+        <h3 class="folder-title m-0 text-base font-semibold" style="color: var(--color-text);">
+          {{ folder().name }}
+        </h3>
+        <p class="text-xs mt-1" style="color: var(--color-text-muted);">
+          {{ folder().taskCount }} task{{ folder().taskCount !== 1 ? 's' : '' }}
+        </p>
+      </div>
+    </div>
+
+    <div class="flex gap-1" (click)="$event.stopPropagation()">
+      <button class="action-btn" (click)="edit.emit(folder())" title="Edit">
+        <i class="fa-solid fa-pen-to-square"></i>
+      </button>
+      <button class="action-btn text-danger" (click)="delete.emit(folder())" title="Delete">
+        <i class="fa-solid fa-trash"></i>
+      </button>
+    </div>
+  </div>
+</div>

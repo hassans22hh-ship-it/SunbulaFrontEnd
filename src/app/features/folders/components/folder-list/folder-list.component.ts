@@ -31,82 +31,8 @@ import { AnimateDirective } from '@shared/directives/animate.directive';
     AnimateDirective,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div class="page-container" sbPage>
-      
-      <!-- Top header -->
-      <div class="flex items-center justify-between mb-8" sbAnimate="slideIn">
-        <div>
-          <h1 class="section-title">Folders</h1>
-          <p class="text-subtle mt-1 text-sm">Organize your tasks and workflows.</p>
-        </div>
-        <sb-button (clicked)="openForm()">
-          <span style="font-size: 1.2em; line-height: 1;">+</span> New Folder
-        </sb-button>
-      </div>
-
-      <!-- Main Content Area -->
-      @if (store.isLoading() && store.folders().length === 0) {
-        <sb-spinner />
-      } @else if (store.error()) {
-        <sb-empty-state
-          icon="⚠️"
-          title="Failed to load folders"
-          [message]="store.error()!"
-          (retry)="store.load()"
-        />
-      } @else if (store.folders().length === 0) {
-        <sb-empty-state
-          icon="📁"
-          title="No folders yet"
-          message="Create your first folder to start organizing tasks."
-        >
-          <div class="mt-4">
-            <sb-button (clicked)="openForm()">Create Folder</sb-button>
-          </div>
-        </sb-empty-state>
-      } @else {
-        <div class="folder-grid">
-          @for (folder of store.folders(); track folder.id) {
-            <div class="folder-card-wrapper">
-              <sb-folder-card
-                [folder]="folder"
-                (edit)="openForm($event)"
-                (delete)="confirmDelete($event)"
-              />
-            </div>
-          }
-        </div>
-      }
-
-      <!-- Form logic -->
-      @if (showForm()) {
-        <sb-folder-form
-          [folder]="selectedFolder()"
-          (saved)="onFormSave($event)"
-          (cancelled)="closeForm()"
-        />
-      }
-
-      <!-- Delete confirmation -->
-      @if (folderToDelete()) {
-        <sb-confirm-dialog
-          title="Delete Folder"
-          message="Are you sure you want to delete '{{ folderToDelete()?.name }}'? This action cannot be undone."
-          confirmLabel="Delete"
-          (confirmed)="onDelete()"
-          (cancelled)="folderToDelete.set(null)"
-        />
-      }
-    </div>
-  `,
-  styles: [`
-    .folder-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.25rem;
-    }
-  `]
+  templateUrl: './folder-list.component.html',
+  styleUrl: './folder-list.component.scss'
 })
 export class FolderListComponent implements OnInit {
   protected readonly store = inject(FoldersStore);

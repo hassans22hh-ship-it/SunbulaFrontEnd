@@ -1,0 +1,71 @@
+.folder-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-top-width: 4px;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.25s var(--ease-spring), box-shadow 0.25s ease;
+  cursor: pointer;
+  overflow: hidden;
+  transform-style: preserve-3d;
+  perspective: 800px;
+  position: relative;
+
+  &:hover {
+    transform: translateY(-6px) rotateX(3deg);
+    box-shadow: var(--shadow-lg);
+
+    .card-glow {
+      opacity: 0.12;
+    }
+  }
+
+  &:active {
+    transform: translateY(-2px) scale(0.99);
+  }
+}
+
+.card-glow {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.folder-icon-wrap {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  flex-shrink: 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transform: translateZ(4px);
+}
+
+.action-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  opacity: 0.6;
+  transition: opacity 0.2s, background 0.2s, color 0.2s;
+
+  &:hover {
+    opacity: 1;
+    background: var(--color-surface-2);
+    color: var(--color-text);
+  }
+
+  &.text-danger {
+    color: var(--color-danger);
+    &:hover { background: color-mix(in srgb, var(--color-danger) 10%, transparent); }
+  }
+}
