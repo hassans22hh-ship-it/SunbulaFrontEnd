@@ -1,0 +1,22 @@
+<div class="streak-calendar">
+  <div class="streak-header">
+    <div class="streak-stat">
+      <i class="fa-solid fa-fire streak-icon"></i>
+      <span class="streak-number">{{ currentStreak() }}</span>
+      <span class="streak-label">day streak</span>
+    </div>
+  </div>
+
+  <div class="streak-days">
+    @for (day of displayDays(); track day.date) {
+      <div class="day-cell" [class.day-cell--active]="day.isActive" [class.day-cell--today]="day.isToday" [title]="day.tooltip">
+        <div class="day-dot">
+          @if (day.isActive) {
+            <i class="fa-solid fa-check"></i>
+          }
+        </div>
+        <span class="day-label">{{ day.label }}</span>
+      </div>
+    }
+  </div>
+</div>

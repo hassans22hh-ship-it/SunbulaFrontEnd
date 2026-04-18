@@ -1,34 +1,30 @@
-<div class="h-full flex flex-col pt-6 pb-2" sbPage>
+<div class="catalog-page" sbPage>
 
-  <div class="mb-6" sbAnimate="slideIn">
+  <div class="catalog-header" sbAnimate="slideIn">
     <h2 class="section-title">Plant Store</h2>
-    <p class="text-subtle mt-1 text-sm">
-      Use your earned <i class="fa-solid fa-coins text-accent"></i> coins to buy new plants for your virtual garden.
+    <p class="catalog-subtitle">
+      Use your earned <i class="fa-solid fa-coins text-warning"></i> coins to buy new plants for your virtual garden.
     </p>
   </div>
 
-  <div class="mb-6" sbAnimate="fadeInUp">
+  <div class="catalog-filter" sbAnimate="fadeInUp">
     <sb-plant-level-filter [selected]="selectedLevel()" (changed)="selectedLevel.set($event)" />
   </div>
 
-  <div class="flex-1 overflow-y-auto custom-scrollbar pr-2 pb-4" sbAnimate="fadeInUp" style="animation-delay: 0.1s;">
+  <div class="catalog-grid-wrap" sbAnimate="fadeInUp" style="animation-delay: 0.1s;">
     @if (store.isLoading() && store.available().length === 0) {
-      <div class="py-12 flex justify-center"><sb-spinner /></div>
+      <div class="loading-center"><sb-spinner /></div>
     } @else if (filteredPlants().length === 0) {
-      <div class="catalog-empty">
-        <div class="catalog-empty-icon">
-          <i class="fa-solid fa-seedling"></i>
-        </div>
-        <h3>No plants found</h3>
-        <p>There are no plants available for this level right now.</p>
-      </div>
+      <sb-empty-state
+        icon="🌱"
+        title="No plants found"
+        message="There are no plants available in the store right now for this level." />
     } @else {
       <div class="catalog-grid">
         @for (plant of filteredPlants(); track plant.id) {
           <sb-plant-card
             [plant]="plant"
-            (clicked)="inspectPlant(plant)"
-          />
+            (clicked)="inspectPlant(plant)" />
         }
       </div>
     }
@@ -38,7 +34,6 @@
     [plant]="inspectingPlant()"
     [purchasing]="isPurchasing()"
     (closed)="inspectingPlant.set(null)"
-    (purchase)="onPurchase($event)"
-  />
+    (purchase)="onPurchase($event)" />
 
 </div>

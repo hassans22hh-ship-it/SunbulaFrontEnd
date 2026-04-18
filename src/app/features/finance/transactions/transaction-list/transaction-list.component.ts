@@ -36,18 +36,18 @@ export class TransactionListComponent {
   }
 
   getIconForType(type: number): string {
-    switch(type) {
-      case TransactionType.Income: return '↓'; // Money in
-      case TransactionType.Expense: return '↑'; // Money out
-      case TransactionType.Transfer: return '⇄';
-      default: return '•';
+    switch (type) {
+      case TransactionType.Income:   return 'income';
+      case TransactionType.Expense:  return 'expense';
+      case TransactionType.Transfer: return 'transfer';
+      default: return 'other';
     }
   }
 
   getLabelForType(type: number): string {
-    switch(type) {
-      case TransactionType.Income: return 'Income';
-      case TransactionType.Expense: return 'Expense';
+    switch (type) {
+      case TransactionType.Income:   return 'Income';
+      case TransactionType.Expense:  return 'Expense';
       case TransactionType.Transfer: return 'Transfer';
       default: return 'Transaction';
     }

@@ -1,7 +1,7 @@
-.tx-panel {
+.txn-container {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-2xl);
   padding: 1.5rem;
   box-shadow: var(--shadow-sm);
   display: flex;
@@ -9,129 +9,120 @@
   height: 100%;
 }
 
-.panel-title {
+.txn-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.txn-title {
+  font-size: 1.0625rem;
   font-weight: 600;
-  font-size: 1.1rem;
   color: var(--color-text);
+  margin: 0;
 }
 
-.tx-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 3rem 1rem;
-  color: var(--color-text-muted);
-  font-size: 0.9rem;
-  font-weight: 500;
+.txn-list-wrap {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+
+  &::-webkit-scrollbar { width: 3px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
 }
 
-.tx-empty-icon {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: var(--color-surface-2);
-  border: 1.5px solid var(--color-border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
-  color: var(--color-text-muted);
-}
-
-.tx-list {
+.txn-list {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.tx-row {
+.txn-row {
   display: flex;
   align-items: center;
   gap: 1rem;
   padding: 0.75rem;
-  border-radius: var(--radius-lg);
-  transition: background 0.15s;
+  border-radius: var(--radius-xl);
+  transition: background 0.15s ease;
 
   &:hover {
     background: var(--color-surface-2);
+
+    .txn-delete { opacity: 1; }
   }
 }
 
-.tx-type-icon {
-  width: 40px;
-  height: 40px;
+.txn-icon {
+  width: 2.5rem;
+  height: 2.5rem;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
+  font-size: 0.875rem;
   flex-shrink: 0;
-  box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
 
-  &.income {
+  &--income {
     background: color-mix(in srgb, var(--color-success) 15%, transparent);
     color: var(--color-success);
   }
-
-  &.expense {
+  &--expense {
     background: color-mix(in srgb, var(--color-danger) 15%, transparent);
     color: var(--color-danger);
   }
-
-  &.transfer {
+  &--transfer {
     background: color-mix(in srgb, var(--color-primary) 15%, transparent);
     color: var(--color-primary);
   }
 }
 
-.tx-info {
-  flex: 1;
-  min-width: 0;
-}
+.txn-details { flex: 1; min-width: 0; }
 
-.tx-desc {
+.txn-desc {
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.tx-meta {
+.txn-meta {
   font-size: 0.75rem;
   color: var(--color-text-muted);
-  margin-top: 2px;
+  margin-top: 0.125rem;
 }
 
-.tx-amount {
-  font-size: 0.9rem;
-  font-weight: 600;
-
-  &.income { color: var(--color-success); }
-  &.neutral { color: var(--color-text); }
-}
-
-.tx-delete {
+.txn-right {
   display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 10px;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.txn-amount {
+  font-size: 0.9375rem;
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--color-danger);
-  background: none;
+  color: var(--color-text);
+
+  &--income { color: var(--color-success); }
+  &--expense { color: var(--color-danger); }
+}
+
+.txn-delete {
+  background: transparent;
   border: none;
   cursor: pointer;
+  font-size: 0.75rem;
+  color: var(--color-danger);
   opacity: 0;
-  margin-top: 3px;
-  transition: opacity 0.2s;
-  padding: 0;
+  transition: opacity 0.15s ease;
+  padding: 0.125rem 0.25rem;
+  border-radius: var(--radius-sm);
 
-  .tx-row:hover & {
-    opacity: 1;
+  &:hover {
+    background: color-mix(in srgb, var(--color-danger) 10%, transparent);
   }
 }
-
-.custom-scrollbar::-webkit-scrollbar { width: 4px; }
-.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }

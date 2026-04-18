@@ -1,0 +1,106 @@
+.form-row {
+  display: flex;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  align-items: flex-start;
+}
+
+.emoji-wrap {
+  flex-shrink: 0;
+  width: 3rem;
+}
+
+.emoji-input {
+  text-align: center;
+  font-size: 1.25rem;
+  padding: 0 !important;
+  height: 46px;
+}
+
+.title-wrap { flex: 1; }
+
+.title-input {
+  font-size: 1.0625rem;
+  font-weight: 500;
+  height: 46px;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+
+  .label-text {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+
+    i { color: var(--color-text-muted); font-size: 0.8em; }
+  }
+}
+
+.behavior-options {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.behavior-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  border-radius: var(--radius-full);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  border: 1.5px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &--active {
+    border-color: var(--chip-color, var(--color-primary));
+    background: color-mix(in srgb, var(--chip-color, var(--color-primary)) 10%, transparent);
+    color: var(--chip-color, var(--color-primary));
+    font-weight: 600;
+  }
+
+  &:hover:not(.behavior-chip--active) {
+    background: var(--color-surface-2);
+    color: var(--color-text);
+  }
+}
+
+.chip-emoji { font-size: 1em; line-height: 1; }
+
+.color-picker {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+
+.color-swatch {
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  border: 2.5px solid transparent;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  padding: 0;
+
+  &:hover { transform: scale(1.15); box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
+
+  &--active {
+    border-color: #fff;
+    outline: 2.5px solid var(--color-primary);
+    transform: scale(1.15);
+  }
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}

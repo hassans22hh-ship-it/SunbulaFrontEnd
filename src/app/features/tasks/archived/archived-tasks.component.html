@@ -1,0 +1,53 @@
+<div class="archived-shell" sbPageTransition>
+  <main class="archived-main">
+
+    <header class="archived-header">
+      <div class="header-left">
+        <button class="back-btn" (click)="goBack()" aria-label="Back to tasks">
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <div>
+          <h1 class="archived-title">
+            <i class="fa-solid fa-box-archive"></i> Archived Tasks
+          </h1>
+          <p class="archived-subtitle">Tasks you've archived. Restore them anytime.</p>
+        </div>
+      </div>
+      @if (store.archivedTotalCount() > 0) {
+        <span class="count-badge">{{ store.archivedTotalCount() }} total</span>
+      }
+    </header>
+
+    <div class="archived-content">
+      @if (store.archivedLoading()) {
+        <div class="loading-center">
+          <sb-spinner size="lg" />
+        </div>
+      } @else if (store.archivedItems().length === 0) {
+        <sb-empty-state
+          icon="📦"
+          heading="No archived tasks"
+          message="Tasks you archive will appear here. You can restore them at any time."
+          class="mt-20" />
+      } @else {
+        <div class="task-grid">
+          @for (task of store.archivedItems(); track task.id) {
+            <sb-task-card
+              [task]="task"
+              (cardClicked)="viewTask($event.id)"
+              (menuClicked)="onRestore(task.id)" />
+          }
+        </div>
+
+        <sb-pagination
+          [currentPage]="store.archivedPageNumber()"
+          [totalPages]="store.archivedTotalPages()"
+          [totalCount]="store.archivedTotalCount()"
+          [hasNextPage]="store.archivedHasNext()"
+          [hasPreviousPage]="store.archivedHasPrevious()"
+          (pageChange)="onPageChange($event)" />
+      }
+    </div>
+
+  </main>
+</div>

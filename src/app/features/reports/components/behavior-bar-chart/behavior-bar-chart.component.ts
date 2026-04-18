@@ -9,24 +9,8 @@ import { BehaviorCategory, BEHAVIOR_META } from '../../../../shared/models/enums
   standalone: true,
   imports: [BaseChartDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div class="chart-container relative h-full w-full min-h-[300px]">
-      @if (data().length === 0) {
-        <div class="absolute inset-0 flex items-center justify-center text-subtle text-sm">
-          No data available for this period.
-        </div>
-      } @else {
-        <canvas baseChart
-          [data]="chartData"
-          [options]="chartOptions"
-          [type]="barChartType">
-        </canvas>
-      }
-    </div>
-  `,
-  styles: [`
-    .text-subtle { color: var(--color-text-muted); }
-  `]
+  templateUrl: './behavior-bar-chart.component.html',
+  styleUrl: './behavior-bar-chart.component.scss'
 })
 export class BehaviorBarChartComponent implements OnChanges {
   data = input<BehaviorStatsDto[]>([]);
@@ -42,7 +26,7 @@ export class BehaviorBarChartComponent implements OnChanges {
     responsive: true,
     maintainAspectRatio: false,
     scales: {
-      y: { beginAtZero: true, grid: { color: '#e2e8f0' /* Adjust to theme */ }, border: { display: false } },
+      y: { beginAtZero: true, grid: { color: '#e2e8f0' }, border: { display: false } },
       x: { grid: { display: false }, border: { display: false } }
     },
     plugins: {
@@ -58,7 +42,6 @@ export class BehaviorBarChartComponent implements OnChanges {
   ngOnChanges(): void {
     const d = this.data();
     if (d && d.length > 0) {
-      // Sort by some arbitrary order or use as is
       this.chartData = {
         labels: d.map(x => BEHAVIOR_META[x.behaviorType as BehaviorCategory]?.label || 'Unknown'),
         datasets: [{

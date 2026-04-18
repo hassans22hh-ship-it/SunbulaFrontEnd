@@ -65,16 +65,11 @@ export class FolderListComponent implements OnInit {
   async onFormSave(event: { dto: CreateFolderDto | UpdateFolderDto, isEdit: boolean }): Promise<void> {
     const { dto, isEdit } = event;
     const current = this.selectedFolder();
-    
-    // Close early for better UX feeling
     this.closeForm();
-
     if (isEdit && current) {
-      const updateDto = dto as UpdateFolderDto;
-      await this.store.update(current.id, updateDto);
+      await this.store.update(current.id, dto as UpdateFolderDto);
     } else {
-      const createDto = dto as CreateFolderDto;
-      await this.store.create(createDto);
+      await this.store.create(dto as CreateFolderDto);
     }
   }
 
@@ -86,7 +81,6 @@ export class FolderListComponent implements OnInit {
     const folder = this.folderToDelete();
     if (!folder) return;
     this.folderToDelete.set(null);
-
     await this.store.remove(folder.id);
   }
 }

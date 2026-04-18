@@ -1,0 +1,91 @@
+.streak-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.streak-header {
+  display: flex;
+  align-items: center;
+}
+
+.streak-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.streak-icon {
+  font-size: 1.25rem;
+  color: #f97316;
+  animation: flicker 2s ease-in-out infinite;
+}
+
+.streak-number {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--color-text);
+  line-height: 1;
+}
+
+.streak-label {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.streak-days {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.day-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.375rem;
+  flex: 1;
+}
+
+.day-dot {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--color-border);
+  background: var(--color-surface-2);
+  font-size: 0.75rem;
+  transition: all 0.2s ease;
+
+  i { color: #fff; font-size: 0.75rem; }
+
+  .day-cell--active & {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 35%, transparent);
+  }
+
+  .day-cell--today & {
+    border-color: var(--color-primary);
+  }
+}
+
+.day-label {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+
+  .day-cell--today & {
+    color: var(--color-primary);
+  }
+}
+
+@keyframes flicker {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50%       { transform: scale(1.1); opacity: 0.9; }
+}

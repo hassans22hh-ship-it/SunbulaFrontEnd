@@ -1,39 +1,39 @@
-.color-grid {
+.form-group {
+  margin-bottom: 1.25rem;
+}
+
+.color-picker {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+  margin-top: 0.5rem;
 }
 
-.color-btn {
-  width: 36px;
-  height: 36px;
+.color-swatch {
+  width: 2rem;
+  height: 2rem;
   border-radius: 50%;
-  border: 2px solid transparent;
+  border: 2.5px solid transparent;
   cursor: pointer;
-  transition: transform 0.15s var(--ease-spring), border-color 0.15s, box-shadow 0.15s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-size: 0.75rem;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  padding: 0;
 
   &:hover {
-    transform: scale(1.15) translateY(-2px);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+    transform: scale(1.12);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   }
 
-  &.selected {
-    border-color: white;
-    outline: 2px solid var(--color-primary);
-    transform: scale(1.15);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  &--selected {
+    border-color: #fff;
+    outline: 2.5px solid var(--color-primary);
+    transform: scale(1.12);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   }
 }
 
-.error-text {
-  color: var(--color-danger);
-  font-size: 0.8rem;
-  margin-top: 0.25rem;
-  display: block;
+.form-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
 }

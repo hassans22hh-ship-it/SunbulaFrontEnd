@@ -1,16 +1,16 @@
-<div class="filter-scroll custom-scrollbar">
-  <button class="filter-pill"
-          [class.active]="selected() === null"
+<div class="level-filter-bar">
+  <button class="filter-chip"
+          [class.filter-chip--active]="selected() === null"
           (click)="select(null)">
-    <i class="fa-solid fa-layer-group mr-1.5"></i>
+    <i class="fa-solid fa-layer-group"></i>
     All Levels
   </button>
 
   @for (l of levels; track l.value) {
-    <button class="filter-pill"
-            [class.active]="selected() === l.value"
+    <button class="filter-chip"
+            [class.filter-chip--active]="selected() === l.value"
             (click)="select(l.value)">
-      <i class="fa-solid fa-seedling mr-1.5"></i>
+      <span class="chip-emoji">{{ l.meta.emoji }}</span>
       {{ l.meta.label }}
     </button>
   }

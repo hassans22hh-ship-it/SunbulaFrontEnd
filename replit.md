@@ -32,6 +32,13 @@ public/           # Static assets
 - **Build:** `npm run build` → outputs to `dist/SunbulaFrontEnd/`
 - `allowedHosts: true` and `host: 0.0.0.0` are set in `angular.json` for Replit proxy compatibility
 
+## Design Conventions
+- All components use `templateUrl` / `styleUrl` (external `.html` + `.scss` files) — no inline templates or styles
+- Icons: Font Awesome 6 via CDN (`<i class="fa-solid fa-...">`) — emojis replaced except for data-driven enum emojis (PLANT_LEVEL_META, GROWTH_STAGE_META, BEHAVIOR_META)
+- 3D effects: `perspective` + `rotateX/Y` hover tilts, `@keyframes float` for empty-state icons, `translateY` lift on card hover
+- SCSS uses CSS custom properties from `src/styles/global.css` (Tailwind v4 `@theme` block) — no hardcoded colors
+- One exception: `sb-icon-coin.component.ts` keeps inline SVG template (pure SVG, no HTML binding needed)
+
 ## Deployment
 - **Type:** Static site
 - **Build command:** `npm run build`

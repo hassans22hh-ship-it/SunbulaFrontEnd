@@ -1,0 +1,46 @@
+<div class="heatmap-wrap">
+
+  <div class="heatmap-months">
+    @for (month of monthLabels(); track $index) {
+      <span class="month-label" [style.grid-column-start]="month.col">{{ month.name }}</span>
+    }
+  </div>
+
+  <div class="heatmap-body">
+    <div class="day-axis">
+      <span>Mon</span>
+      <span></span>
+      <span>Wed</span>
+      <span></span>
+      <span>Fri</span>
+      <span></span>
+      <span>Sun</span>
+    </div>
+
+    <div class="heatmap-grid">
+      @for (week of weeks(); track $index) {
+        <div class="heatmap-week">
+          @for (day of week; track day.date) {
+            <div
+              class="heatmap-cell"
+              [class]="'heatmap-cell--level-' + day.level"
+              [title]="day.tooltip"
+              [attr.aria-label]="day.tooltip">
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="heatmap-legend">
+    <span class="legend-text">Less</span>
+    <div class="legend-cell heatmap-cell--level-0"></div>
+    <div class="legend-cell heatmap-cell--level-1"></div>
+    <div class="legend-cell heatmap-cell--level-2"></div>
+    <div class="legend-cell heatmap-cell--level-3"></div>
+    <div class="legend-cell heatmap-cell--level-4"></div>
+    <span class="legend-text">More</span>
+  </div>
+
+</div>

@@ -34,7 +34,7 @@ export class MyGardenComponent implements OnInit {
     return GROWTH_STAGE_META[p.currentStage as GrowthStage] || GROWTH_STAGE_META[GrowthStage.Seedling] || {};
   }
 
-  waterPlantPrompt(id: string, isSeed: boolean) {
+  waterPlantPrompt(id: string, isSeed: boolean): void {
     const amtStr = window.prompt('How many coins to invest?', '10');
     if (!amtStr) return;
     const amt = parseInt(amtStr, 10);

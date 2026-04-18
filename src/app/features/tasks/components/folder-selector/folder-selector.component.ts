@@ -13,38 +13,19 @@ import { FolderDto } from '@shared/models/task.models';
       multi: true
     }
   ],
-  template: `
-    <div class="folder-selector">
-      <select 
-        [disabled]="disabled" 
-        [value]="value || ''" 
-        (change)="onChangeEl($event)"
-        (blur)="onTouched()"
-        class="input-field"
-      >
-        <option value="">No Folder (Inbox)</option>
-        @for (folder of folders(); track folder.id) {
-          <option [value]="folder.id">{{ folder.name }}</option>
-        }
-      </select>
-      
-      <!-- Optional: Custom styled dropdown could be implemented here for a richer UI -->
-    </div>
-  `,
-  styles: [`
-    .folder-selector { position: relative; width: 100%; }
-  `]
+  templateUrl: './folder-selector.component.html',
+  styleUrl: './folder-selector.component.scss'
 })
 export class FolderSelectorComponent implements ControlValueAccessor {
   folders = input<FolderDto[]>([]);
-  
+
   value: string | null = null;
   disabled = false;
-  
+
   onChange: (value: string | null) => void = () => {};
   onTouched: () => void = () => {};
 
-  onChangeEl(event: Event) {
+  onChangeEl(event: Event): void {
     const val = (event.target as HTMLSelectElement).value;
     const finalVal = val === '' ? null : val;
     this.value = finalVal;
@@ -52,19 +33,8 @@ export class FolderSelectorComponent implements ControlValueAccessor {
     this.onTouched();
   }
 
-  writeValue(obj: string | null): void {
-    this.value = obj;
-  }
-  
-  registerOnChange(fn: (value: string | null) => void): void {
-    this.onChange = fn;
-  }
-  
-  registerOnTouched(fn: () => void): void {
-    this.onTouched = fn;
-  }
-  
-  setDisabledState?(isDisabled: boolean): void {
-    this.disabled = isDisabled;
-  }
+  writeValue(obj: string | null): void { this.value = obj; }
+  registerOnChange(fn: (value: string | null) => void): void { this.onChange = fn; }
+  registerOnTouched(fn: () => void): void { this.onTouched = fn; }
+  setDisabledState(isDisabled: boolean): void { this.disabled = isDisabled; }
 }

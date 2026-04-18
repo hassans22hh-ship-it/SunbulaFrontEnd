@@ -1,0 +1,14 @@
+<div class="chart-container relative h-full w-full min-h-[300px]">
+  @if (data().length === 0) {
+    <div class="chart-empty">
+      <i class="fa-solid fa-chart-bar"></i>
+      <span>No data available for this period.</span>
+    </div>
+  } @else {
+    <canvas baseChart
+      [data]="chartData"
+      [options]="chartOptions"
+      [type]="barChartType">
+    </canvas>
+  }
+</div>

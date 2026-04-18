@@ -10,24 +10,8 @@ import { DatePipe } from '@angular/common';
   imports: [BaseChartDirective],
   providers: [DatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div class="chart-container relative h-full w-full min-h-[300px]">
-      @if (data().length === 0) {
-        <div class="absolute inset-0 flex items-center justify-center text-subtle text-sm">
-          No data available for this period.
-        </div>
-      } @else {
-        <canvas baseChart
-          [data]="chartData"
-          [options]="chartOptions"
-          [type]="lineChartType">
-        </canvas>
-      }
-    </div>
-  `,
-  styles: [`
-    .text-subtle { color: var(--color-text-muted); }
-  `]
+  templateUrl: './trend-line-chart.component.html',
+  styleUrl: './trend-line-chart.component.scss'
 })
 export class TrendLineChartComponent implements OnChanges {
   data = input<DailyTrendDto[]>([]);

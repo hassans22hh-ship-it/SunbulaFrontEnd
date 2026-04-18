@@ -55,8 +55,6 @@ export class FolderFormComponent implements OnInit {
       this.form.markAllAsTouched();
       return;
     }
-    
-    // We emit back to parent component to handle store logic + GSAP
     this.saved.emit({
       dto: this.form.getRawValue() as CreateFolderDto | UpdateFolderDto,
       isEdit: !!this.folder()

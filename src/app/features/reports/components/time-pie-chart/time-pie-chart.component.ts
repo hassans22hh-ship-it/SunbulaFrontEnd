@@ -8,24 +8,8 @@ import { TimeDistributionDto } from '@shared/models/reports.models';
   standalone: true,
   imports: [BaseChartDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div class="chart-container relative h-full w-full min-h-[300px]">
-      @if (data().length === 0) {
-        <div class="absolute inset-0 flex items-center justify-center text-subtle text-sm">
-          No data available for this period.
-        </div>
-      } @else {
-        <canvas baseChart
-          [data]="chartData"
-          [options]="chartOptions"
-          [type]="pieChartType">
-        </canvas>
-      }
-    </div>
-  `,
-  styles: [`
-    .text-subtle { color: var(--color-text-muted); }
-  `]
+  templateUrl: './time-pie-chart.component.html',
+  styleUrl: './time-pie-chart.component.scss'
 })
 export class TimePieChartComponent implements OnChanges {
   data = input<TimeDistributionDto[]>([]);

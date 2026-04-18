@@ -11,60 +11,12 @@ import { SbButtonComponent } from '../../../../shared/ui/button/sb-button.compon
   standalone: true,
   imports: [ReactiveFormsModule, SbButtonComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  template: `
-    <div class="bg-surface border border-border rounded-2xl p-6 shadow-sm">
-      <h3 class="font-semibold text-lg text-text mb-4">Edit Profile</h3>
-      
-      <div class="flex items-center gap-6 mb-8">
-        <div class="w-20 h-20 rounded-full bg-primary/10 text-primary flex items-center justify-center text-3xl font-bold border-2 border-surface shadow-sm relative">
-           {{ getInitial() }}
-           <button class="absolute bottom-0 right-[-4px] w-7 h-7 bg-surface-2 border border-border rounded-full flex items-center justify-center text-xs shadow-sm hover:bg-border transition-colors">
-             ✏️
-           </button>
-        </div>
-        <div>
-          <div class="font-medium text-text">{{ auth.user()?.fullName }}</div>
-          <div class="text-sm text-subtle">{{ auth.user()?.email }}</div>
-        </div>
-      </div>
-
-      <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div class="form-group">
-            <label class="label-text">First Name</label>
-            <input class="input-field" type="text" formControlName="firstName">
-          </div>
-          <div class="form-group">
-            <label class="label-text">Last Name</label>
-            <input class="input-field" type="text" formControlName="lastName">
-          </div>
-        </div>
-
-        <div class="flex justify-end">
-          <sb-button type="submit" [disabled]="form.invalid || form.pristine || saving()">
-            {{ saving() ? 'Saving...' : 'Save Profile Changes' }}
-          </sb-button>
-        </div>
-
-      </form>
-    </div>
-  `,
-  styles: [`
-    .text-text { color: var(--color-text); }
-    .text-subtle { color: var(--color-text-muted); }
-    .bg-surface { background: var(--color-surface); }
-    .bg-surface-2 { background: var(--color-surface-2); }
-    .border-border { border-color: var(--color-border); }
-    .border-surface { border-color: var(--color-surface); }
-    
-    .bg-primary\\/10 { background: color-mix(in srgb, var(--color-primary) 10%, transparent); }
-    .text-primary { color: var(--color-primary); }
-  `]
+  templateUrl: './profile-settings.component.html',
+  styleUrl: './profile-settings.component.scss'
 })
 export class ProfileSettingsComponent {
   protected readonly auth = inject(AuthService);
-  private readonly authApi = inject(AuthApiService); // Changed from SettingsApiService
+  private readonly authApi = inject(AuthApiService);
   private readonly fb = inject(FormBuilder);
   private readonly toast = inject(ToastService);
 
@@ -87,10 +39,10 @@ export class ProfileSettingsComponent {
 
   onSubmit(): void {
     if (this.form.invalid || this.form.pristine) return;
-    
+
     this.saving.set(true);
     const v = this.form.value;
-    
+
     const dto: UpdateProfileDto = {
       firstName: v.firstName!,
       lastName: v.lastName!

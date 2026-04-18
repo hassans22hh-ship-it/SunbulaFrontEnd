@@ -1,0 +1,17 @@
+<div class="folder-selector">
+  <div class="select-wrapper">
+    <i class="fa-solid fa-folder select-icon"></i>
+    <select
+      class="input-field select-field"
+      [disabled]="disabled"
+      [value]="value || ''"
+      (change)="onChangeEl($event)"
+      (blur)="onTouched()">
+      <option value="">No Folder (Inbox)</option>
+      @for (folder of folders(); track folder.id) {
+        <option [value]="folder.id">{{ folder.name }}</option>
+      }
+    </select>
+    <i class="fa-solid fa-chevron-down select-caret"></i>
+  </div>
+</div>

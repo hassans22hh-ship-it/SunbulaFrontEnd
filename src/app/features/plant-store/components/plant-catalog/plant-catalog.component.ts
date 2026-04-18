@@ -14,11 +14,11 @@ import { AnimateDirective } from '@shared/directives/animate.directive';
   selector: 'sb-plant-catalog',
   standalone: true,
   imports: [
-    PlantCardComponent, 
-    PlantLevelFilterComponent, 
-    PlantDetailModalComponent, 
-    SbSpinnerComponent, 
-    SbEmptyStateComponent, 
+    PlantCardComponent,
+    PlantLevelFilterComponent,
+    PlantDetailModalComponent,
+    SbSpinnerComponent,
+    SbEmptyStateComponent,
     AnimateDirective
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -52,13 +52,11 @@ export class PlantCatalogComponent implements OnInit {
   }
 
   onPurchase(plant: PlantDto): void {
-    // Basic validation could happen here (check wallet balance via finance store if connected)
     this.isPurchasing.set(true);
-    // Mimic the async call finishing by temporarily setting this
     setTimeout(() => {
-       this.store.purchase(plant.id, plant.price ?? 0);
-       this.isPurchasing.set(false);
-       this.inspectingPlant.set(null);
+      this.store.purchase(plant.id, plant.price ?? 0);
+      this.isPurchasing.set(false);
+      this.inspectingPlant.set(null);
     }, 500);
   }
 }

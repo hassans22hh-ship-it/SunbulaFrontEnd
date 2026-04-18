@@ -1,0 +1,50 @@
+<div class="theme-card">
+  <h3 class="theme-card__title">
+    <i class="fa-solid fa-palette"></i> Appearance
+  </h3>
+
+  <div class="theme-options">
+    <div class="option-section">
+      <div class="option-label">Color Scheme</div>
+      <div class="theme-buttons">
+
+        <button
+          class="theme-btn"
+          [class.theme-btn--active]="currentTheme() === 'light'"
+          (click)="setTheme('light')">
+          <div class="theme-preview theme-preview--light">
+            <div class="preview-bar"></div>
+            <div class="preview-card"></div>
+          </div>
+          <div class="theme-btn__label">
+            <i class="fa-solid fa-sun"></i> Light
+          </div>
+          @if (currentTheme() === 'light') {
+            <span class="theme-btn__check"><i class="fa-solid fa-circle-check"></i></span>
+          }
+        </button>
+
+        <button
+          class="theme-btn"
+          [class.theme-btn--active]="currentTheme() === 'dark'"
+          (click)="setTheme('dark')">
+          <div class="theme-preview theme-preview--dark">
+            <div class="preview-bar"></div>
+            <div class="preview-card"></div>
+          </div>
+          <div class="theme-btn__label">
+            <i class="fa-solid fa-moon"></i> Dark
+          </div>
+          @if (currentTheme() === 'dark') {
+            <span class="theme-btn__check"><i class="fa-solid fa-circle-check"></i></span>
+          }
+        </button>
+
+      </div>
+      <p class="option-hint">
+        <i class="fa-solid fa-circle-info"></i>
+        Choose how Sunbula looks to you. This affects all pages.
+      </p>
+    </div>
+  </div>
+</div>

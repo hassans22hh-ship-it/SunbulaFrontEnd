@@ -1,0 +1,130 @@
+.theme-card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-2xl);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+
+  &__title {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0 0 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    i { color: var(--color-primary); }
+  }
+}
+
+.option-label {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--color-text);
+  margin-bottom: 0.75rem;
+}
+
+.theme-buttons {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.theme-btn {
+  position: relative;
+  width: 130px;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  background: transparent;
+  padding: 0;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+
+  &--active {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 20%, transparent), var(--shadow-md);
+  }
+
+  &__label {
+    padding: 0.625rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    color: var(--color-text);
+  }
+
+  &__check {
+    position: absolute;
+    top: 0.375rem;
+    right: 0.375rem;
+    color: var(--color-primary);
+    font-size: 1rem;
+  }
+}
+
+.theme-preview {
+  width: 100%;
+  height: 4.5rem;
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+
+  &--light {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  &--dark {
+    background: #0f172a;
+    border-bottom: 1px solid #1e293b;
+  }
+}
+
+.preview-bar {
+  height: 0.5rem;
+  width: 40%;
+  border-radius: 4px;
+
+  .theme-preview--light & { background: #cbd5e1; }
+  .theme-preview--dark  & { background: #334155; }
+}
+
+.preview-card {
+  height: 2rem;
+  width: 80%;
+  border-radius: 6px;
+  border: 1px solid;
+
+  .theme-preview--light & {
+    background: #fff;
+    border-color: #e2e8f0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .theme-preview--dark & {
+    background: #1e293b;
+    border-color: #334155;
+  }
+}
+
+.option-hint {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  margin: 0;
+
+  i { color: var(--color-info); }
+}

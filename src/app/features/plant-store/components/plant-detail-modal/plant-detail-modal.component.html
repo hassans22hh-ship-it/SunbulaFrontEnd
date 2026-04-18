@@ -1,54 +1,47 @@
 @if (plant()) {
   <sb-modal [title]="' '" maxWidth="450px" (closed)="closed.emit()">
 
-    <div class="flex flex-col items-center text-center -mt-6">
+    <div class="modal-body">
 
-      <div class="plant-hero-icon mb-6">
-        @if (plant()!.imageUrl) {
-          <img [src]="plant()!.imageUrl" [alt]="plant()!.name" class="w-20 h-20 object-contain drop-shadow-md" />
-        } @else {
-          <i class="fa-solid fa-seedling"></i>
-        }
-        <div class="level-badge-float"
-             [style.background]="'var(--color-' + levelMeta.variant + ')'"
-             [style.color]="'#fff'">
-          {{ levelMeta.label }}
-        </div>
-      </div>
-
-      <h2 class="text-2xl font-bold mb-2" style="color: var(--color-text);">{{ plant()!.name }}</h2>
-      <p class="text-sm mb-6 leading-relaxed px-4" style="color: var(--color-text-muted);">
-        {{ plant()!.description }}
-      </p>
-
-      <div class="detail-info-row mb-6">
-        <div class="text-left">
-          <div class="detail-label">Price</div>
-          <div class="coin-badge px-3 py-1 text-base font-bold inline-flex items-center gap-1.5">
-            <i class="fa-solid fa-coins"></i>
-            {{ plant()!.price }}
+      <div class="plant-hero">
+        <div class="plant-hero__icon">
+          @if (plant()!.imageUrl) {
+            <img [src]="plant()!.imageUrl" [alt]="plant()!.name" class="plant-hero__img" />
+          } @else {
+            <span class="plant-hero__emoji">{{ stageMeta.emoji }}</span>
+          }
+          <div class="plant-hero__level"
+               [style.background]="'var(--color-' + levelMeta.variant + ')'"
+               style="color:#fff;">
+            {{ levelMeta.label }}
           </div>
         </div>
-        <div class="text-right">
-          <div class="detail-label">Growth Stage</div>
-          <div class="text-sm font-semibold" style="color: var(--color-text);">{{ stageMeta.label }}</div>
+
+        <h2 class="plant-hero__name">{{ plant()!.name }}</h2>
+        <p class="plant-hero__desc">{{ plant()!.description }}</p>
+      </div>
+
+      <div class="plant-meta">
+        <div class="plant-meta__item">
+          <span class="plant-meta__label">Price</span>
+          <span class="price-badge">
+            <i class="fa-solid fa-coins"></i> {{ plant()!.price }}
+          </span>
+        </div>
+        <div class="plant-meta__item plant-meta__item--right">
+          <span class="plant-meta__label">Growth Stage</span>
+          <span class="plant-meta__value">{{ stageMeta.label }}</span>
         </div>
       </div>
 
-      <div class="w-full">
-        <sb-button
-          [fullWidth]="true"
-          (clicked)="purchase.emit(plant()!)"
-          [disabled]="purchasing()">
-          @if (purchasing()) {
-            <i class="fa-solid fa-spinner fa-spin mr-2"></i> Purchasing...
-          } @else {
-            <i class="fa-solid fa-cart-shopping mr-2"></i> Buy Seed
-          }
-        </sb-button>
-      </div>
+      <sb-button [fullWidth]="true" (clicked)="purchase.emit(plant()!)" [disabled]="purchasing()">
+        @if (purchasing()) {
+          <i class="fa-solid fa-spinner fa-spin"></i> Purchasing...
+        } @else {
+          <i class="fa-solid fa-seedling"></i> Buy Seed
+        }
+      </sb-button>
 
     </div>
-
   </sb-modal>
 }

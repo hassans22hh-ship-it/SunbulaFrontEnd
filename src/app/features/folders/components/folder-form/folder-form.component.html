@@ -1,43 +1,44 @@
 <sb-modal
   [title]="folder() ? 'Edit Folder' : 'New Folder'"
   maxWidth="400px"
-  (closed)="cancelled.emit()"
->
+  (closed)="cancelled.emit()">
+
   <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
 
-    <div class="form-group" style="margin-bottom: 1.25rem;">
+    <div class="form-group">
       <label class="label-text">Folder Name</label>
-      <input class="input-field" type="text" formControlName="name" placeholder="e.g. Work, Personal, Fitness">
+      <input class="input-field"
+             type="text"
+             formControlName="name"
+             placeholder="e.g. Work, Personal, Fitness">
       @if (form.get('name')?.touched && form.get('name')?.hasError('required')) {
         <span class="error-text">Name is required</span>
       }
     </div>
 
-    <div class="form-group" style="margin-bottom: 1.5rem;">
+    <div class="form-group">
       <label class="label-text">Folder Color</label>
-      <div class="color-grid">
+      <div class="color-picker">
         @for (color of presetColors; track color) {
           <button
             type="button"
+            class="color-swatch"
+            [class.color-swatch--selected]="form.value.color === color"
             [style.background]="color"
-            [class.selected]="form.value.color === color"
-            class="color-btn"
             (click)="form.patchValue({ color: color })"
-            title="Select color"
-          >
-            @if (form.value.color === color) {
-              <i class="fa-solid fa-check"></i>
-            }
+            [attr.aria-label]="'Select color ' + color">
           </button>
         }
       </div>
     </div>
 
-    <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+    <div class="form-actions">
       <sb-button variant="ghost" (clicked)="cancelled.emit()">Cancel</sb-button>
       <sb-button type="submit" [disabled]="form.invalid || loading()">
+        <i class="fa-solid fa-folder-plus"></i>
         {{ folder() ? 'Save Changes' : 'Create Folder' }}
       </sb-button>
     </div>
+
   </form>
 </sb-modal>

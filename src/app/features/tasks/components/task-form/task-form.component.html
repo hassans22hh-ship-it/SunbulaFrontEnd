@@ -1,0 +1,85 @@
+<sb-modal
+  [title]="task() ? 'Edit Task' : 'New Task'"
+  maxWidth="500px"
+  (closed)="cancelled.emit()">
+
+  <form [formGroup]="form" (ngSubmit)="onSubmit()" novalidate>
+
+    <div class="form-row">
+      <div class="emoji-wrap">
+        <input class="input-field emoji-input"
+               type="text"
+               formControlName="emoji"
+               maxlength="2"
+               placeholder="🌱">
+      </div>
+      <div class="title-wrap">
+        <input class="input-field title-input"
+               type="text"
+               formControlName="title"
+               placeholder="Task title...">
+        @if (form.get('title')?.touched && form.get('title')?.hasError('required')) {
+          <span class="error-text">Title is required</span>
+        }
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="label-text">
+        <i class="fa-solid fa-folder"></i> Folder
+      </label>
+      <sb-folder-selector formControlName="folderId" [folders]="folders()" />
+    </div>
+
+    <div class="form-group">
+      <label class="label-text">
+        <i class="fa-solid fa-brain"></i> Behavior Type
+      </label>
+      <div class="behavior-options">
+        @for (opt of behaviorOptions; track opt.value) {
+          <button
+            type="button"
+            class="behavior-chip"
+            [class.behavior-chip--active]="form.value.behaviorType === opt.value"
+            [style.--chip-color]="'var(' + opt.meta.colorVar + ')'"
+            (click)="form.patchValue({ behaviorType: opt.value })">
+            <span class="chip-emoji">{{ opt.meta.emoji }}</span>
+            {{ opt.meta.label }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="label-text">
+        <i class="fa-solid fa-palette"></i> Task Color
+      </label>
+      <div class="color-picker">
+        @for (color of taskColors; track color) {
+          <button
+            type="button"
+            class="color-swatch"
+            [class.color-swatch--active]="form.value.color === color"
+            [style.background]="color"
+            (click)="form.patchValue({ color: color })"
+            [attr.aria-label]="'Select color'">
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <sb-button variant="ghost" (clicked)="cancelled.emit()">
+        <i class="fa-solid fa-xmark"></i> Cancel
+      </sb-button>
+      <sb-button type="submit" [disabled]="form.invalid || loading()">
+        @if (task()) {
+          <i class="fa-solid fa-floppy-disk"></i> Save Changes
+        } @else {
+          <i class="fa-solid fa-plus"></i> Create Task
+        }
+      </sb-button>
+    </div>
+
+  </form>
+</sb-modal>

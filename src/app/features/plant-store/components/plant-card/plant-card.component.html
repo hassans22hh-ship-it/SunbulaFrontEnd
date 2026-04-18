@@ -1,43 +1,26 @@
-<div class="card-scene" (click)="clicked.emit(plant())" role="button" tabindex="0">
-  <div class="card-3d h-full">
+<div class="plant-card" (click)="clicked.emit(plant())" role="button" tabindex="0">
+  <div class="plant-card__inner">
 
-    <div class="card-face card-face--front p-4 flex flex-col justify-between">
-      <div class="flex justify-between items-start mb-4">
-        <div class="level-badge"
-             [style.border-color]="'var(--color-' + levelMeta.variant + ')'"
-             [style.color]="'var(--color-' + levelMeta.variant + ')'">
-          {{ levelMeta.label }}
-        </div>
-        <div class="coin-badge text-xs px-2 py-1">
-          <i class="fa-solid fa-coins mr-1"></i>{{ plant().price }}
-        </div>
-      </div>
-
-      <div class="plant-image-wrap flex-1 flex items-center justify-center py-4">
-        @if (plant().imageUrl) {
-          <img [src]="plant().imageUrl" [alt]="plant().name" class="w-20 h-20 object-contain drop-shadow-lg" />
-        } @else {
-          <div class="plant-emoji-fallback">
-            <i class="fa-solid fa-seedling"></i>
-          </div>
-        }
-      </div>
-
-      <div class="mt-2 text-center">
-        <h3 class="font-semibold text-base" style="color: var(--color-text);">{{ plant().name }}</h3>
-        <p class="text-xs mt-1 line-clamp-2" style="color: var(--color-text-muted);">{{ plant().description }}</p>
-      </div>
+    <div class="plant-card__badges">
+      <span class="level-badge" [style.border-color]="'var(--color-' + levelMeta.variant + ')'" [style.color]="'var(--color-' + levelMeta.variant + ')'">
+        {{ levelMeta.label }}
+      </span>
+      <span class="coin-badge">
+        <i class="fa-solid fa-coins"></i> {{ plant().price }}
+      </span>
     </div>
 
-    <div class="card-face card-face--back p-5 flex flex-col justify-center items-center text-center">
-      <div class="back-icon mb-3">
-        <i class="fa-solid fa-seedling"></i>
-      </div>
-      <h3 class="font-bold text-base mb-2" style="color: var(--color-text);">{{ plant().name }}</h3>
-      <p class="text-xs leading-relaxed mb-4" style="color: var(--color-text-muted);">{{ plant().description }}</p>
-      <div class="back-price coin-badge text-sm px-3 py-1.5">
-        <i class="fa-solid fa-coins mr-1"></i>{{ plant().price }} coins
-      </div>
+    <div class="plant-card__visual">
+      @if (plant().imageUrl) {
+        <img [src]="plant().imageUrl" [alt]="plant().name" class="plant-img" />
+      } @else {
+        <span class="plant-emoji">{{ stageMeta.emoji }}</span>
+      }
+    </div>
+
+    <div class="plant-card__info">
+      <h3 class="plant-name">{{ plant().name }}</h3>
+      <p class="plant-desc">{{ plant().description }}</p>
     </div>
 
   </div>

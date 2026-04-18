@@ -1,0 +1,53 @@
+<div class="donut-chart">
+  <div class="donut-title">{{ title() }}</div>
+
+  <div class="donut-body">
+    <svg class="donut-svg" viewBox="0 0 100 100">
+      <circle class="donut-bg" cx="50" cy="50" r="40" />
+
+      @if (segments().length === 0) {
+        <circle cx="50" cy="50" r="40"
+                fill="none"
+                stroke="var(--color-border)"
+                stroke-width="16"
+                stroke-dasharray="251.3 0" />
+      }
+
+      @for (seg of segments(); track seg.label) {
+        <circle cx="50" cy="50" r="40"
+                fill="none"
+                [attr.stroke]="seg.color"
+                stroke-width="16"
+                [attr.stroke-dasharray]="seg.dasharray"
+                [attr.stroke-dashoffset]="seg.dashoffset"
+                stroke-linecap="butt" />
+      }
+
+      <text x="50" y="46" text-anchor="middle" class="donut-center-val">
+        {{ primaryPercentage() | number:'1.0-0' }}%
+      </text>
+      <text x="50" y="58" text-anchor="middle" class="donut-center-sub">
+        positive
+      </text>
+    </svg>
+
+    <div class="donut-legend">
+      @for (seg of segments(); track seg.label) {
+        <div class="legend-item">
+          <span class="legend-dot" [style.background]="seg.color"></span>
+          <span class="legend-label">{{ seg.label }}</span>
+          <span class="legend-pct">{{ (seg.percentage * 100) | number:'1.0-0' }}%</span>
+        </div>
+      }
+      @if (segments().length === 0) {
+        <div class="no-data">
+          <i class="fa-solid fa-chart-pie"></i> No data
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="donut-total">
+    <i class="fa-regular fa-clock"></i> {{ totalTimeLabel() }} tracked
+  </div>
+</div>

@@ -1,36 +1,29 @@
-<div class="tx-panel">
+<div class="txn-container">
 
-  <div class="flex justify-between items-center mb-6">
-    <h3 class="panel-title">
-      @if (selectedWalletId()) {
-        Recent Transactions
-      } @else {
-        All Transactions
-      }
+  <div class="txn-header">
+    <h3 class="txn-title">
+      @if (selectedWalletId()) { Recent Transactions } @else { All Transactions }
     </h3>
-
     <sb-button size="sm" (clicked)="showForm.set(true)" [disabled]="store.wallets().length === 0">
-      <i class="fa-solid fa-plus mr-1"></i> Record
+      <i class="fa-solid fa-plus"></i> Record
     </sb-button>
   </div>
 
-  <div class="flex-1 overflow-y-auto custom-scrollbar pr-2">
+  <div class="txn-list-wrap">
     @if (filteredTransactions().length === 0) {
-      <div class="tx-empty">
-        <div class="tx-empty-icon">
-          <i class="fa-solid fa-receipt"></i>
-        </div>
-        <span>No transactions found</span>
-      </div>
+      <sb-empty-state
+        icon="🧾"
+        title="No transactions"
+        message="No financial history found for this view." />
     } @else {
-      <div class="tx-list">
+      <div class="txn-list">
         @for (t of filteredTransactions(); track t.id) {
-          <div class="tx-row group">
+          <div class="txn-row">
 
-            <div class="tx-type-icon"
-                 [class.income]="t.type === TransactionType.Income"
-                 [class.expense]="t.type === TransactionType.Expense"
-                 [class.transfer]="t.type === TransactionType.Transfer">
+            <div class="txn-icon"
+                 [class.txn-icon--income]="t.type === TransactionType.Income"
+                 [class.txn-icon--expense]="t.type === TransactionType.Expense"
+                 [class.txn-icon--transfer]="t.type === TransactionType.Transfer">
               @if (t.type === TransactionType.Income) {
                 <i class="fa-solid fa-arrow-down"></i>
               } @else if (t.type === TransactionType.Expense) {
@@ -40,9 +33,9 @@
               }
             </div>
 
-            <div class="tx-info">
-              <div class="tx-desc">{{ t.description || getLabelForType(t.type) }}</div>
-              <div class="tx-meta">
+            <div class="txn-details">
+              <div class="txn-desc">{{ t.description || getLabelForType(t.type) }}</div>
+              <div class="txn-meta">
                 {{ t.transactionDate | date:'MMM d, y' }}
                 @if (!selectedWalletId()) {
                   &bull; {{ getWalletName(t.walletId) }}
@@ -50,14 +43,14 @@
               </div>
             </div>
 
-            <div class="flex flex-col items-end">
-              <span class="tx-amount"
-                    [class.income]="t.type === TransactionType.Income"
-                    [class.neutral]="t.type === TransactionType.Expense || t.type === TransactionType.Transfer">
+            <div class="txn-right">
+              <span class="txn-amount"
+                    [class.txn-amount--income]="t.type === TransactionType.Income"
+                    [class.txn-amount--expense]="t.type === TransactionType.Expense">
                 {{ t.type === TransactionType.Expense ? '-' : (t.type === TransactionType.Income ? '+' : '') }}{{ t.amount | currency }}
               </span>
-              <button class="tx-delete" (click)="onDelete(t)">
-                <i class="fa-solid fa-trash-can"></i> Delete
+              <button class="txn-delete" (click)="onDelete(t)">
+                <i class="fa-solid fa-trash-can"></i>
               </button>
             </div>
 
@@ -73,8 +66,7 @@
       [categories]="store.categories()"
       [defaultWalletId]="selectedWalletId()"
       (saved)="onFormSave($event)"
-      (cancelled)="showForm.set(false)"
-    />
+      (cancelled)="showForm.set(false)" />
   }
 
 </div>

@@ -1,0 +1,20 @@
+<div class="filter-group">
+  <button class="filter-btn"
+          [class.active]="selected() === '7d'"
+          (click)="select('7d')">
+    <i class="fa-regular fa-calendar-week mr-1"></i>
+    Last 7 Days
+  </button>
+  <button class="filter-btn"
+          [class.active]="selected() === '30d'"
+          (click)="select('30d')">
+    <i class="fa-regular fa-calendar mr-1"></i>
+    Last 30 Days
+  </button>
+  <button class="filter-btn"
+          [class.active]="selected() === '90d'"
+          (click)="select('90d')">
+    <i class="fa-regular fa-calendar-days mr-1"></i>
+    Last 3 Months
+  </button>
+</div>
