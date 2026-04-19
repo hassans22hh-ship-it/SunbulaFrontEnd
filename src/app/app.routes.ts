@@ -25,5 +25,5 @@ export const APP_ROUTES: Routes = [
     loadChildren: () => import('@features/auth/auth.routes').then(m => m.AUTH_ROUTES),
     canActivate: [guestGuard],
   },
-  { path: '**', redirectTo: 'dashboard' },
+  { path: '**', redirectTo: 'tasks' },
 ];

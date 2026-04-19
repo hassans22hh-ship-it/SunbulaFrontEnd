@@ -44,8 +44,8 @@ export class WalletListComponent implements OnInit {
     this.store.loadAll();
   }
 
-  formatCurrency(value: number, currency: string = 'SAR'): string {
-    return new Intl.NumberFormat('ar-SA', { style: 'currency', currency }).format(value);
+  formatCurrency(value: number, currency: string = 'EGP'): string {
+    return new Intl.NumberFormat('Engen-Us', { style: 'currency', currency }).format(value);
   }
 
   openForm(wallet: WalletDto | null = null): void {

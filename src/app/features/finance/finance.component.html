@@ -102,10 +102,12 @@
     </div>
   }
 
-  <!-- ═══ FAB ═══ -->
-  <button class="fab" (click)="openAddTx()" aria-label="Add Transaction">
-    <span class="fab-icon">+</span>
-  </button>
+  <!-- ═══ FAB (Centered at bottom) ═══ -->
+  <div class="flex justify-center py-10">
+    <button class="fab !static !transform-none !m-0" (click)="openAddTx()" aria-label="Add Transaction">
+      <i class="fa-solid fa-plus text-xl"></i>
+    </button>
+  </div>
 
   <!-- ═══ ADD/EDIT TRANSACTION MODAL ═══ -->
   @if (showTxForm()) {

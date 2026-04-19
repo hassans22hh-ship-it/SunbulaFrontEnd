@@ -1,6 +1,9 @@
 <div class="page" sbPageTransition>
   <div class="flex items-center justify-between mb-8">
-    <h1 class="section-title mb-0">📈 Reports</h1>
+    <h1 class="section-title mb-0 flex items-center gap-3">
+      <i class="fa-solid fa-chart-line text-primary text-2xl"></i>
+      Reports
+    </h1>
     <div class="flex gap-2">
       <button class="range-btn" [class.active]="range() === 'today'" (click)="loadRange('today')">Today</button>
       <button class="range-btn" [class.active]="range() === '7d'" (click)="loadRange('7d')">7 Days</button>
@@ -8,141 +11,173 @@
     </div>
   </div>
   @if (loading()) {
-    <sb-spinner size="lg" />
+  <sb-spinner size="lg" />
   } @else {
-    <div class="stats-grid">
-      <sb-card><div class="stat"><div class="stat-icon flex items-center justify-center p-3 bg-primary/10 rounded-xl"><i class="fa-solid fa-stopwatch text-primary text-xl"></i></div><div class="stat-info"><span class="stat-value">{{ totalTrackedAllTime() | duration }}</span><span class="stat-label">Total tracked</span></div></div></sb-card>
-      <sb-card><div class="stat"><div class="stat-icon flex items-center justify-center p-3 bg-primary/10 rounded-xl"><i class="fa-solid fa-clipboard-list text-primary text-xl"></i></div><div class="stat-info"><span class="stat-value">{{ sessions().length }}</span><span class="stat-label">Total sessions</span></div></div></sb-card>
-      <sb-card><div class="stat"><div class="stat-icon flex items-center justify-center p-3 bg-amber-500/10 rounded-xl"><i class="fa-solid fa-coins text-amber-500 text-xl"></i></div><div class="stat-info"><span class="stat-value">{{ totalCoinsAllTime() | coins }}</span><span class="stat-label">Total coins earned</span></div></div></sb-card>
-      <sb-card><div class="stat"><div class="stat-icon flex items-center justify-center p-3 bg-orange-500/10 rounded-xl"><i class="fa-solid fa-fire text-orange-500 text-xl"></i></div><div class="stat-info"><span class="stat-value">{{ streak() }}</span><span class="stat-label">Current streak</span></div></div></sb-card>
-    </div>
- 
-    @if (taskSummary()) {
-      <div class="flex items-center justify-between mt-4 mb-4">
-        <h2 class="subsection-title mb-0">🏗️ Tasks Overview</h2>
+  <div class="stats-grid">
+    <sb-card>
+      <div class="stat">
+        <div class="stat-icon flex items-center justify-center p-3 bg-primary/10 rounded-xl"><i
+            class="fa-solid fa-stopwatch text-primary text-xl"></i></div>
+        <div class="stat-info"><span class="stat-value">{{ totalTrackedAllTime() | duration }}</span><span
+            class="stat-label">Total tracked</span></div>
       </div>
-      <div class="stats-grid mb-10">
-        <sb-card>
-          <div class="stat">
-            <div class="stat-icon flex items-center justify-center p-3 bg-blue-500/10 rounded-xl">
-              <i class="fa-solid fa-list-check text-blue-500 text-xl"></i>
-            </div>
-            <div class="stat-info">
-              <span class="stat-value">{{ taskSummary()?.totalTasks }}</span>
-              <span class="stat-label">Total tasks</span>
-            </div>
-          </div>
-        </sb-card>
-        <sb-card>
-          <div class="stat">
-            <div class="stat-icon flex items-center justify-center p-3 bg-green-500/10 rounded-xl">
-              <i class="fa-solid fa-check-double text-green-500 text-xl"></i>
-            </div>
-            <div class="stat-info">
-              <span class="stat-value">{{ taskSummary()?.completedTasks }}</span>
-              <span class="stat-label">Completed</span>
-            </div>
-          </div>
-        </sb-card>
-        <sb-card>
-          <div class="stat">
-            <div class="stat-icon flex items-center justify-center p-3 bg-indigo-500/10 rounded-xl">
-              <i class="fa-solid fa-hourglass-half text-indigo-500 text-xl"></i>
-            </div>
-            <div class="stat-info">
-              <span class="stat-value">{{ taskSummary()?.activeTasks }}</span>
-              <span class="stat-label">Active focus</span>
-            </div>
-          </div>
-        </sb-card>
-        <sb-card>
-          <div class="stat">
-            <div class="stat-icon flex items-center justify-center p-3 bg-purple-500/10 rounded-xl">
-              <i class="fa-solid fa-box-archive text-purple-500 text-xl"></i>
-            </div>
-            <div class="stat-info">
-              <span class="stat-value">{{ taskSummary()?.archivedTasks }}</span>
-              <span class="stat-label">Archived</span>
-            </div>
-          </div>
-        </sb-card>
+    </sb-card>
+    <sb-card>
+      <div class="stat">
+        <div class="stat-icon flex items-center justify-center p-3 bg-primary/10 rounded-xl"><i
+            class="fa-solid fa-clipboard-list text-primary text-xl"></i></div>
+        <div class="stat-info"><span class="stat-value">{{ sessions().length }}</span><span class="stat-label">Total
+            sessions</span></div>
       </div>
-    }
+    </sb-card>
+    <sb-card>
+      <div class="stat">
+        <div class="stat-icon flex items-center justify-center p-3 bg-amber-500/10 rounded-xl"><i
+            class="fa-solid fa-coins text-amber-500 text-xl"></i></div>
+        <div class="stat-info"><span class="stat-value">{{ totalCoinsAllTime() | coins }}</span><span
+            class="stat-label">Total coins earned</span></div>
+      </div>
+    </sb-card>
+  </div>
 
-    <!-- Heatmap & Analytics Section -->
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-10">
-      <div class="lg:col-span-3">
-        <div class="flex items-center justify-between mb-6">
-          <h2 class="text-xl font-display font-bold text-text flex items-center gap-2">
-            <i class="fa-solid fa-fire text-amber-500 text-base"></i> Contribution Heatmap
-          </h2>
-          <div class="flex items-center gap-4 text-xs font-bold text-text-muted">
-             <span class="uppercase tracking-widest">Select Year</span>
-             <div class="flex bg-surface-2 p-1 rounded-lg">
-                <button (click)="changeYear(2026)" [class.bg-surface]="selectedYear() === 2026" [class.text-primary]="selectedYear() === 2026" class="px-3 py-1 rounded-md transition-all">2026</button>
-                <button (click)="changeYear(2025)" [class.bg-surface]="selectedYear() === 2025" [class.text-primary]="selectedYear() === 2025" class="px-3 py-1 rounded-md transition-all">2025</button>
-             </div>
+  @if (taskSummary()) {
+  <div class="flex items-center justify-between mt-4 mb-4">
+    <h2 class="subsection-title mb-0 flex items-center gap-3">
+      <i class="fa-solid fa-layer-group text-primary"></i>
+      Tasks Overview
+    </h2>
+  </div>
+  <div class="stats-grid mb-10">
+    <sb-card>
+      <div class="stat">
+        <div class="stat-icon flex items-center justify-center p-3 bg-blue-500/10 rounded-xl">
+          <i class="fa-solid fa-list-check text-blue-500 text-xl"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ taskSummary()?.totalTasks }}</span>
+          <span class="stat-label">Total tasks</span>
+        </div>
+      </div>
+    </sb-card>
+    <sb-card>
+      <div class="stat">
+        <div class="stat-icon flex items-center justify-center p-3 bg-green-500/10 rounded-xl">
+          <i class="fa-solid fa-check-double text-green-500 text-xl"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ taskSummary()?.completedTasks }}</span>
+          <span class="stat-label">Completed</span>
+        </div>
+      </div>
+    </sb-card>
+    <sb-card>
+      <div class="stat">
+        <div class="stat-icon flex items-center justify-center p-3 bg-indigo-500/10 rounded-xl">
+          <i class="fa-solid fa-hourglass-half text-indigo-500 text-xl"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ taskSummary()?.activeTasks }}</span>
+          <span class="stat-label">Active focus</span>
+        </div>
+      </div>
+    </sb-card>
+    <sb-card>
+      <div class="stat">
+        <div class="stat-icon flex items-center justify-center p-3 bg-purple-500/10 rounded-xl">
+          <i class="fa-solid fa-box-archive text-purple-500 text-xl"></i>
+        </div>
+        <div class="stat-info">
+          <span class="stat-value">{{ taskSummary()?.archivedTasks }}</span>
+          <span class="stat-label">Archived</span>
+        </div>
+      </div>
+    </sb-card>
+  </div>
+  }
+
+  <!-- Heatmap & Analytics Section -->
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 mb-10">
+    <div class="lg:col-span-3">
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-xl font-display font-bold text-text flex items-center gap-2">
+          <i class="fa-solid fa-fire text-amber-500 text-base"></i> Contribution Heatmap
+        </h2>
+        <div class="flex items-center gap-4 text-xs font-bold text-text-muted">
+          <span class="uppercase tracking-widest">Select Year</span>
+          <div class="flex bg-surface-2 p-1 rounded-lg">
+            <button (click)="changeYear(2026)" [class.bg-surface]="selectedYear() === 2026"
+              [class.text-primary]="selectedYear() === 2026" class="px-3 py-1 rounded-md transition-all">2026</button>
+            <button (click)="changeYear(2025)" [class.bg-surface]="selectedYear() === 2025"
+              [class.text-primary]="selectedYear() === 2025" class="px-3 py-1 rounded-md transition-all">2025</button>
           </div>
         </div>
-        
-        @if (isYearlyLoading()) {
-           <div class="h-[200px] flex items-center justify-center bg-surface-2 rounded-2xl border border-dashed border-border/30">
-              <sb-spinner />
-           </div>
-        } @else {
-           <sb-heatmap [data]="yearlyTrend()" [year]="selectedYear()" />
-        }
       </div>
 
-      <div class="lg:col-span-1 space-y-6">
-         <h2 class="text-xl font-display font-bold text-text">Highlights</h2>
-         <div class="space-y-4">
-            <sb-card padding="sm">
-               <div class="flex flex-col">
-                  <span class="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Peak Productivity</span>
-                  <span class="text-lg font-bold text-text">{{ peakDay() ? (peakDay() | date:'longDate':'':'en-US') : 'N/A' }}</span>
-               </div>
-            </sb-card>
-            <sb-card padding="sm">
-               <div class="flex flex-col">
-                  <span class="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Top Focus Category</span>
-                  <span class="text-lg font-bold text-text">Positive</span>
-               </div>
-            </sb-card>
-         </div>
+      @if (isYearlyLoading()) {
+      <div
+        class="h-[200px] flex items-center justify-center bg-surface-2 rounded-2xl border border-dashed border-border/30">
+        <sb-spinner />
       </div>
+      } @else {
+      <sb-heatmap [data]="yearlyTrend()" [year]="selectedYear()" />
+      }
     </div>
 
-    @let stats = (summary() ? summary()?.behaviorBreakdown : rangeReport()?.behaviorBreakdown) || [];
-    @if (stats.length) {
-      <div class="mb-8">
-        <sb-behavior-donut 
-          [breakdown]="stats" 
-          [title]="range() === 'today' ? 'Today Productivity' : 'Range Breakdown'" />
+    <div class="lg:col-span-1 space-y-6">
+      <h2 class="text-xl font-display font-bold text-text flex items-center gap-2">
+        <i class="fa-solid fa-star text-amber-500 text-base"></i> Highlights
+      </h2>
+      <div class="space-y-4">
+        <sb-card padding="sm">
+          <div class="flex flex-col">
+            <span class="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Peak Productivity</span>
+            <span class="text-lg font-bold text-text">{{ peakDay() ? (peakDay() | date:'longDate':'':'en-US') : 'N/A'
+              }}</span>
+          </div>
+        </sb-card>
+        <sb-card padding="sm">
+          <div class="flex flex-col">
+            <span class="text-[10px] font-bold text-text-muted uppercase tracking-widest mb-1">Top Focus Category</span>
+            <span class="text-lg font-bold text-text">Positive</span>
+          </div>
+        </sb-card>
       </div>
-    }
-
-    @if (rangeReport()?.topTasks?.length) {
-      <h2 class="subsection-title">Top Tasks in Period</h2>
-      <div class="behavior-grid">
-        @for (task of rangeReport()!.topTasks; track task.taskId) {
-          <sb-card padding="sm">
-            <div class="behavior-item">
-              <div class="task-info">
-                @if (task.taskEmoji) { <span class="task-icon">{{ task.taskEmoji }}</span> }
-                <span class="behavior-label">{{ task.taskTitle }}</span>
-              </div>
-              <span class="behavior-time">{{ task.totalSeconds | duration }}</span>
-              <div class="bar"><div class="bar-fill" [style.width.%]="task.percentage" [style.background]="task.taskColor"></div></div>
-              <span class="behavior-pct">{{ task.percentage | number:'1.0-0' }}%</span>
-            </div>
-          </sb-card>
-        }
-      </div>
-    }
-
-    <div class="mb-8">
-      <sb-behavior-donut [breakdown]="behaviorDistribution()" title="All-Time Behavior Distribution" />
     </div>
+  </div>
+
+  @let stats = (summary() ? summary()?.behaviorBreakdown : rangeReport()?.behaviorBreakdown) || [];
+  @if (stats.length) {
+  <div class="mb-8">
+    <sb-behavior-donut [breakdown]="stats" [title]="range() === 'today' ? 'Today Productivity' : 'Range Breakdown'" />
+  </div>
+  }
+
+  @if (rangeReport()?.topTasks?.length) {
+  <h2 class="subsection-title flex items-center gap-3">
+    <i class="fa-solid fa-ranking-star text-primary"></i>
+    Top Tasks in Period
+  </h2>
+  <div class="behavior-grid">
+    @for (task of rangeReport()!.topTasks; track task.taskId) {
+    <sb-card padding="sm">
+      <div class="behavior-item">
+        <div class="task-info">
+          @if (task.taskEmoji) { <span class="task-icon">{{ task.taskEmoji }}</span> }
+          <span class="behavior-label">{{ task.taskTitle }}</span>
+        </div>
+        <span class="behavior-time">{{ task.totalSeconds | duration }}</span>
+        <div class="bar">
+          <div class="bar-fill" [style.width.%]="task.percentage" [style.background]="task.taskColor"></div>
+        </div>
+        <span class="behavior-pct">{{ task.percentage | number:'1.0-0' }}%</span>
+      </div>
+    </sb-card>
+    }
+  </div>
+  }
+
+  <div class="mb-8">
+    <sb-behavior-donut [breakdown]="behaviorDistribution()" title="All-Time Behavior Distribution" />
+  </div>
   }
 </div>

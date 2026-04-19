@@ -1,5 +1,8 @@
 <div class="page" sbPageTransition>
-  <h1 class="section-title">⚙️ Settings</h1>
+  <h1 class="section-title flex items-center gap-3">
+    <i class="fa-solid fa-gear text-primary"></i>
+    Settings
+  </h1>
 
   <sb-card padding="lg">
     <h2 class="subsection-title">Profile</h2>
@@ -22,19 +25,34 @@
     <h2 class="subsection-title">Appearance</h2>
     <div class="theme-toggle">
       <span>Theme: {{ theme.isDark() ? 'Dark' : 'Light' }}</span>
-      <sb-button variant="outline" (click)="theme.toggle()">{{ theme.isDark() ? '☀️ Light Mode' : '🌙 Dark Mode'
-        }}</sb-button>
+      <sb-button variant="outline" (click)="theme.toggle()">
+        @if (theme.isDark()) {
+          <i class="fa-solid fa-sun mr-2"></i> Light Mode
+        } @else {
+          <i class="fa-solid fa-moon mr-2"></i> Dark Mode
+        }
+      </sb-button>
     </div>
   </sb-card>
 
   <sb-card padding="lg">
     <h2 class="subsection-title">Account</h2>
-    <p class="account-info">Coin balance: {{ auth.coinBalance() }} 🪙</p>
-    <p class="account-info">Streak: {{ auth.streakDays() }} 🔥 days</p>
-    <div class="security-links">
-      <a routerLink="change-password" class="settings-link">🔑 Change Password</a>
-      <a routerLink="reset-coins" class="settings-link text-warning">🪙 Reset Coins</a>
-      <a routerLink="delete-account" class="settings-link text-danger">🗑️ Delete Account</a>
+    <p class="account-info flex items-center gap-2">
+      Coin balance: {{ auth.coinBalance() }} <i class="fa-solid fa-coins text-amber-500"></i>
+    </p>
+    <p class="account-info flex items-center gap-2">
+      Streak: {{ auth.streakDays() }} <i class="fa-solid fa-fire text-orange-500"></i> days
+    </p>
+    <div class="security-links flex flex-col gap-3">
+      <a routerLink="change-password" class="settings-link flex items-center gap-2">
+        <i class="fa-solid fa-key"></i> Change Password
+      </a>
+      <a routerLink="reset-coins" class="settings-link text-warning flex items-center gap-2">
+        <i class="fa-solid fa-coins"></i> Reset Coins
+      </a>
+      <a routerLink="delete-account" class="settings-link text-danger flex items-center gap-2">
+        <i class="fa-solid fa-trash"></i> Delete Account
+      </a>
     </div>
     <div style="margin-top: 1.5rem">
       <sb-button variant="danger" (click)="auth.logout()">Sign Out</sb-button>

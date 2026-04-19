@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-bg flex flex-col lg:flex-row shadow-2xl rounded-3xl overflow-hidden mr-4 my-4 ml-0 border border-border/30" sbPageTransition>
+<div class="min-h-screen bg-bg flex flex-col lg:flex-row shadow-2xl rounded-3xl overflow-hidden lg:mr-4 lg:my-4 ml-0 border border-border/30" sbPageTransition>
   
   <!-- Side Filter Sidebar Overlay (Mobile) -->
   @if (showSidebar()) {
@@ -134,7 +134,7 @@
   <main class="flex-1 flex flex-col bg-surface">
     <!-- Header -->
     <header class="p-4 lg:p-6 border-b border-border/30 flex flex-wrap items-center justify-between gap-4 bg-surface/50 backdrop-blur-xl sticky top-0 z-20">
-      <div class="flex items-center gap-4 flex-1 min-w-[300px]">
+      <div class="flex items-center gap-4 flex-1 min-w-[200px]">
         <!-- Mobile Sidebar Toggle -->
         <button (click)="showSidebar.set(true)" class="lg:hidden p-2 hover:bg-surface-2 rounded-xl text-text-subtle transition-colors">
           <svg viewBox="0 0 24 24" fill="none" class="w-6 h-6" stroke="currentColor" stroke-width="2.5">
@@ -179,10 +179,10 @@
     </header>
 
     <!-- Tasks Toolbar & Grid -->
-    <div class="flex-1 p-4 sm:p-10 overflow-auto">
+    <div class="flex-1 p-4 sm:p-6 lg:p-10 overflow-auto">
       <div class="flex items-center justify-between mb-10">
         <div class="flex items-baseline gap-3">
-          <h2 class="text-4xl font-display font-bold text-text tracking-tight">Tasks</h2>
+          <h2 class="text-2xl sm:text-3xl lg:text-4xl font-display font-bold text-text tracking-tight">Tasks</h2>
           <span class="text-sm font-bold text-text-subtle uppercase tracking-widest">({{ store.count() }} active)</span>
         </div>
         
@@ -214,7 +214,7 @@
         @if (currentTasks.length === 0) {
           <sb-empty-state icon="✅" heading="No tasks found" message="Try adjusting your filters or create a new task." class="mt-20" />
         } @else {
-          <div [class]="viewMode() === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-32' : 'flex flex-col gap-4 pb-32'">
+          <div [class]="viewMode() === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 pb-32' : 'flex flex-col gap-4 pb-32'">
             @for (task of currentTasks; track task.id) {
               <sb-task-card [task]="task" 
                             (cardClicked)="viewTaskDetails($event.id)" 

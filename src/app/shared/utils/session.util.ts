@@ -50,7 +50,11 @@ export function getSessionCoins(s: TimeSessionDto): number {
  * handling all backend response variations.
  */
 export function getSessionBehavior(s: TimeSessionDto): BehaviorCategory | undefined {
-  return s.taskBehavior ?? s.task?.behaviorType as BehaviorCategory | undefined;
+  const behavior = s.taskBehavior ?? 
+                   s.task?.behaviorType ?? 
+                   (s as any).behaviorType ?? 
+                   (s as any).behavior;
+  return behavior !== undefined && behavior !== null ? (behavior as BehaviorCategory) : undefined;
 }
 
 /**

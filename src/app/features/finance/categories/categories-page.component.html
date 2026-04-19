@@ -39,10 +39,12 @@
     }
   }
 
-  <!-- ═══ FAB ═══ -->
-  <button class="fab" (click)="openAddForm()" aria-label="Add Category">
-    <span class="fab-icon">+</span>
-  </button>
+  <!-- ═══ FAB (Centered at bottom) ═══ -->
+  <div class="flex justify-center py-10">
+    <button class="fab !static !transform-none !m-0" (click)="openAddForm()" aria-label="Add Category">
+      <i class="fa-solid fa-plus text-xl"></i>
+    </button>
+  </div>
 
   <!-- ═══ ADD CATEGORY MODAL ═══ -->
   @if (showAddForm()) {

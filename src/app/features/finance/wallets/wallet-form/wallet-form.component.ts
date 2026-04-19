@@ -30,7 +30,7 @@ export class WalletFormComponent implements OnInit {
     name: ['', Validators.required],
     type: [WalletType.Cash, Validators.required],
     initialBalance: [0],
-    currency: ['SAR'],
+    currency: ['EGP'],
   });
 
   ngOnInit(): void {
@@ -55,11 +55,11 @@ export class WalletFormComponent implements OnInit {
     const dto = isEdit
       ? { name: v.name!, type: v.type! } as UpdateWalletDto
       : {
-          name: v.name!,
-          type: v.type!,
-          openingBalance: v.initialBalance,
-          currency: v.currency,
-        } as CreateWalletDto;
+        name: v.name!,
+        type: v.type!,
+        openingBalance: v.initialBalance,
+        currency: v.currency,
+      } as CreateWalletDto;
 
     this.saved.emit({ dto, isEdit });
   }

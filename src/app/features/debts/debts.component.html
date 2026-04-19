@@ -96,10 +96,12 @@
     }
   }
 
-  <!-- ═══ FAB ═══ -->
-  <button class="fab" (click)="showCreate.set(true)" aria-label="New Debt">
-    <span class="fab-icon">+</span>
-  </button>
+  <!-- ═══ FAB (Centered at bottom) ═══ -->
+  <div class="flex justify-center py-10">
+    <button class="fab !static !transform-none !m-0" (click)="showCreate.set(true)" aria-label="New Debt">
+      <i class="fa-solid fa-plus text-xl"></i>
+    </button>
+  </div>
 </div>
 
 <!-- ═══ MODALS ═══ -->
