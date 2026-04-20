@@ -1,0 +1,46 @@
+<div class="verify-page">
+  <div class="verify-card">
+    <div class="header">
+      <div class="icon-wrapper">
+        <i class="pi pi-envelope"></i>
+      </div>
+      <h1>Verify your email</h1>
+      <p>We've sent a verification link to <strong>{{ user()?.email }}</strong>. Please check your inbox and follow the instructions to activate your account.</p>
+    </div>
+
+    @if (message()) {
+      <div class="alert" [class]="message()?.type">
+        {{ message()?.text }}
+      </div>
+    }
+
+    <div class="actions">
+      <sb-button 
+        variant="primary" 
+        [fullWidth]="true" 
+        [loading]="loading()"
+        (click)="onRefreshStatus()"
+      >
+        I've verified my email
+      </sb-button>
+
+      <sb-button 
+        variant="outline" 
+        [fullWidth]="true" 
+        [disabled]="loading()"
+        (click)="onResendEmail()"
+      >
+        Resend confirmation email
+      </sb-button>
+
+      <button class="logout-btn" (click)="onLogout()">
+        <i class="pi pi-sign-out"></i>
+        Sign out and use a different email
+      </button>
+    </div>
+
+    <div class="footer">
+      <p>Did not receive the email? Check your spam folder or try resending it.</p>
+    </div>
+  </div>
+</div>
