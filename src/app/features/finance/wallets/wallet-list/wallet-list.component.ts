@@ -45,7 +45,7 @@ export class WalletListComponent implements OnInit {
   }
 
   formatCurrency(value: number, currency: string = 'EGP'): string {
-    return new Intl.NumberFormat('Engen-Us', { style: 'currency', currency }).format(value);
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(value);
   }
 
   openForm(wallet: WalletDto | null = null): void {

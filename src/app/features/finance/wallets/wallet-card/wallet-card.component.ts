@@ -21,7 +21,7 @@ export class WalletCardComponent {
     return WALLET_TYPE_META[this.wallet().type as unknown as WalletType] || WALLET_TYPE_META[WalletType.Cash];
   }
 
-  formatCurrency(value: number, currency: string = 'SAR'): string {
-    return new Intl.NumberFormat('ar-SA', { style: 'currency', currency }).format(value);
+  formatCurrency(value: number, currency: string = 'EGP'): string {
+    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(value);
   }
 }

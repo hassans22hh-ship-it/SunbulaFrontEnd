@@ -45,7 +45,7 @@ export class FinanceComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    this.store.loadAll('SAR');
+    this.store.loadAll('EGP');
   }
 
   openAddTx(): void {
