@@ -39,7 +39,7 @@ const initialState: TasksState = {
 
   totalCount:      0,
   pageNumber:      1,
-  pageSize:        10,
+  pageSize:        100,
   totalPages:      0,
   hasNextPage:     false,
   hasPreviousPage: false,
@@ -47,7 +47,7 @@ const initialState: TasksState = {
   archivedItems:       [],
   archivedLoading:     false,
   archivedPageNumber:  1,
-  archivedPageSize:    10,
+  archivedPageSize:    100,
   archivedTotalCount:  0,
   archivedTotalPages:  0,
   archivedHasNext:     false,
@@ -72,6 +72,7 @@ export const TasksStore = signalStore(
       activeTasks:    computed(() => applyFilters(tasks().filter(t => t.status === TaskStatus.Active && !t.isArchived))),
       completedTasks: computed(() => applyFilters(tasks().filter(t => t.status === TaskStatus.Completed))),
       archivedTasks:  computed(() => applyFilters(tasks().filter(t => t.isArchived))),
+      filteredAllTasks: computed(() => applyFilters(tasks())),
       count:          computed(() => applyFilters(tasks().filter(t => t.status === TaskStatus.Active && !t.isArchived)).length),
     };
   }),
@@ -79,9 +80,9 @@ export const TasksStore = signalStore(
 
     // ─── Load all tasks ─────────────────────────────────
     async load(params?: TaskQueryParams): Promise<void> {
-      patchState(store, { isLoading: true, error: null, filter: params ?? {} });
+      patchState(store, { isLoading: true, error: null, filter: { ...store.filter(), ...(params ?? {}) } });
       try {
-        const effectiveParams = { ...params } as any;
+        const effectiveParams = { PageSize: 100, ...params } as any;
         if (params?.behaviorType !== undefined) {
           effectiveParams.behavior = params.behaviorType;
         }
@@ -144,18 +145,19 @@ export const TasksStore = signalStore(
     },
 
     // ─── Load by folder (paginated) ─────────────────────
-    async loadByFolder(folderId: string, page: number = 1, pageSize: number = 10): Promise<void> {
-      patchState(store, { isLoading: true });
+    async loadByFolder(folderId: string, page: number = 1, pageSize: number = 100): Promise<void> {
+      patchState(store, { isLoading: true, filter: { ...store.filter(), folderId: undefined } });
       try {
-        const res = await firstValueFrom(api.getByFolder(folderId, { PageNumber: page, PageSize: pageSize }));
+        const res: any = await firstValueFrom(api.getByFolder(folderId, { PageNumber: page, PageSize: pageSize }));
+        const tasks = Array.isArray(res) ? res : (res.items ?? []);
         patchState(store, {
-          tasks:           res.items,
+          tasks,
           isLoading:       false,
-          totalCount:      res.totalCount,
-          pageNumber:      res.pageNumber,
-          totalPages:      res.totalPages,
-          hasNextPage:     res.hasNextPage,
-          hasPreviousPage: res.hasPreviousPage,
+          totalCount:      res.totalCount ?? tasks.length,
+          pageNumber:      res.pageNumber ?? 1,
+          totalPages:      res.totalPages ?? 1,
+          hasNextPage:     res.hasNextPage ?? false,
+          hasPreviousPage: res.hasPreviousPage ?? false,
         });
       } catch (e: unknown) {
         patchState(store, { isLoading: false });
@@ -292,16 +294,14 @@ export const TasksStore = signalStore(
       }
     },
     setBehavior(behavior: number | undefined): void {
-      if (behavior !== undefined) {
-        this.loadByBehavior(behavior);
-      } else {
+      patchState(store, { filter: { ...store.filter(), behaviorType: behavior } });
+      if (store.tasks().length === 0) {
         this.load();
       }
     },
     setFolder(folderId: string | undefined): void {
-      if (folderId) {
-        this.loadByFolder(folderId);
-      } else {
+      patchState(store, { filter: { ...store.filter(), folderId } });
+      if (store.tasks().length === 0) {
         this.load();
       }
     },

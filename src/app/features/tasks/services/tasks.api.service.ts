@@ -31,9 +31,10 @@ export class TasksApiService {
 
   getDetails(id: string): Observable<TaskDto> { return this.http.get<TaskDto>(`${this.BASE}/${id}/details`); }
 
-  /** GET /api/v1/Tasks/folder/{folderId}?PageNumber=&PageSize= */
-  getByFolder(folderId: string, params?: PaginationParams): Observable<PaginatedResult<TaskDto>> {
-    return this.http.get<PaginatedResult<TaskDto>>(`${this.BASE}/folder/${folderId}`, {
+  /** GET /api/v1/Folders/{folderId}/tasks */
+  getByFolder(folderId: string, params?: PaginationParams): Observable<TaskDto[] | PaginatedResult<TaskDto>> {
+    const url = `${environment.apiUrl}/api/v1/Folders/${folderId}/tasks`;
+    return this.http.get<TaskDto[] | PaginatedResult<TaskDto>>(url, {
       params: params ? buildHttpParams(params as Record<string, string | number | boolean | null | undefined>) : undefined,
     });
   }
