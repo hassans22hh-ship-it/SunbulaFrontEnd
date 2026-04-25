@@ -1,25 +1,27 @@
 // ─── Behavior Category ────────────────────────────────────────────────────────
+// Values match backend BehaviorType enum exactly:
+// Positive=1, Neutral=2, Rest=3, Negative=4
 export enum BehaviorCategory {
-  Positive = 0,
-  Neutral  = 1,
-  Negative = 2,
+  Positive = 1,
+  Neutral  = 2,
   Rest     = 3,
+  Negative = 4,
 }
 
 export const BEHAVIOR_COIN_RATES: Record<BehaviorCategory, number> = {
   [BehaviorCategory.Positive]:  2,
   [BehaviorCategory.Neutral]:   1,
-  [BehaviorCategory.Negative]: -1,
   [BehaviorCategory.Rest]:      1,
+  [BehaviorCategory.Negative]: -1,
 };
 
 export const BEHAVIOR_META: Record<BehaviorCategory, {
-  label: string; emoji: string; colorVar: string; cssClass: string;
+  label: string; icon: string; colorVar: string; cssClass: string;
 }> = {
-  [BehaviorCategory.Positive]: { label: 'Positive', emoji: '🟢', colorVar: '--color-positive', cssClass: 'behavior-positive' },
-  [BehaviorCategory.Neutral]:  { label: 'Neutral',  emoji: '🔵', colorVar: '--color-neutral',  cssClass: 'behavior-neutral'  },
-  [BehaviorCategory.Negative]: { label: 'Negative', emoji: '🔴', colorVar: '--color-negative', cssClass: 'behavior-negative' },
-  [BehaviorCategory.Rest]:     { label: 'Rest',     emoji: '🟡', colorVar: '--color-rest',     cssClass: 'behavior-rest'     },
+  [BehaviorCategory.Positive]: { label: 'Positive', icon: 'fa-solid fa-circle-check', colorVar: '--color-positive', cssClass: 'behavior-positive' },
+  [BehaviorCategory.Neutral]:  { label: 'Neutral',  icon: 'fa-solid fa-circle-minus', colorVar: '--color-neutral',  cssClass: 'behavior-neutral'  },
+  [BehaviorCategory.Rest]:     { label: 'Rest',     icon: 'fa-solid fa-mug-hot',      colorVar: '--color-rest',     cssClass: 'behavior-rest'     },
+  [BehaviorCategory.Negative]: { label: 'Negative', icon: 'fa-solid fa-circle-xmark', colorVar: '--color-negative', cssClass: 'behavior-negative' },
 };
 
 // ─── Task Status ──────────────────────────────────────────────────────────────

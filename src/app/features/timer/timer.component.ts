@@ -74,7 +74,7 @@ export class TimerComponent implements OnInit {
   readonly addTaskId = signal('');
   readonly addStartTime = signal(this.toLocalISO(new Date()));
   readonly addEndTime = signal(this.toLocalISO(new Date()));
-  readonly addBehaviorType = signal<number>(1);
+  readonly addBehaviorType = signal<number>(1); // 1=Positive, matches BehaviorType backend enum
   readonly addNotes = signal('');
 
   // Edit Modal Form State
@@ -115,11 +115,12 @@ export class TimerComponent implements OnInit {
   });
 
   private getBehaviorCoinRate(type: number): number {
+    // Values match backend BehaviorType enum: Positive=1, Neutral=2, Rest=3, Negative=4
     switch (Number(type)) {
-      case 0: return 2; // Positive
-      case 1: return 1; // Neutral
-      case 2: return -1; // Negative
-      case 3: return 1; // Rest
+      case 1: return 2;  // Positive
+      case 2: return 1;  // Neutral
+      case 3: return 1;  // Rest
+      case 4: return -1; // Negative
       default: return 0;
     }
   }
