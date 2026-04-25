@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, HostListener, inject, OnInit, signal } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TasksStore } from './store/tasks.store';
 import { FoldersStore } from '../folders/store/folders.store';
 import { TimerStore } from '../timer/store/timer.store';
@@ -14,12 +15,13 @@ import { PageTransitionDirective } from '@core/animation/page-transition.directi
 import { CoinsPipe } from '@shared/pipes/coins.pipe';
 import { AuthService } from '@core/auth/auth.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Router, RouterLink } from '@angular/router';
 import { CategoriesStore } from './store/categories.store';
 import { EmojiPickerComponent } from '@shared/ui/emoji-picker/emoji-picker.component';
 import { SbBehaviorBadgeComponent } from '@shared/ui/behavior-badge/sb-behavior-badge.component';
 import { RelativeDatePipe } from '@shared/pipes/relative-date.pipe';
 import { DurationPipe } from '@shared/pipes/duration.pipe';
+
+import { TaskCardComponent } from './components/task-card/task-card.component';
 
 @Component({
   selector: 'sb-tasks',
@@ -29,7 +31,7 @@ import { DurationPipe } from '@shared/pipes/duration.pipe';
     SbSpinnerComponent, SbConfirmDialogComponent,
     ReactiveFormsModule, PageTransitionDirective, CoinsPipe,
     RouterLink, EmojiPickerComponent, SbBehaviorBadgeComponent,
-    RelativeDatePipe, DurationPipe
+    RelativeDatePipe, DurationPipe, TaskCardComponent
   ],
   templateUrl: './tasks.component.html',
   styleUrl: './tasks.component.scss',
@@ -37,14 +39,16 @@ import { DurationPipe } from '@shared/pipes/duration.pipe';
 })
 export class TasksComponent implements OnInit {
   protected readonly store = inject(TasksStore);
-  protected readonly folders = inject(FoldersStore);
+  protected readonly foldersStore = inject(FoldersStore);
   protected readonly auth = inject(AuthService);
   protected readonly timer = inject(TimerStore);
   protected readonly categoriesStore = inject(CategoriesStore);
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
+  readonly activeMenu = signal<string | null>(null);
   readonly showForm = signal(false);
   readonly showFolderForm = signal(false);
   readonly showCategoryForm = signal(false);
@@ -55,6 +59,12 @@ export class TasksComponent implements OnInit {
   readonly tab = signal<'active' | 'completed' | 'archived' | 'all'>('active');
   readonly viewMode = signal<'grid' | 'list'>('grid');
   readonly showSidebar = signal(false);
+  readonly greeting = computed(() => {
+    const h = new Date().getHours();
+    if (h < 12) return 'Good morning';
+    if (h < 17) return 'Good afternoon';
+    return 'Good evening';
+  });
 
   protected readonly behaviors = [
     BehaviorCategory.Positive, BehaviorCategory.Neutral,
@@ -84,8 +94,14 @@ export class TasksComponent implements OnInit {
 
   ngOnInit(): void {
     this.store.load();
-    this.folders.load();
+    this.foldersStore.load();
     this.categoriesStore.load();
+
+    this.route.params.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      if (params['folderId']) {
+        this.store.setFolder(params['folderId']);
+      }
+    });
 
     this.searchCtrl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
       this.store.setSearch(val ?? '', this.store.filter().behaviorType);
@@ -186,7 +202,7 @@ export class TasksComponent implements OnInit {
 
   onSaveFolder(): void {
     if (this.folderForm.invalid) return;
-    this.folders.create(this.folderForm.getRawValue());
+    this.foldersStore.create(this.folderForm.getRawValue());
     this.showFolderForm.set(false);
   }
 
@@ -264,11 +280,25 @@ export class TasksComponent implements OnInit {
 
   getFolderName(folderId: string | null): string {
     if (!folderId) return '';
-    return this.folders.folders().find(f => f.id === folderId)?.name || '';
+    return this.foldersStore.folders().find(f => f.id === folderId)?.name || '';
   }
 
   getFolderColor(folderId: string | null): string {
     if (!folderId) return '#52B788';
-    return this.folders.folders().find(f => f.id === folderId)?.color || '#52B788';
+    return this.foldersStore.folders().find(f => f.id === folderId)?.color || '#52B788';
+  }
+
+  toggleMenu(event: Event, taskId: string): void {
+    event.stopPropagation();
+    if (this.activeMenu() === taskId) {
+      this.activeMenu.set(null);
+    } else {
+      this.activeMenu.set(taskId);
+    }
+  }
+
+  @HostListener('document:click')
+  closeMenus(): void {
+    this.activeMenu.set(null);
   }
 }

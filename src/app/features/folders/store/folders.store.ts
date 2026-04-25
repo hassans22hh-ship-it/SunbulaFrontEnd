@@ -3,7 +3,8 @@ import { patchState, signalStore, withComputed, withMethods, withState } from '@
 import { FoldersApiService } from '../services/folders.api.service';
 import { ToastService } from '@shared/ui/toast/toast.service';
 import { FolderDto, CreateFolderDto, UpdateFolderDto } from '@shared/models/task.models';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, forkJoin, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 
 interface FoldersState {
   folders:   FolderDto[];
@@ -28,27 +29,42 @@ export const FoldersStore = signalStore(
       patchState(store, { isLoading: true, error: null });
       try {
         const folders = await firstValueFrom(api.getAll());
-        patchState(store, { folders, isLoading: false });
+
+        if (folders.length === 0) {
+          patchState(store, { folders: [], isLoading: false });
+          return;
+        }
+
+        const enriched = await firstValueFrom(
+          forkJoin(
+            folders.map(f =>
+              api.getTasksInFolder(f.id).pipe(
+                map(tasks => ({ ...f, taskCount: Array.isArray(tasks) ? tasks.length : 0 })),
+                catchError(() => of({ ...f, taskCount: 0 }))
+              )
+            )
+          )
+        );
+
+        patchState(store, { folders: enriched, isLoading: false });
       } catch (e: unknown) {
         patchState(store, { isLoading: false, error: (e as { message: string }).message });
       }
     },
     async create(dto: CreateFolderDto): Promise<void> {
       try {
-        const folder = await firstValueFrom(api.create(dto));
-        patchState(store, { folders: [...store.folders(), folder] });
+        await firstValueFrom(api.create(dto));
         toast.success('Folder created');
+        await this.load();
       } catch (e: unknown) {
         toast.error((e as { message: string }).message);
       }
     },
     async update(id: string, dto: UpdateFolderDto): Promise<void> {
       try {
-        const updated = await firstValueFrom(api.update(id, dto));
-        patchState(store, {
-          folders: store.folders().map(f => f.id === id ? updated : f),
-        });
+        await firstValueFrom(api.update(id, dto));
         toast.success('Folder updated');
+        await this.load();
       } catch (e: unknown) {
         toast.error((e as { message: string }).message);
       }
@@ -56,10 +72,8 @@ export const FoldersStore = signalStore(
     async remove(id: string): Promise<void> {
       try {
         await firstValueFrom(api.delete(id));
-        patchState(store, {
-          folders: store.folders().filter(f => f.id !== id),
-        });
         toast.success('Folder deleted');
+        await this.load();
       } catch (e: unknown) {
         toast.error((e as { message: string }).message);
       }
