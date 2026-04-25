@@ -13,11 +13,13 @@ import { BehaviorCategory } from '@shared/models/enums';
 import { PageTransitionDirective } from '@core/animation/page-transition.directive';
 import { CoinsPipe } from '@shared/pipes/coins.pipe';
 import { AuthService } from '@core/auth/auth.service';
-import { TaskCardComponent } from './components/task-card/task-card.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router, RouterLink } from '@angular/router';
 import { CategoriesStore } from './store/categories.store';
 import { EmojiPickerComponent } from '@shared/ui/emoji-picker/emoji-picker.component';
+import { SbBehaviorBadgeComponent } from '@shared/ui/behavior-badge/sb-behavior-badge.component';
+import { RelativeDatePipe } from '@shared/pipes/relative-date.pipe';
+import { DurationPipe } from '@shared/pipes/duration.pipe';
 
 @Component({
   selector: 'sb-tasks',
@@ -25,33 +27,34 @@ import { EmojiPickerComponent } from '@shared/ui/emoji-picker/emoji-picker.compo
   imports: [
     SbButtonComponent, SbModalComponent, SbEmptyStateComponent,
     SbSpinnerComponent, SbConfirmDialogComponent,
-    ReactiveFormsModule, PageTransitionDirective, TaskCardComponent, CoinsPipe,
-    RouterLink, EmojiPickerComponent
+    ReactiveFormsModule, PageTransitionDirective, CoinsPipe,
+    RouterLink, EmojiPickerComponent, SbBehaviorBadgeComponent,
+    RelativeDatePipe, DurationPipe
   ],
   templateUrl: './tasks.component.html',
   styleUrl: './tasks.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TasksComponent implements OnInit {
-  protected readonly store   = inject(TasksStore);
+  protected readonly store = inject(TasksStore);
   protected readonly folders = inject(FoldersStore);
-  protected readonly auth    = inject(AuthService);
-  protected readonly timer   = inject(TimerStore);
+  protected readonly auth = inject(AuthService);
+  protected readonly timer = inject(TimerStore);
   protected readonly categoriesStore = inject(CategoriesStore);
-  private readonly fb        = inject(FormBuilder);
+  private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly router     = inject(Router);
+  private readonly router = inject(Router);
 
-  readonly showForm       = signal(false);
+  readonly showForm = signal(false);
   readonly showFolderForm = signal(false);
   readonly showCategoryForm = signal(false);
   readonly showEmojiPicker = signal(false);
-  readonly showDelete     = signal(false);
-  readonly editing        = signal<TaskDto | null>(null);
-  readonly deleting       = signal<TaskDto | null>(null);
-  readonly tab            = signal<'active' | 'completed' | 'archived' | 'all'>('active');
-  readonly viewMode       = signal<'grid' | 'list'>('grid');
-  readonly showSidebar    = signal(false);
+  readonly showDelete = signal(false);
+  readonly editing = signal<TaskDto | null>(null);
+  readonly deleting = signal<TaskDto | null>(null);
+  readonly tab = signal<'active' | 'completed' | 'archived' | 'all'>('active');
+  readonly viewMode = signal<'grid' | 'list'>('grid');
+  readonly showSidebar = signal(false);
 
   protected readonly behaviors = [
     BehaviorCategory.Positive, BehaviorCategory.Neutral,
@@ -59,21 +62,21 @@ export class TasksComponent implements OnInit {
   ];
 
   readonly form = this.fb.nonNullable.group({
-    title:        ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
-    emoji:        [''],
-    color:        ['#52B788', Validators.required],
+    title: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
+    emoji: [''],
+    color: ['#52B788', Validators.required],
     behaviorType: [BehaviorCategory.Positive as BehaviorCategory, Validators.required],
-    folderId:     [''],
-    categoryIds:  [[] as string[]],
+    folderId: [''],
+    categoryIds: [[] as string[]],
   });
 
   readonly folderForm = this.fb.nonNullable.group({
-    name:  ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+    name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
     color: ['#52B788', Validators.required],
   });
 
   readonly categoryForm = this.fb.nonNullable.group({
-    name:  ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+    name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
     color: ['#B1a', Validators.required],
   });
 
@@ -228,5 +231,44 @@ export class TasksComponent implements OnInit {
 
   getFolderCount(folderId: string): number {
     return this.store.tasks().filter(t => t.folderId === folderId && t.status === 0 && !t.isArchived).length;
+  }
+
+  // --- Inlined Task Card Logic ---
+  isActive(taskId: string): boolean {
+    return this.timer.activeSessions().some((s: any) => s.taskId === taskId);
+  }
+
+  isPaused(taskId: string): boolean {
+    const session = this.timer.activeSessions().find((s: any) => s.taskId === taskId);
+    return !!session?.isPaused;
+  }
+
+  displayElapsed(task: TaskDto): number {
+    const session = this.timer.activeSessions().find((s: any) => s.taskId === task.id);
+    if (session) return session.durationSeconds || 0;
+    return task.totalTrackedSeconds ?? 0;
+  }
+
+  toggleTimer(event: Event, task: TaskDto): void {
+    event.stopPropagation();
+    if (this.isActive(task.id)) {
+      const session = this.timer.activeSessions().find((s: any) => s.taskId === task.id);
+      if (session) {
+        if (!session.isPaused) this.timer.pauseTimer(session.id);
+        else this.timer.resumeTimer(session.id);
+      }
+    } else {
+      this.timer.start(task.id);
+    }
+  }
+
+  getFolderName(folderId: string | null): string {
+    if (!folderId) return '';
+    return this.folders.folders().find(f => f.id === folderId)?.name || '';
+  }
+
+  getFolderColor(folderId: string | null): string {
+    if (!folderId) return '#52B788';
+    return this.folders.folders().find(f => f.id === folderId)?.color || '#52B788';
   }
 }

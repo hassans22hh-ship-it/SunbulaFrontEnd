@@ -2,6 +2,7 @@ import { Component, ChangeDetectionStrategy, computed, inject, Input, signal, On
 import { RouterLink, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { TasksStore } from '../store/tasks.store';
+import { FoldersStore } from '../../folders/store/folders.store';
 import { TasksApiService } from '../services/tasks.api.service';
 import { TimeSessionApiService } from '../../timer/services/time-session.api.service';
 import { TimeSessionDto } from '@shared/models/timer.models';
@@ -39,6 +40,7 @@ export class TaskDetailComponent implements OnInit {
   protected readonly timerApi = inject(TimeSessionApiService);
   protected readonly timerStore = inject(TimerStore);
   protected readonly reportsApi = inject(ReportsApiService);
+  protected readonly foldersStore = inject(FoldersStore);
   protected readonly router = inject(Router);
 
   // Input bound from route parameter
@@ -61,6 +63,12 @@ export class TaskDetailComponent implements OnInit {
     if (fromStore) return fromStore;
     // Fallback to detailed task fetched from API
     return this.detailedTask();
+  });
+
+  readonly folder = computed(() => {
+    const t = this.task();
+    if (!t) return null;
+    return t.folder || this.foldersStore.folders().find(f => f.id === t.folderId) || null;
   });
 
   readonly activeSession = computed(() => {
