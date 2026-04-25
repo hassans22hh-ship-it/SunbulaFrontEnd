@@ -39,6 +39,7 @@ export class TaskFormComponent implements OnInit {
   readonly behaviorOptions = [
     BehaviorCategory.Positive,
     BehaviorCategory.Neutral,
+    BehaviorCategory.Rest,
     BehaviorCategory.Negative
   ].map(value => ({ value, meta: BEHAVIOR_META[value] }));
 
@@ -48,7 +49,7 @@ export class TaskFormComponent implements OnInit {
     title:        ['', Validators.required],
     emoji:        [''],
     color:        ['#3B82F6', Validators.required],
-    behaviorType: [BehaviorCategory.Neutral, Validators.required],
+    behaviorType: [BehaviorCategory.Positive, Validators.required],
     folderId:     [null as string | null],
     status:       [TaskStatus.Active],
     isArchived:   [false]
