@@ -14,8 +14,9 @@ import { BehaviorCategory } from '@shared/models/enums';
 import { PageTransitionDirective } from '@core/animation/page-transition.directive';
 import { CoinsPipe } from '@shared/pipes/coins.pipe';
 import { AuthService } from '@core/auth/auth.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { CategoriesStore } from './store/categories.store';
+import { TaskFilterService } from './services/task-filter.service';
 import { EmojiPickerComponent } from '@shared/ui/emoji-picker/emoji-picker.component';
 import { SbBehaviorBadgeComponent } from '@shared/ui/behavior-badge/sb-behavior-badge.component';
 import { RelativeDatePipe } from '@shared/pipes/relative-date.pipe';
@@ -300,5 +301,24 @@ export class TasksComponent implements OnInit {
   @HostListener('document:click')
   closeMenus(): void {
     this.activeMenu.set(null);
+  }
+
+  private readonly filterSvc = inject(TaskFilterService);
+  protected readonly selectedCategoryId = toSignal(this.filterSvc.categoryFilter$);
+
+  protected selectCategory(id: string | undefined): void {
+    this.filterSvc.setCategoryFilter(id);
+  }
+
+  protected onCategoryChange(event: any): void {
+    const id = event.target.value;
+    this.form.patchValue({ categoryIds: id ? [id] : [] });
+  }
+
+  getCategoryCount(categoryId: string): number {
+    return this.store.tasks().filter(t => 
+      (t.categories?.some(c => c.id === categoryId) || (t as any).categoryId === categoryId) && 
+      t.status === 0 && !t.isArchived
+    ).length;
   }
 }

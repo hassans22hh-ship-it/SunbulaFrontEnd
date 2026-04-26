@@ -1,4 +1,6 @@
-<div class="flex flex-col lg:flex-row min-h-screen bg-bg shadow-2xl rounded-3xl overflow-hidden lg:mr-4 lg:my-4 ml-0 border border-border/30" sbPageTransition>
+<div
+  class="flex flex-col lg:flex-row min-h-screen bg-bg shadow-2xl rounded-3xl overflow-hidden lg:mr-4 lg:my-4 ml-0 border border-border/30"
+  sbPageTransition>
 
   <!-- Side Filter Sidebar Overlay (Mobile) -->
   @if (showSidebar()) {
@@ -60,6 +62,45 @@
             Rest
           </div>
         </button>
+      </div>
+    </div>
+
+    <!-- Category Filter -->
+    <div class="space-y-4 mb-6">
+      <div class="flex items-center justify-between">
+        <h5 class="text-[10px] font-bold uppercase tracking-[0.2em] text-text-subtle">Categories</h5>
+        <button (click)="openCategoryCreate()"
+          class="w-5 h-5 flex items-center justify-center rounded-full bg-surface-3 text-text-subtle hover:bg-primary hover:text-white transition-all">
+          <svg viewBox="0 0 24 24" fill="none" class="w-3 h-3" stroke="currentColor" stroke-width="3">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+        </button>
+      </div>
+
+      <div class="flex flex-col gap-1">
+        <button (click)="selectCategory(undefined)" [class.bg-primary/10]="selectedCategoryId() === undefined"
+          [class.text-primary]="selectedCategoryId() === undefined"
+          class="flex items-center justify-between px-3 py-2 rounded-xl text-text-muted hover:bg-surface-2 font-medium text-sm transition-all group text-left w-full">
+          All Categories
+        </button>
+
+        @for (cat of categoriesStore.categories(); track cat.id) {
+        <button (click)="selectCategory(cat.id)" 
+          [class.bg-primary/10]="selectedCategoryId() === cat.id"
+          [class.text-primary]="selectedCategoryId() === cat.id"
+          class="flex items-center justify-between px-3 py-2 rounded-xl text-text hover:bg-surface-2 font-bold text-sm transition-all group text-left w-full">
+          
+          <div class="flex items-center gap-3">
+            <div class="w-2 h-2 rounded-full flex-shrink-0" [style.backgroundColor]="cat.color || '#2D6A4F'"></div>
+            <span class="font-bold text-text">{{ cat.name }}</span>
+          </div>
+
+          <span class="text-[10px] text-text-subtle font-bold bg-surface-3 px-2 py-0.5 rounded-full">
+            {{ getCategoryCount(cat.id) }}
+          </span>
+        </button>
+        }
       </div>
     </div>
 
@@ -203,10 +244,12 @@
       <div class="flex items-center justify-between mb-10">
         <div class="flex items-baseline gap-3">
           <h2 class="text-2xl sm:text-3xl lg:text-4xl font-display font-bold text-text tracking-tight">Tasks</h2>
-          @let currentTasksHeader = tab() === 'active' ? store.activeTasks() : tab() === 'completed' ? store.completedTasks() : tab() === 'archived' ? store.archivedItems() : store.filteredAllTasks();
+          @let currentTasksHeader = tab() === 'active' ? store.activeTasks() : tab() === 'completed' ?
+          store.completedTasks() : tab() === 'archived' ? store.archivedItems() : store.filteredAllTasks();
           <span class="text-sm font-bold text-text-subtle uppercase tracking-widest">
-            ({{ currentTasksHeader.length }} 
-            {{ tab() === 'active' ? 'ACTIVE' : tab() === 'archived' ? 'ARCHIVED' : tab() === 'completed' ? 'COMPLETED' : 'TOTAL' }})
+            ({{ currentTasksHeader.length }}
+            {{ tab() === 'active' ? 'ACTIVE' : tab() === 'archived' ? 'ARCHIVED' : tab() === 'completed' ? 'COMPLETED' :
+            'TOTAL' }})
           </span>
         </div>
 
@@ -261,6 +304,7 @@
       <div class="task-list" [class.grid-view]="viewMode() === 'grid'" [class.list-view]="viewMode() === 'list'">
         @for (task of currentTasks; track task.id) {
         @let folder = foldersStore.folders().find(f => f.id === task.folderId);
+        @if (!selectedCategoryId() || (task.categories && task.categories.some(c => c.id === selectedCategoryId()))) {
         <sb-task-card [task]="task" (cardClicked)="viewTaskDetails($event.id)" (editClicked)="openEdit(task)"
           (duplicateClicked)="store.duplicate(task.id)" (completeClicked)="store.complete(task.id)"
           (archiveClicked)="store.archive(task.id)" (unarchiveClicked)="store.restore(task.id)"
@@ -273,6 +317,7 @@
           </div>
           }
         </sb-task-card>
+        }
         }
       </div>
       }
@@ -349,28 +394,14 @@
       </div>
 
       <div class="space-y-1.5">
-        <div class="flex items-center justify-between">
-          <label class="text-xs font-bold text-text-muted uppercase tracking-wider">Categories</label>
-          <button type="button" class="text-[10px] text-primary font-bold tracking-wider hover:underline"
-            (click)="openCategoryCreate()">+ NEW</button>
-        </div>
+        <label class="text-xs font-bold text-text-muted uppercase tracking-wider">Categories</label>
 
-        <div class="flex flex-wrap gap-2 max-h-24 overflow-y-auto p-1">
+        <select (change)="onCategoryChange($event)" class="input-field cursor-pointer">
+          <option value="">No category</option>
           @for (c of categoriesStore.categories(); track c.id) {
-          <button type="button" (click)="toggleCategory(c.id)"
-            class="px-2.5 py-1 text-xs font-bold rounded-lg border-2 transition-all cursor-pointer"
-            [class.border-primary]="$any(form.value.categoryIds)?.includes(c.id)"
-            [class.bg-primary]="$any(form.value.categoryIds)?.includes(c.id)"
-            [class.text-white]="$any(form.value.categoryIds)?.includes(c.id)"
-            [class.border-border]="!$any(form.value.categoryIds)?.includes(c.id)"
-            [class.text-text-subtle]="!$any(form.value.categoryIds)?.includes(c.id)">
-            {{ c.name }}
-          </button>
+          <option [value]="c.id" [selected]="$any(form.value.categoryIds)?.includes(c.id)">{{ c.name }}</option>
           }
-          @if(categoriesStore.categories().length === 0) {
-          <span class="text-xs text-text-muted italic">No categories</span>
-          }
-        </div>
+        </select>
       </div>
     </div>
 
