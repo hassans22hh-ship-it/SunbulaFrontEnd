@@ -86,10 +86,11 @@
         </button>
 
         @for (cat of categoriesStore.categories(); track cat.id) {
-        <button (click)="selectCategory(cat.id)" 
+        <button [routerLink]="['/categories', cat.id]"
           [class.bg-primary/10]="selectedCategoryId() === cat.id"
           [class.text-primary]="selectedCategoryId() === cat.id"
           class="flex items-center justify-between px-3 py-2 rounded-xl text-text hover:bg-surface-2 font-bold text-sm transition-all group text-left w-full">
+
           
           <div class="flex items-center gap-3">
             <div class="w-2 h-2 rounded-full flex-shrink-0" [style.backgroundColor]="cat.color || '#2D6A4F'"></div>

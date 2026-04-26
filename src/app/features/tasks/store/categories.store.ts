@@ -50,6 +50,19 @@ export const CategoriesStore = signalStore(
       } catch (e: unknown) {
         toast.error((e as { message: string }).message);
       }
+    },
+
+    async update(id: string, dto: { name: string; color: string }): Promise<void> {
+      try {
+        const updated = await firstValueFrom(api.update(id, dto));
+        patchState(store, {
+          categories: store.categories().map(c => c.id === id ? updated : c)
+        });
+        toast.success('Category updated');
+      } catch (e: unknown) {
+        toast.error((e as { message: string }).message);
+      }
     }
+
   }))
 );
