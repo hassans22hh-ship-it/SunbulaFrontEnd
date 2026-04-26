@@ -14,14 +14,18 @@ import { BehaviorCategory } from '@shared/models/enums';
 import { PageTransitionDirective } from '@core/animation/page-transition.directive';
 import { CoinsPipe } from '@shared/pipes/coins.pipe';
 import { AuthService } from '@core/auth/auth.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { CategoriesStore } from './store/categories.store';
+import { TaskFilterService } from './services/task-filter.service';
 import { EmojiPickerComponent } from '@shared/ui/emoji-picker/emoji-picker.component';
 import { SbBehaviorBadgeComponent } from '@shared/ui/behavior-badge/sb-behavior-badge.component';
 import { RelativeDatePipe } from '@shared/pipes/relative-date.pipe';
 import { DurationPipe } from '@shared/pipes/duration.pipe';
 
 import { TaskCardComponent } from './components/task-card/task-card.component';
+import { firstValueFrom } from 'rxjs';
+import { TasksApiService } from './services/tasks.api.service';
+
 
 @Component({
   selector: 'sb-tasks',
@@ -47,6 +51,8 @@ export class TasksComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly tasksApi = inject(TasksApiService);
+
 
   readonly activeMenu = signal<string | null>(null);
   readonly showForm = signal(false);
@@ -136,18 +142,53 @@ export class TasksComponent implements OnInit {
     this.showForm.set(true);
   }
 
-  onSave(): void {
+  async onSave(): Promise<void> {
     if (this.form.invalid) return;
     const data = this.form.getRawValue();
     const dto = { ...data, folderId: data.folderId || undefined };
     const e = this.editing();
+    const newCategoryIds: string[] = data.categoryIds ?? [];
+
     if (e) {
-      this.store.update(e.id, dto);
+      await this.store.update(e.id, dto);
+      const oldCategoryIds = e.categories?.map(c => c.id) ?? [];
+      // Only unlink categories that were removed
+      const toUnlink = oldCategoryIds.filter(id => !newCategoryIds.includes(id));
+      // Only link categories that are truly new
+      const toLink = newCategoryIds.filter(id => !oldCategoryIds.includes(id));
+      try {
+        await Promise.all([
+          ...toUnlink.map(id => firstValueFrom(this.tasksApi.unlinkCategory(e.id, id))),
+          ...toLink.map(id => firstValueFrom(this.tasksApi.linkCategory(e.id, id))),
+        ]);
+      } catch (err) {
+        console.error('Category link/unlink error:', err);
+      }
     } else {
-      this.store.create(dto);
+      if (newCategoryIds.length > 0) {
+        // Create task first and get the returned task with ID
+        const createdTask = await firstValueFrom(this.tasksApi.create(dto));
+        // Add to store manually
+        await this.store.load();
+        // Link categories to the new task
+        try {
+          await Promise.all(
+            newCategoryIds.map(id => firstValueFrom(this.tasksApi.linkCategory(createdTask.id, id)))
+          );
+          await this.store.load();
+        } catch (err) {
+          console.error('Category link error:', err);
+        }
+      } else {
+        this.store.create(dto);
+      }
     }
+
     this.showForm.set(false);
+    this.store.load();
   }
+
+
 
   protected onLogout(): void {
     this.auth.logout();
@@ -300,5 +341,24 @@ export class TasksComponent implements OnInit {
   @HostListener('document:click')
   closeMenus(): void {
     this.activeMenu.set(null);
+  }
+
+  private readonly filterSvc = inject(TaskFilterService);
+  protected readonly selectedCategoryId = toSignal(this.filterSvc.categoryFilter$);
+
+  protected selectCategory(id: string | undefined): void {
+    this.filterSvc.setCategoryFilter(id);
+  }
+
+  protected onCategoryChange(event: any): void {
+    const id = event.target.value;
+    this.form.patchValue({ categoryIds: id ? [id] : [] });
+  }
+
+  getCategoryCount(categoryId: string): number {
+    return this.store.tasks().filter(t => 
+      (t.categories?.some(c => c.id === categoryId) || (t as any).categoryId === categoryId) && 
+      t.status === 0 && !t.isArchived
+    ).length;
   }
 }

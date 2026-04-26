@@ -31,6 +31,7 @@ export interface UpdateTaskDto {
   color:        string;
   behaviorType: BehaviorCategory;
   folderId?:    string;
+  categoryIds?: string[];
 }
 
 export interface CategoryDto {
