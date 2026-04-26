@@ -1,7 +1,8 @@
 import { ChangeDetectionStrategy, Component, computed, HostListener, inject, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
+
 import { FoldersStore } from './store/folders.store';
 import { TasksStore } from '../tasks/store/tasks.store';
 import { FolderDto } from '@shared/models/task.models';
@@ -18,8 +19,9 @@ import { SbConfirmDialogComponent } from '@shared/ui/confirm-dialog/sb-confirm-d
   imports: [
     CommonModule, ReactiveFormsModule, SbButtonComponent, SbModalComponent,
     SbEmptyStateComponent, SbSpinnerComponent, SbConfirmDialogComponent,
-    PageTransitionDirective
+    PageTransitionDirective, RouterLink
   ],
+
   templateUrl: './folders-page.component.html',
   styleUrl: './folders-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -79,8 +81,9 @@ export class FoldersPageComponent implements OnInit {
   }
 
   navigateToFolderTasks(folderId: string): void {
-    this.router.navigate(['/tasks/folder', folderId]);
+    this.router.navigate(['/folders', folderId]);
   }
+
 
   openCreate(): void {
     this.editing.set(null);

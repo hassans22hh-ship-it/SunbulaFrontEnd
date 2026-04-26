@@ -1,5 +1,11 @@
-<div class="folders-container" sbPageTransition>
-  <header class="flex items-center justify-between mb-8">
+<div class="folders-container p-6 lg:p-10" sbPageTransition>
+  <button routerLink="/tasks" class="flex items-center gap-2 text-text-muted hover:text-primary transition-colors text-xs font-medium mb-4">
+    <i class="fa-solid fa-arrow-left"></i>
+    <span>Back to Tasks</span>
+  </button>
+
+  <header class="flex items-center justify-between mb-10">
+
     <div>
       <h1 class="text-3xl font-display font-bold text-text mb-1">Folders</h1>
       <p class="text-text-muted text-sm font-medium uppercase tracking-wider">Organize your botanical archives</p>
@@ -91,14 +97,8 @@
         </div>
       }
 
-      <!-- New Folder Placeholder Card -->
-      <button class="new-folder-card group min-h-[220px]" (click)="openCreate()">
-        <div class="w-14 h-14 rounded-2xl border-2 border-dashed border-border flex items-center justify-center mb-4 group-hover:bg-primary group-hover:border-primary group-hover:text-white transition-all shadow-sm">
-          <i class="fa-solid fa-plus text-2xl"></i>
-        </div>
-        <span class="font-black text-xs uppercase tracking-[0.2em] text-text-muted group-hover:text-primary transition-colors">Add Folder</span>
-      </button>
     </div>
+
   }
 </div>
 

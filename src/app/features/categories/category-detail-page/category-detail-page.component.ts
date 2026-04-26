@@ -132,8 +132,11 @@ export class CategoryDetailPageComponent {
     if (this.editForm.invalid) return;
     const id = this.categoryId();
     if (!id) return;
-    const updated = await firstValueFrom(this.categoryApi.update(id, this.editForm.getRawValue()));
+    const payload = this.editForm.getRawValue();
+    console.log('Updating category:', id, payload);
+    const updated = await firstValueFrom(this.categoryApi.update(id, payload));
     this.showEditForm.set(false);
+
     this.category.set(null);
     setTimeout(() => {
       this.category.set(updated);

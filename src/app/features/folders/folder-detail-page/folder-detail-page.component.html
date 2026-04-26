@@ -3,41 +3,39 @@
     
     <!-- Back Button -->
     <button (click)="goBack()" class="flex items-center gap-2 text-text-muted hover:text-primary transition-colors text-sm font-medium mb-6">
-      <svg viewBox="0 0 24 24" fill="none" class="w-4 h-4" stroke="currentColor" stroke-width="2.5">
-        <line x1="19" y1="12" x2="5" y2="12"></line>
-        <polyline points="12 19 5 12 12 5"></polyline>
-      </svg>
-      <span>Back to Tasks</span>
+      <i class="fa-solid fa-arrow-left"></i>
+      <span>Back to Folders</span>
     </button>
 
     <!-- Color Accent Bar -->
-    <div class="w-full h-2 rounded-t-3xl" 
-         [style.backgroundColor]="categoryColor()"></div>
+    <div class="w-full h-2 rounded-t-3xl" [style.backgroundColor]="folder()?.color || '#52B788'"></div>
 
     <header class="relative rounded-b-3xl rounded-t-none bg-surface border border-t-0 border-border/30 p-8 lg:p-12 shadow-2xl">
-
-
-
-
-      
       <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-        <div class="space-y-2 relative">
+        <div class="space-y-2">
           <h1 class="text-4xl lg:text-5xl font-display font-bold text-text tracking-tight">
-            {{ category()?.name || 'Loading...' }}
+            {{ folder()?.name || 'Loading...' }}
           </h1>
-          <p class="text-text-subtle text-sm font-medium">Category Overview</p>
+          <p class="text-text-subtle text-sm font-medium">Folder Overview</p>
         </div>
 
-
         <div class="flex items-center gap-4">
-          <div class="flex gap-4">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div class="px-6 py-3 bg-surface-2 rounded-2xl border border-border/30 shadow-sm flex flex-col">
-              <span class="text-[10px] font-bold text-text-subtle uppercase tracking-wider">Total Tracked Time</span>
+              <span class="text-[10px] font-bold text-text-subtle uppercase tracking-wider">Total Time</span>
               <span class="text-xl font-display font-bold text-primary">{{ totalSeconds() | duration }}</span>
             </div>
             <div class="px-6 py-3 bg-surface-2 rounded-2xl border border-border/30 shadow-sm flex flex-col">
-              <span class="text-[10px] font-bold text-text-subtle uppercase tracking-wider">Active Tasks</span>
-              <span class="text-xl font-display font-bold text-text">{{ tasks().length }}</span>
+              <span class="text-[10px] font-bold text-text-subtle uppercase tracking-wider">Active</span>
+              <span class="text-xl font-display font-bold text-text">{{ activeCount() }}</span>
+            </div>
+            <div class="px-6 py-3 bg-surface-2 rounded-2xl border border-border/30 shadow-sm flex flex-col">
+              <span class="text-[10px] font-bold text-text-subtle uppercase tracking-wider">Completed</span>
+              <span class="text-xl font-display font-bold text-success">{{ completedCount() }}</span>
+            </div>
+            <div class="px-6 py-3 bg-surface-2 rounded-2xl border border-border/30 shadow-sm flex flex-col">
+              <span class="text-[10px] font-bold text-text-subtle uppercase tracking-wider">Archived</span>
+              <span class="text-xl font-display font-bold text-text-muted">{{ archivedCount() }}</span>
             </div>
           </div>
 
@@ -45,23 +43,20 @@
           <div class="relative">
             <button (click)="toggleMenu($event)" 
               class="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-2 text-text-subtle hover:bg-surface-3 hover:text-text transition-all">
-              <i class="fa-solid fa-ellipsis-vertical"></i>
+              <svg viewBox="0 0 24 24" fill="none" class="w-6 h-6" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="12" cy="5" r="1"></circle>
+                <circle cx="12" cy="19" r="1"></circle>
+              </svg>
             </button>
-  
+
             @if (showMenu()) {
-              <div class="absolute right-0 top-full mt-2 w-48 bg-surface rounded-2xl shadow-xl border border-border/40 py-2 z-50 overflow-hidden" (click)="$event.stopPropagation()">
-                <button (click)="openEdit(); showMenu.set(false)" class="w-full px-4 py-2.5 text-left text-sm font-semibold text-text hover:bg-surface-2 flex items-center gap-3 transition-all">
-                  <i class="fa-solid fa-pen-to-square text-text-muted/70"></i>
-                  Edit Category
-                </button>
-                <div class="h-px bg-border/20 mx-2 my-1"></div>
-                <button (click)="confirmDelete(); showMenu.set(false)" class="w-full px-4 py-2.5 text-left text-sm font-semibold text-danger hover:bg-danger/5 flex items-center gap-3 transition-all">
-                  <i class="fa-solid fa-trash-can opacity-70"></i>
-                  Delete Category
-                </button>
+              <div class="absolute right-0 top-full mt-2 w-40 bg-surface rounded-2xl shadow-xl border border-border/40 py-2 z-50" (click)="$event.stopPropagation()">
+                <button (click)="openEdit(); showMenu.set(false)" class="w-full px-5 py-3 text-left text-sm font-bold text-text hover:bg-surface-2 transition-colors">Edit</button>
+                <div class="h-px bg-border/20 mx-3"></div>
+                <button (click)="confirmDelete(); showMenu.set(false)" class="w-full px-5 py-3 text-left text-sm font-bold text-danger hover:bg-danger/10 transition-colors">Delete</button>
               </div>
             }
-
           </div>
         </div>
       </div>
@@ -75,12 +70,12 @@
       <!-- Tasks Section -->
       <section class="space-y-6">
         <div class="flex items-baseline gap-3">
-          <h2 class="text-2xl font-display font-bold text-text">Tasks in this category</h2>
+          <h2 class="text-2xl font-display font-bold text-text">Tasks in this folder</h2>
           <span class="text-xs font-bold text-text-subtle uppercase tracking-widest">({{ tasks().length }})</span>
         </div>
 
         @if (tasks().length === 0) {
-          <sb-empty-state icon="📂" heading="No tasks found" message="Tasks assigned to this category will appear here."></sb-empty-state>
+          <sb-empty-state icon="📁" heading="No tasks found" message="Tasks in this folder will appear here."></sb-empty-state>
         } @else {
           <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             @for (task of tasks(); track task.id) {
@@ -96,17 +91,17 @@
   </div>
 </div>
 
-<!-- Edit Category Modal -->
+<!-- Edit Folder Modal -->
 @if (showEditForm()) {
-  <sb-modal title="Edit Category" (close)="showEditForm.set(false)" size="sm">
+  <sb-modal title="Edit Folder" (close)="showEditForm.set(false)" size="sm">
     <form [formGroup]="editForm" (ngSubmit)="onSave()" class="flex flex-col gap-6 py-2">
       <div class="space-y-1.5">
-        <label class="text-xs font-bold text-text-muted uppercase tracking-wider">Category Name</label>
-        <input formControlName="name" class="w-full bg-surface-2 border-border/30 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all" placeholder="e.g. Code, Design, Health...">
+        <label class="text-xs font-bold text-text-muted uppercase tracking-wider">Folder Name</label>
+        <input formControlName="name" class="w-full bg-surface-2 border-border/30 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all" placeholder="e.g. Work, Personal, School...">
       </div>
   
       <div class="space-y-1.5">
-        <label class="text-xs font-bold text-text-muted uppercase tracking-wider">Category Color</label>
+        <label class="text-xs font-bold text-text-muted uppercase tracking-wider">Folder Color</label>
         <div class="flex items-center gap-4 p-3 bg-surface-2 rounded-xl border border-border/30">
           <input formControlName="color" type="color"
             class="w-12 h-10 border-2 border-border/50 rounded-lg cursor-pointer p-0 overflow-hidden">
@@ -120,7 +115,7 @@
       <div modal-footer class="pt-4 flex items-center justify-end gap-3">
         <sb-button variant="ghost" (click)="showEditForm.set(false)">Cancel</sb-button>
         <sb-button type="submit" [disabled]="editForm.invalid" class="w-full">
-          Update Category
+          Update Folder
         </sb-button>
       </div>
     </form>
@@ -130,10 +125,9 @@
 <!-- Delete Confirmation -->
 @if (showDelete()) {
   <sb-confirm-dialog 
-    title="Delete Category" 
-    [message]="'Are you sure you want to delete \'' + category()?.name + '\'? This cannot be undone.'" 
+    title="Delete Folder" 
+    [message]="'Are you sure you want to delete \'' + folder()?.name + '\'? This cannot be undone.'" 
     (confirmed)="onDelete()" 
     (cancelled)="showDelete.set(false)">
   </sb-confirm-dialog>
 }
-
