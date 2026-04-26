@@ -35,10 +35,10 @@ export class SbBehaviorDonutComponent {
     const circumference = 2 * Math.PI * 40;
 
     const typeMap: Record<number, { color: string, label: string }> = {
-      0: { color: '#52B788', label: 'Positive' },
-      1: { color: '#3B82F6', label: 'Neutral' },
-      2: { color: '#EF4444', label: 'Negative' },
-      3: { color: '#F59E0B', label: 'Rest' }
+      1: { color: '#52B788', label: 'Positive' },
+      2: { color: '#3B82F6', label: 'Neutral' },
+      3: { color: '#F59E0B', label: 'Rest' },
+      4: { color: '#EF4444', label: 'Negative' }
     };
 
     const sorted = [...list].sort((a, b) => a.behaviorType - b.behaviorType);
@@ -62,15 +62,4 @@ export class SbBehaviorDonutComponent {
     });
   });
 
-  primaryPercentage = computed(() => {
-    const segs = this.segments();
-    const pos = segs.find(s => s.label === 'Positive');
-    return pos ? pos.percentage * 100 : 0;
-  });
-
-  primaryColor = computed(() => {
-    const segs = this.segments();
-    const pos = segs.find(s => s.label === 'Positive');
-    return pos ? pos.color : '#9CA3AF';
-  });
 }
