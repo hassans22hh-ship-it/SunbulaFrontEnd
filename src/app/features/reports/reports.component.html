@@ -176,8 +176,71 @@
   </div>
   }
 
-  <div class="mb-8">
-    <sb-behavior-donut [breakdown]="behaviorDistribution()" title="All-Time Behavior Distribution" />
+  <!-- Analytics Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+    <!-- Daily Focus Time Line Chart -->
+    <div class="bg-surface rounded-2xl p-6 shadow-sm border border-border/50">
+      <h3 class="text-sm font-bold text-text-muted uppercase tracking-wider mb-6 flex items-center gap-2">
+        <i class="fa-solid fa-chart-line text-primary"></i> Daily Focus Time
+      </h3>
+      <div class="h-[200px] relative">
+        <canvas #dailyFocusCanvas id="dailyFocusChart" role="img" aria-label="Line chart showing daily focus hours over the last 14 days">Daily focus time over last 14 days</canvas>
+      </div>
+    </div>
+
+    <!-- Behavior Distribution -->
+    <div class="bg-surface rounded-2xl p-6 shadow-sm border border-border/50">
+      <h3 class="text-sm font-bold text-text-muted uppercase tracking-wider mb-6 flex items-center gap-2">
+        <i class="fa-solid fa-chart-pie text-primary"></i> Behavior Distribution
+      </h3>
+      <sb-behavior-donut [breakdown]="behaviorDistribution()" />
+    </div>
   </div>
+
+
+  <!-- New Analytics Charts -->
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+    <!-- Coins per day -->
+    <div class="bg-surface rounded-2xl p-6 border border-border/50 shadow-sm">
+      <div class="flex items-center gap-2 mb-6">
+        <i class="fa-solid fa-coins text-amber-500"></i>
+        <h3 class="text-sm font-bold text-text uppercase tracking-wider">Coins earned per day</h3>
+      </div>
+      <div class="space-y-4">
+        @for (day of coinsPerDay(); track day[0]) {
+          <div class="flex items-center gap-4">
+            <span class="text-[10px] font-bold text-text-muted w-16 shrink-0 uppercase">{{ day[0] | date:'MMM d' }}</span>
+            <div class="flex-1 bg-surface-2 rounded-full h-2.5 overflow-hidden">
+              <div class="h-full rounded-full bg-amber-400 transition-all duration-500"
+                   [style.width.%]="(day[1] / maxCoins()) * 100"></div>
+            </div>
+            <span class="text-xs font-bold text-amber-600 w-10 text-right">{{ day[1] | number:'1.0-0' }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Time per category -->
+    <div class="bg-surface rounded-2xl p-6 border border-border/50 shadow-sm">
+      <div class="flex items-center gap-2 mb-6">
+        <i class="fa-solid fa-tags text-primary"></i>
+        <h3 class="text-sm font-bold text-text uppercase tracking-wider">Time per category</h3>
+      </div>
+      <div class="space-y-4">
+        @for (cat of timePerCategory(); track cat.id) {
+          <div class="flex items-center gap-4">
+            <span class="text-[10px] font-bold text-text-muted w-16 shrink-0 truncate uppercase">{{ cat.name }}</span>
+            <div class="flex-1 bg-surface-2 rounded-full h-2.5 overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-500"
+                   [style.width.%]="(cat.seconds / maxCategorySeconds()) * 100"
+                   [style.backgroundColor]="cat.color"></div>
+            </div>
+            <span class="text-xs font-bold text-text-muted w-20 text-right">{{ cat.seconds | duration:'words' }}</span>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
   }
 </div>
