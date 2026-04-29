@@ -48,11 +48,12 @@ export function getSessionCoins(s: TimeSessionDto): number {
 /**
  * Extracts the behavior category from a session DTO,
  * handling all backend response variations.
+ * Priority: taskBehavior (store-enriched) → behaviorType (raw backend) → task.behaviorType
  */
 export function getSessionBehavior(s: TimeSessionDto): BehaviorCategory | undefined {
-  const behavior = s.taskBehavior ?? 
-                   s.task?.behaviorType ?? 
-                   (s as any).behaviorType ?? 
+  const behavior = s.taskBehavior ??
+                   s.behaviorType ??
+                   s.task?.behaviorType ??
                    (s as any).behavior;
   return behavior !== undefined && behavior !== null ? (behavior as BehaviorCategory) : undefined;
 }

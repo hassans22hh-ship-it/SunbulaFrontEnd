@@ -25,10 +25,10 @@ const TASK_COLORS = ['#3B82F6', '#EF4444', '#10B981', '#F59E0B', '#8B5CF6', '#EC
   styleUrl: './task-form.component.scss'
 })
 export class TaskFormComponent implements OnInit {
-  task    = input<TaskDto | null>(null);
+  task = input<TaskDto | null>(null);
   folders = input<FolderDto[]>([]);
 
-  saved     = output<{ dto: CreateTaskDto | UpdateTaskDto, isEdit: boolean }>();
+  saved = output<{ dto: CreateTaskDto | UpdateTaskDto, isEdit: boolean }>();
   cancelled = output<void>();
 
   private readonly fb = inject(FormBuilder);
@@ -39,32 +39,33 @@ export class TaskFormComponent implements OnInit {
   readonly behaviorOptions = [
     BehaviorCategory.Positive,
     BehaviorCategory.Neutral,
+    BehaviorCategory.Rest,
     BehaviorCategory.Negative
   ].map(value => ({ value, meta: BEHAVIOR_META[value] }));
 
   loading = signal(false);
 
   form = this.fb.group({
-    title:        ['', Validators.required],
-    emoji:        [''],
-    color:        ['#3B82F6', Validators.required],
-    behaviorType: [BehaviorCategory.Neutral, Validators.required],
-    folderId:     [null as string | null],
-    status:       [TaskStatus.Active],
-    isArchived:   [false]
+    title: ['', Validators.required],
+    emoji: [''],
+    color: ['#09c', Validators.required],
+    behaviorType: [BehaviorCategory.Positive, Validators.required],
+    folderId: [null as string | null],
+    status: [TaskStatus.Active],
+    isArchived: [false]
   });
 
   ngOnInit(): void {
     const t = this.task();
     if (t) {
       this.form.patchValue({
-        title:        t.title,
-        emoji:        t.emoji,
-        color:        t.color,
+        title: t.title,
+        emoji: t.emoji,
+        color: t.color,
         behaviorType: t.behaviorType,
-        folderId:     t.folderId,
-        status:       t.status,
-        isArchived:   t.isArchived,
+        folderId: t.folderId,
+        status: t.status,
+        isArchived: t.isArchived,
       });
     }
   }
@@ -80,19 +81,19 @@ export class TaskFormComponent implements OnInit {
 
     if (this.task()) {
       dto = {
-        title:        v.title!,
-        emoji:        v.emoji || undefined,
-        color:        v.color!,
+        title: v.title!,
+        emoji: v.emoji || undefined,
+        color: v.color!,
         behaviorType: v.behaviorType!,
-        folderId:     v.folderId || undefined
+        folderId: v.folderId || undefined
       };
     } else {
       dto = {
-        title:        v.title!,
-        emoji:        v.emoji || undefined,
-        color:        v.color!,
+        title: v.title!,
+        emoji: v.emoji || undefined,
+        color: v.color!,
         behaviorType: v.behaviorType!,
-        folderId:     v.folderId || undefined
+        folderId: v.folderId || undefined
       };
     }
 

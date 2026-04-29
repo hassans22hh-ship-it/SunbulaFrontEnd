@@ -20,6 +20,7 @@
             </h1>
             <div class="flex items-center gap-3">
               <sb-behavior-badge [behavior]="task()!.behaviorType" class="scale-90 origin-left" />
+
               <div class="h-1 w-1 rounded-full bg-border"></div>
               <span class="text-xs font-medium text-text-muted uppercase tracking-wider">
                 Created {{ task()!.createdAt | date:'MMM d, yyyy':'':'en-US' }}
@@ -76,7 +77,7 @@
     </div>
 
     <!-- Stats Row -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
       <!-- Total Time -->
       <div class="bg-surface rounded-2xl p-6 shadow-sm border border-border/50 flex flex-col justify-between task-stat-card">
         <div class="flex items-center gap-3 mb-2">
@@ -109,10 +110,36 @@
           <div class="w-8 h-8 rounded-lg bg-[var(--color-coin)]/10 text-[var(--color-coin)] flex items-center justify-center">
             <sb-icon-coin size="18" />
           </div>
-          <h3 class="text-sm font-bold text-text-muted uppercase tracking-wider">Coins Earned</h3>
+          <h3 class="text-sm font-bold text-text-muted uppercase tracking-wider">Coins</h3>
         </div>
         <p class="text-2xl font-bold font-display text-text">
           {{ totalCoinsEarned() | coins }}
+        </p>
+      </div>
+
+      <!-- Folder -->
+      <div class="bg-surface rounded-2xl p-6 shadow-sm border border-border/50 flex flex-col justify-between task-stat-card">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-8 h-8 rounded-lg bg-info/10 text-info flex items-center justify-center">
+            <i class="fa-solid fa-folder"></i>
+          </div>
+          <h3 class="text-sm font-bold text-text-muted uppercase tracking-wider">Folder</h3>
+        </div>
+        <p class="text-2xl font-bold font-display text-text truncate">
+          {{ folder()?.name || 'General' }}
+        </p>
+      </div>
+
+      <!-- Category -->
+      <div class="bg-surface rounded-2xl p-6 shadow-sm border border-border/50 flex flex-col justify-between task-stat-card">
+        <div class="flex items-center gap-3 mb-2">
+          <div class="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center">
+            <i class="fa-solid fa-tag"></i>
+          </div>
+          <h3 class="text-sm font-bold text-text-muted uppercase tracking-wider">Category</h3>
+        </div>
+        <p class="text-2xl font-bold font-display text-text truncate">
+          {{ task()?.categories?.[0]?.name || 'None' }}
         </p>
       </div>
     </div>

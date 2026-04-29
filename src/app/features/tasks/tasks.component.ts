@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, HostListener, inject, OnInit, signal } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TasksStore } from './store/tasks.store';
 import { FoldersStore } from '../folders/store/folders.store';
 import { TimerStore } from '../timer/store/timer.store';
@@ -13,11 +14,18 @@ import { BehaviorCategory } from '@shared/models/enums';
 import { PageTransitionDirective } from '@core/animation/page-transition.directive';
 import { CoinsPipe } from '@shared/pipes/coins.pipe';
 import { AuthService } from '@core/auth/auth.service';
-import { TaskCardComponent } from './components/task-card/task-card.component';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { Router, RouterLink } from '@angular/router';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { CategoriesStore } from './store/categories.store';
+import { TaskFilterService } from './services/task-filter.service';
 import { EmojiPickerComponent } from '@shared/ui/emoji-picker/emoji-picker.component';
+import { SbBehaviorBadgeComponent } from '@shared/ui/behavior-badge/sb-behavior-badge.component';
+import { RelativeDatePipe } from '@shared/pipes/relative-date.pipe';
+import { DurationPipe } from '@shared/pipes/duration.pipe';
+
+import { TaskCardComponent } from './components/task-card/task-card.component';
+import { firstValueFrom } from 'rxjs';
+import { TasksApiService } from './services/tasks.api.service';
+
 
 @Component({
   selector: 'sb-tasks',
@@ -25,33 +33,44 @@ import { EmojiPickerComponent } from '@shared/ui/emoji-picker/emoji-picker.compo
   imports: [
     SbButtonComponent, SbModalComponent, SbEmptyStateComponent,
     SbSpinnerComponent, SbConfirmDialogComponent,
-    ReactiveFormsModule, PageTransitionDirective, TaskCardComponent, CoinsPipe,
-    RouterLink, EmojiPickerComponent
+    ReactiveFormsModule, PageTransitionDirective, CoinsPipe,
+    RouterLink, EmojiPickerComponent, SbBehaviorBadgeComponent,
+    RelativeDatePipe, DurationPipe, TaskCardComponent
   ],
   templateUrl: './tasks.component.html',
   styleUrl: './tasks.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class TasksComponent implements OnInit {
-  protected readonly store   = inject(TasksStore);
-  protected readonly folders = inject(FoldersStore);
-  protected readonly auth    = inject(AuthService);
-  protected readonly timer   = inject(TimerStore);
+  protected readonly store = inject(TasksStore);
+  protected readonly foldersStore = inject(FoldersStore);
+  protected readonly auth = inject(AuthService);
+  protected readonly timer = inject(TimerStore);
   protected readonly categoriesStore = inject(CategoriesStore);
-  private readonly fb        = inject(FormBuilder);
+  private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly router     = inject(Router);
+  private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
+  private readonly tasksApi = inject(TasksApiService);
 
-  readonly showForm       = signal(false);
+
+  readonly activeMenu = signal<string | null>(null);
+  readonly showForm = signal(false);
   readonly showFolderForm = signal(false);
   readonly showCategoryForm = signal(false);
   readonly showEmojiPicker = signal(false);
-  readonly showDelete     = signal(false);
-  readonly editing        = signal<TaskDto | null>(null);
-  readonly deleting       = signal<TaskDto | null>(null);
-  readonly tab            = signal<'active' | 'completed' | 'archived' | 'all'>('active');
-  readonly viewMode       = signal<'grid' | 'list'>('grid');
-  readonly showSidebar    = signal(false);
+  readonly showDelete = signal(false);
+  readonly editing = signal<TaskDto | null>(null);
+  readonly deleting = signal<TaskDto | null>(null);
+  readonly tab = signal<'active' | 'completed' | 'archived' | 'all'>('active');
+  readonly viewMode = signal<'grid' | 'list'>('grid');
+  readonly showSidebar = signal(false);
+  readonly greeting = computed(() => {
+    const h = new Date().getHours();
+    if (h < 12) return 'Good morning';
+    if (h < 17) return 'Good afternoon';
+    return 'Good evening';
+  });
 
   protected readonly behaviors = [
     BehaviorCategory.Positive, BehaviorCategory.Neutral,
@@ -59,21 +78,21 @@ export class TasksComponent implements OnInit {
   ];
 
   readonly form = this.fb.nonNullable.group({
-    title:        ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
-    emoji:        [''],
-    color:        ['#52B788', Validators.required],
+    title: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(200)]],
+    emoji: [''],
+    color: ['#52B788', Validators.required],
     behaviorType: [BehaviorCategory.Positive as BehaviorCategory, Validators.required],
-    folderId:     [''],
-    categoryIds:  [[] as string[]],
+    folderId: [''],
+    categoryIds: [[] as string[]],
   });
 
   readonly folderForm = this.fb.nonNullable.group({
-    name:  ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+    name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
     color: ['#52B788', Validators.required],
   });
 
   readonly categoryForm = this.fb.nonNullable.group({
-    name:  ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+    name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
     color: ['#B1a', Validators.required],
   });
 
@@ -81,8 +100,14 @@ export class TasksComponent implements OnInit {
 
   ngOnInit(): void {
     this.store.load();
-    this.folders.load();
+    this.foldersStore.load();
     this.categoriesStore.load();
+
+    this.route.params.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(params => {
+      if (params['folderId']) {
+        this.store.setFolder(params['folderId']);
+      }
+    });
 
     this.searchCtrl.valueChanges.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(val => {
       this.store.setSearch(val ?? '', this.store.filter().behaviorType);
@@ -117,18 +142,53 @@ export class TasksComponent implements OnInit {
     this.showForm.set(true);
   }
 
-  onSave(): void {
+  async onSave(): Promise<void> {
     if (this.form.invalid) return;
     const data = this.form.getRawValue();
     const dto = { ...data, folderId: data.folderId || undefined };
     const e = this.editing();
+    const newCategoryIds: string[] = data.categoryIds ?? [];
+
     if (e) {
-      this.store.update(e.id, dto);
+      await this.store.update(e.id, dto);
+      const oldCategoryIds = e.categories?.map(c => c.id) ?? [];
+      // Only unlink categories that were removed
+      const toUnlink = oldCategoryIds.filter(id => !newCategoryIds.includes(id));
+      // Only link categories that are truly new
+      const toLink = newCategoryIds.filter(id => !oldCategoryIds.includes(id));
+      try {
+        await Promise.all([
+          ...toUnlink.map(id => firstValueFrom(this.tasksApi.unlinkCategory(e.id, id))),
+          ...toLink.map(id => firstValueFrom(this.tasksApi.linkCategory(e.id, id))),
+        ]);
+      } catch (err) {
+        console.error('Category link/unlink error:', err);
+      }
     } else {
-      this.store.create(dto);
+      if (newCategoryIds.length > 0) {
+        // Create task first and get the returned task with ID
+        const createdTask = await firstValueFrom(this.tasksApi.create(dto));
+        // Add to store manually
+        await this.store.load();
+        // Link categories to the new task
+        try {
+          await Promise.all(
+            newCategoryIds.map(id => firstValueFrom(this.tasksApi.linkCategory(createdTask.id, id)))
+          );
+          await this.store.load();
+        } catch (err) {
+          console.error('Category link error:', err);
+        }
+      } else {
+        this.store.create(dto);
+      }
     }
+
     this.showForm.set(false);
+    this.store.load();
   }
+
+
 
   protected onLogout(): void {
     this.auth.logout();
@@ -183,7 +243,7 @@ export class TasksComponent implements OnInit {
 
   onSaveFolder(): void {
     if (this.folderForm.invalid) return;
-    this.folders.create(this.folderForm.getRawValue());
+    this.foldersStore.create(this.folderForm.getRawValue());
     this.showFolderForm.set(false);
   }
 
@@ -228,5 +288,77 @@ export class TasksComponent implements OnInit {
 
   getFolderCount(folderId: string): number {
     return this.store.tasks().filter(t => t.folderId === folderId && t.status === 0 && !t.isArchived).length;
+  }
+
+  // --- Inlined Task Card Logic ---
+  isActive(taskId: string): boolean {
+    return this.timer.activeSessions().some((s: any) => s.taskId === taskId);
+  }
+
+  isPaused(taskId: string): boolean {
+    const session = this.timer.activeSessions().find((s: any) => s.taskId === taskId);
+    return !!session?.isPaused;
+  }
+
+  displayElapsed(task: TaskDto): number {
+    const session = this.timer.activeSessions().find((s: any) => s.taskId === task.id);
+    if (session) return session.durationSeconds || 0;
+    return task.totalTrackedSeconds ?? 0;
+  }
+
+  toggleTimer(event: Event, task: TaskDto): void {
+    event.stopPropagation();
+    if (this.isActive(task.id)) {
+      const session = this.timer.activeSessions().find((s: any) => s.taskId === task.id);
+      if (session) {
+        if (!session.isPaused) this.timer.pauseTimer(session.id);
+        else this.timer.resumeTimer(session.id);
+      }
+    } else {
+      this.timer.start(task.id);
+    }
+  }
+
+  getFolderName(folderId: string | null): string {
+    if (!folderId) return '';
+    return this.foldersStore.folders().find(f => f.id === folderId)?.name || '';
+  }
+
+  getFolderColor(folderId: string | null): string {
+    if (!folderId) return '#52B788';
+    return this.foldersStore.folders().find(f => f.id === folderId)?.color || '#52B788';
+  }
+
+  toggleMenu(event: Event, taskId: string): void {
+    event.stopPropagation();
+    if (this.activeMenu() === taskId) {
+      this.activeMenu.set(null);
+    } else {
+      this.activeMenu.set(taskId);
+    }
+  }
+
+  @HostListener('document:click')
+  closeMenus(): void {
+    this.activeMenu.set(null);
+  }
+
+  private readonly filterSvc = inject(TaskFilterService);
+  protected readonly selectedCategoryId = toSignal(this.filterSvc.categoryFilter$);
+
+  protected selectCategory(id: string | undefined): void {
+    this.filterSvc.setCategoryFilter(id);
+  }
+
+  protected onCategoryChange(event: any): void {
+    const id = event.target.value;
+    this.form.patchValue({ categoryIds: id ? [id] : [] });
+  }
+
+  getCategoryCount(categoryId: string): number {
+    return this.store.tasks().filter(t => 
+      (t.categories?.some(c => c.id === categoryId) || (t as any).categoryId === categoryId) && 
+      t.status === 0 && !t.isArchived
+    ).length;
   }
 }

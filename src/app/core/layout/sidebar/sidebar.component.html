@@ -1,6 +1,23 @@
+@if (mobileOpen()) {
+  <div class="fixed inset-0 bg-black/50 z-40 lg:hidden" (click)="closeMobile()"></div>
+}
+
 <aside
-  class="flex flex-col h-screen bg-primary-dark text-white transition-all duration-300 border-r border-white/5 relative z-50"
-  [class.w-72]="!collapsed()" [class.w-20]="collapsed()">
+  class="flex flex-col h-screen bg-primary-dark text-white transition-all duration-300 border-r border-white/5 relative z-50 fixed lg:static shadow-2xl shadow-black/50 lg:shadow-none"
+  [class.w-72]="!collapsed()"
+  [class.w-20]="collapsed() && !mobileOpen()"
+  [class.-translate-x-full]="!mobileOpen()"
+  [class.translate-x-0]="mobileOpen()"
+  [class.lg:translate-x-0]="true"
+  [class.lg:w-72]="!collapsed()"
+  [class.lg:w-20]="collapsed()">
+
+  <button (click)="closeMobile()" class="lg:hidden absolute top-4 right-4 text-white/60 hover:text-white">
+    <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="2.5">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  </button>
 
   <!-- Header: Branding -->
   <div class="p-6 mb-4">
@@ -113,15 +130,14 @@
         <polyline points="16 17 21 12 16 7"></polyline>
         <line x1="21" y1="12" x2="9" y2="12"></line>
       </svg>
-      @if (!collapsed()) {
+      @if (!collapsed() || mobileOpen()) {
       <span class="font-medium animate-fadeIn">Logout</span>
       }
     </button>
   </div>
 
-  <!-- Collapse Toggle Button -->
   <button (click)="toggleCollapse()"
-    class="absolute -right-3 top-20 w-6 h-6 bg-primary-light text-primary-dark rounded-full flex items-center justify-center shadow-lg border-2 border-primary-dark hover:scale-110 active:scale-95 transition-all z-[60]">
+    class="hidden lg:flex absolute -right-3 top-20 w-6 h-6 bg-primary-light text-primary-dark rounded-full items-center justify-center shadow-lg border-2 border-primary-dark hover:scale-110 active:scale-95 transition-all z-[60]">
     <svg viewBox="0 0 24 24" fill="none" class="w-4 h-4 transition-transform duration-300"
       [class.rotate-180]="collapsed()" stroke="currentColor" stroke-width="3">
       <polyline points="15 18 9 12 15 6"></polyline>

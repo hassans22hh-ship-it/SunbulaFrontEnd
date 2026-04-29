@@ -3,7 +3,7 @@ import { patchState, signalStore, withComputed, withMethods, withState } from '@
 import { TimeSessionApiService } from '../services/time-session.api.service';
 import { AuthService } from '@core/auth/auth.service';
 import { ToastService } from '@shared/ui/toast/toast.service';
-import { TimeSessionDto, StartSessionDto, PagedResult } from '@shared/models/timer.models';
+import { TimeSessionDto, PagedResult } from '@shared/models/timer.models';
 import { getSessionBehavior, getSessionCoins, getSessionDuration, normaliseTimestamp } from '@shared/utils/session.util';
 import { TasksStore } from '../../tasks/store/tasks.store';
 import { firstValueFrom } from 'rxjs';
@@ -208,9 +208,13 @@ export const TimerStore = signalStore(
           return;
         }
 
+        // Look up the task's behaviorType so it's sent to the backend correctly
+        const task = tasksStore.tasks().find(t => t.id === taskId);
+        const behaviorType = task?.behaviorType ?? 1; // Default to Positive (1) if not found
+
         patchState(store, { isLoading: true });
         try {
-          const res: any = await firstValueFrom(api.start({ taskId } as StartSessionDto));
+          const res: any = await firstValueFrom(api.start({ taskId, behaviorType }));
           const session = res?.data ?? res;
           patchState(store, { 
             rawActiveSessions: [...store.rawActiveSessions(), session],

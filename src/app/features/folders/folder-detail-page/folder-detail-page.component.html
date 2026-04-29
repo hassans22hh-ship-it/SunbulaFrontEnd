@@ -1,0 +1,133 @@
+<div class="min-h-screen bg-bg p-4 lg:p-8" (click)="showMenu.set(false)">
+  <div class="max-w-7xl mx-auto space-y-8">
+    
+    <!-- Back Button -->
+    <button (click)="goBack()" class="flex items-center gap-2 text-text-muted hover:text-primary transition-colors text-sm font-medium mb-6">
+      <i class="fa-solid fa-arrow-left"></i>
+      <span>Back to Folders</span>
+    </button>
+
+    <!-- Color Accent Bar -->
+    <div class="w-full h-2 rounded-t-3xl" [style.backgroundColor]="folder()?.color || '#52B788'"></div>
+
+    <header class="relative rounded-b-3xl rounded-t-none bg-surface border border-t-0 border-border/30 p-8 lg:p-12 shadow-2xl">
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+        <div class="space-y-2">
+          <h1 class="text-4xl lg:text-5xl font-display font-bold text-text tracking-tight">
+            {{ folder()?.name || 'Loading...' }}
+          </h1>
+          <p class="text-text-subtle text-sm font-medium">Folder Overview</p>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="px-6 py-3 bg-surface-2 rounded-2xl border border-border/30 shadow-sm flex flex-col">
+              <span class="text-[10px] font-bold text-text-subtle uppercase tracking-wider">Total Time</span>
+              <span class="text-xl font-display font-bold text-primary">{{ totalSeconds() | duration }}</span>
+            </div>
+            <div class="px-6 py-3 bg-surface-2 rounded-2xl border border-border/30 shadow-sm flex flex-col">
+              <span class="text-[10px] font-bold text-text-subtle uppercase tracking-wider">Active</span>
+              <span class="text-xl font-display font-bold text-text">{{ activeCount() }}</span>
+            </div>
+            <div class="px-6 py-3 bg-surface-2 rounded-2xl border border-border/30 shadow-sm flex flex-col">
+              <span class="text-[10px] font-bold text-text-subtle uppercase tracking-wider">Completed</span>
+              <span class="text-xl font-display font-bold text-success">{{ completedCount() }}</span>
+            </div>
+            <div class="px-6 py-3 bg-surface-2 rounded-2xl border border-border/30 shadow-sm flex flex-col">
+              <span class="text-[10px] font-bold text-text-subtle uppercase tracking-wider">Archived</span>
+              <span class="text-xl font-display font-bold text-text-muted">{{ archivedCount() }}</span>
+            </div>
+          </div>
+
+          <!-- Actions Menu -->
+          <div class="relative">
+            <button (click)="toggleMenu($event)" 
+              class="w-10 h-10 flex items-center justify-center rounded-xl bg-surface-2 text-text-subtle hover:bg-surface-3 hover:text-text transition-all">
+              <svg viewBox="0 0 24 24" fill="none" class="w-6 h-6" stroke="currentColor" stroke-width="2.5">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="12" cy="5" r="1"></circle>
+                <circle cx="12" cy="19" r="1"></circle>
+              </svg>
+            </button>
+
+            @if (showMenu()) {
+              <div class="absolute right-0 top-full mt-2 w-40 bg-surface rounded-2xl shadow-xl border border-border/40 py-2 z-50" (click)="$event.stopPropagation()">
+                <button (click)="openEdit(); showMenu.set(false)" class="w-full px-5 py-3 text-left text-sm font-bold text-text hover:bg-surface-2 transition-colors">Edit</button>
+                <div class="h-px bg-border/20 mx-3"></div>
+                <button (click)="confirmDelete(); showMenu.set(false)" class="w-full px-5 py-3 text-left text-sm font-bold text-danger hover:bg-danger/10 transition-colors">Delete</button>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </header>
+
+    @if (isLoading()) {
+      <div class="flex h-64 items-center justify-center">
+        <sb-spinner size="lg" />
+      </div>
+    } @else {
+      <!-- Tasks Section -->
+      <section class="space-y-6">
+        <div class="flex items-baseline gap-3">
+          <h2 class="text-2xl font-display font-bold text-text">Tasks in this folder</h2>
+          <span class="text-xs font-bold text-text-subtle uppercase tracking-widest">({{ tasks().length }})</span>
+        </div>
+
+        @if (tasks().length === 0) {
+          <sb-empty-state icon="📁" heading="No tasks found" message="Tasks in this folder will appear here."></sb-empty-state>
+        } @else {
+          <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            @for (task of tasks(); track task.id) {
+              <sb-task-card 
+                [task]="task" 
+                (cardClicked)="viewTaskDetails($event.id)"
+              />
+            }
+          </div>
+        }
+      </section>
+    }
+  </div>
+</div>
+
+<!-- Edit Folder Modal -->
+@if (showEditForm()) {
+  <sb-modal title="Edit Folder" (close)="showEditForm.set(false)" size="sm">
+    <form [formGroup]="editForm" (ngSubmit)="onSave()" class="flex flex-col gap-6 py-2">
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-text-muted uppercase tracking-wider">Folder Name</label>
+        <input formControlName="name" class="w-full bg-surface-2 border-border/30 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary/20 transition-all" placeholder="e.g. Work, Personal, School...">
+      </div>
+  
+      <div class="space-y-1.5">
+        <label class="text-xs font-bold text-text-muted uppercase tracking-wider">Folder Color</label>
+        <div class="flex items-center gap-4 p-3 bg-surface-2 rounded-xl border border-border/30">
+          <input formControlName="color" type="color"
+            class="w-12 h-10 border-2 border-border/50 rounded-lg cursor-pointer p-0 overflow-hidden">
+          <div class="flex-1">
+            <span class="text-sm font-bold text-text block">Preview Color</span>
+            <span class="text-[10px] text-text-subtle font-mono">{{ editForm.get('color')?.value }}</span>
+          </div>
+        </div>
+      </div>
+  
+      <div modal-footer class="pt-4 flex items-center justify-end gap-3">
+        <sb-button variant="ghost" (click)="showEditForm.set(false)">Cancel</sb-button>
+        <sb-button type="submit" [disabled]="editForm.invalid" class="w-full">
+          Update Folder
+        </sb-button>
+      </div>
+    </form>
+  </sb-modal>
+}
+
+<!-- Delete Confirmation -->
+@if (showDelete()) {
+  <sb-confirm-dialog 
+    title="Delete Folder" 
+    [message]="'Are you sure you want to delete \'' + folder()?.name + '\'? This cannot be undone.'" 
+    (confirmed)="onDelete()" 
+    (cancelled)="showDelete.set(false)">
+  </sb-confirm-dialog>
+}
