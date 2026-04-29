@@ -56,13 +56,13 @@
     <div class="section-header-row">
       <h2 class="subsection-title">✨ Start Timer</h2>
       <sb-button variant="ghost" size="sm" (click)="openAddModal()">
-        <span class="mr-2">➕</span> Add Manual Session
+        <span class="mr-1 sm:mr-2">➕</span> <span class="hidden sm:inline">Add Manual Session</span><span class="sm:hidden">Add Manual</span>
       </sb-button>
     </div>
 
     @if (tasks.activeTasks().length === 0) {
     <sb-empty-state icon="" heading="No active tasks" message="Create a task first to start tracking time" />
-    } @else {✅
+    } @else {
     <div class="task-grid">
       @for (task of tasks.activeTasks(); track task.id) {
       @let isTracking = timer.activeSessions().find(s => s.taskId === task.id);
