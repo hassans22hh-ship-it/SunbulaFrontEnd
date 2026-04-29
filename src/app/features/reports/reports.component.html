@@ -1,93 +1,93 @@
 <div class="page" sbPageTransition>
-  <div class="flex items-center justify-between mb-8">
-    <h1 class="section-title mb-0 flex items-center gap-3">
-      <i class="fa-solid fa-chart-line text-primary text-2xl"></i>
+  <div class="flex items-center justify-between mb-6 gap-4">
+    <h1 class="text-xl sm:text-2xl font-display font-bold text-text mb-0 flex items-center gap-2 shrink-0">
+      <i class="fa-solid fa-chart-line text-primary"></i>
       Reports
     </h1>
-    <div class="flex gap-2">
-      <button class="range-btn" [class.active]="range() === 'today'" (click)="loadRange('today')">Today</button>
-      <button class="range-btn" [class.active]="range() === '7d'" (click)="loadRange('7d')">7 Days</button>
-      <button class="range-btn" [class.active]="range() === '30d'" (click)="loadRange('30d')">30 Days</button>
+    <div class="flex items-center gap-2 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+      <button class="range-btn whitespace-nowrap px-3 py-1.5 text-xs sm:text-sm" [class.active]="range() === 'today'" (click)="loadRange('today')">Today</button>
+      <button class="range-btn whitespace-nowrap px-3 py-1.5 text-xs sm:text-sm" [class.active]="range() === '7d'" (click)="loadRange('7d')">7 Days</button>
+      <button class="range-btn whitespace-nowrap px-3 py-1.5 text-xs sm:text-sm" [class.active]="range() === '30d'" (click)="loadRange('30d')">30 Days</button>
     </div>
   </div>
   @if (loading()) {
   <sb-spinner size="lg" />
   } @else {
   <div class="stats-grid">
-    <sb-card>
+    <sb-card padding="sm">
       <div class="stat">
-        <div class="stat-icon flex items-center justify-center p-3 bg-primary/10 rounded-xl"><i
-            class="fa-solid fa-stopwatch text-primary text-xl"></i></div>
-        <div class="stat-info"><span class="stat-value">{{ totalTrackedAllTime() | duration }}</span><span
+        <div class="stat-icon flex items-center justify-center w-10 h-10 bg-primary/10 rounded-xl"><i
+            class="fa-solid fa-stopwatch text-primary text-lg"></i></div>
+        <div class="stat-info"><span class="stat-value text-lg">{{ totalTrackedAllTime() | duration }}</span><span
             class="stat-label">Total tracked</span></div>
       </div>
     </sb-card>
-    <sb-card>
+    <sb-card padding="sm">
       <div class="stat">
-        <div class="stat-icon flex items-center justify-center p-3 bg-primary/10 rounded-xl"><i
-            class="fa-solid fa-clipboard-list text-primary text-xl"></i></div>
-        <div class="stat-info"><span class="stat-value">{{ sessions().length }}</span><span class="stat-label">Total
+        <div class="stat-icon flex items-center justify-center w-10 h-10 bg-primary/10 rounded-xl"><i
+            class="fa-solid fa-clipboard-list text-primary text-lg"></i></div>
+        <div class="stat-info"><span class="stat-value text-lg">{{ sessions().length }}</span><span class="stat-label">Total
             sessions</span></div>
       </div>
     </sb-card>
-    <sb-card>
+    <sb-card padding="sm">
       <div class="stat">
-        <div class="stat-icon flex items-center justify-center p-3 bg-amber-500/10 rounded-xl"><i
-            class="fa-solid fa-coins text-amber-500 text-xl"></i></div>
-        <div class="stat-info"><span class="stat-value">{{ totalCoinsAllTime() | coins }}</span><span
+        <div class="stat-icon flex items-center justify-center w-10 h-10 bg-amber-500/10 rounded-xl"><i
+            class="fa-solid fa-coins text-amber-500 text-lg"></i></div>
+        <div class="stat-info"><span class="stat-value text-lg">{{ totalCoinsAllTime() | coins }}</span><span
             class="stat-label">Total coins earned</span></div>
       </div>
     </sb-card>
   </div>
 
   @if (taskSummary()) {
-  <div class="flex items-center justify-between mt-4 mb-4">
-    <h2 class="subsection-title mb-0 flex items-center gap-3">
-      <i class="fa-solid fa-layer-group text-primary"></i>
+  <div class="flex items-center justify-between mt-6 mb-3">
+    <h2 class="text-lg font-display font-bold text-text mb-0 flex items-center gap-2">
+      <i class="fa-solid fa-layer-group text-primary text-base"></i>
       Tasks Overview
     </h2>
   </div>
-  <div class="stats-grid mb-10">
-    <sb-card>
+  <div class="stats-grid mb-8">
+    <sb-card padding="sm">
       <div class="stat">
-        <div class="stat-icon flex items-center justify-center p-3 bg-blue-500/10 rounded-xl">
-          <i class="fa-solid fa-list-check text-blue-500 text-xl"></i>
+        <div class="stat-icon flex items-center justify-center w-10 h-10 bg-blue-500/10 rounded-xl">
+          <i class="fa-solid fa-list-check text-blue-500 text-lg"></i>
         </div>
         <div class="stat-info">
-          <span class="stat-value">{{ taskSummary()?.totalTasks }}</span>
+          <span class="stat-value text-lg">{{ taskSummary()?.totalTasks }}</span>
           <span class="stat-label">Total tasks</span>
         </div>
       </div>
     </sb-card>
-    <sb-card>
+    <sb-card padding="sm">
       <div class="stat">
-        <div class="stat-icon flex items-center justify-center p-3 bg-green-500/10 rounded-xl">
-          <i class="fa-solid fa-check-double text-green-500 text-xl"></i>
+        <div class="stat-icon flex items-center justify-center w-10 h-10 bg-green-500/10 rounded-xl">
+          <i class="fa-solid fa-check-double text-green-500 text-lg"></i>
         </div>
         <div class="stat-info">
-          <span class="stat-value">{{ taskSummary()?.completedTasks }}</span>
+          <span class="stat-value text-lg">{{ taskSummary()?.completedTasks }}</span>
           <span class="stat-label">Completed</span>
         </div>
       </div>
     </sb-card>
-    <sb-card>
+    <sb-card padding="sm">
       <div class="stat">
-        <div class="stat-icon flex items-center justify-center p-3 bg-indigo-500/10 rounded-xl">
-          <i class="fa-solid fa-hourglass-half text-indigo-500 text-xl"></i>
+        <div class="stat-icon flex items-center justify-center w-10 h-10 bg-indigo-500/10 rounded-xl">
+          <i class="fa-solid fa-hourglass-half text-indigo-500 text-lg"></i>
         </div>
         <div class="stat-info">
-          <span class="stat-value">{{ taskSummary()?.activeTasks }}</span>
+          <span class="stat-value text-lg">{{ taskSummary()?.activeTasks }}</span>
           <span class="stat-label">Active focus</span>
         </div>
       </div>
     </sb-card>
-    <sb-card>
+    <sb-card padding="sm">
       <div class="stat">
-        <div class="stat-icon flex items-center justify-center p-3 bg-purple-500/10 rounded-xl">
-          <i class="fa-solid fa-box-archive text-purple-500 text-xl"></i>
+        <div class="stat-icon flex items-center justify-center w-10 h-10 bg-purple-500/10 rounded-xl">
+          <i class="fa-solid fa-box-archive text-purple-500 text-lg"></i>
         </div>
         <div class="stat-info">
-          <span class="stat-value">{{ taskSummary()?.archivedTasks }}</span>
+          <span class="stat-value text-lg">{{ taskSummary()?.archivedTasks }}</span>
           <span class="stat-label">Archived</span>
         </div>
       </div>

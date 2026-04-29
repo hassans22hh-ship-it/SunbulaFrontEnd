@@ -14,7 +14,7 @@
           </div>
         }
         <div class="flex flex-col items-start gap-0.5 min-w-0 flex-1">
-          <h4 class="text-base font-display font-bold text-text truncate w-full group-hover:text-primary transition-colors" [title]="task().title">
+          <h4 class="text-base font-display font-bold text-text break-words whitespace-normal w-full group-hover:text-primary transition-colors" [title]="task().title">
             {{ task().title }}
           </h4>
           <div class="flex flex-wrap items-center gap-2">
@@ -79,7 +79,7 @@
     <!-- Footer: Action & Date -->
     <div class="mt-auto pt-4 border-t border-border/30 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 sm:gap-0">
       <button (click)="toggleTimer($event)" 
-              class="flex items-center justify-center gap-2 px-4 py-2 font-bold text-xs rounded-xl border-2 transition-all active:scale-95 shadow-sm"
+              class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-3 sm:py-2 font-bold text-sm sm:text-xs rounded-xl border-2 transition-all active:scale-95 shadow-sm"
               [class]="isActive() && !isPaused() ? 'bg-primary-light/20 text-primary border-primary/30 hover:bg-primary-light/30' : (isActive() && isPaused() ? 'bg-amber-500/10 text-amber-600 border-amber-500/30 hover:bg-amber-500/20' : 'bg-surface text-text border-border/50 hover:border-primary-light hover:text-primary hover:bg-primary-light/5')">
         @if (isActive() && !isPaused()) {
           <i class="fa-solid fa-pause w-4 h-4 text-center"></i>
