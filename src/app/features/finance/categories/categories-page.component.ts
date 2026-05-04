@@ -27,7 +27,7 @@ export class CategoriesPageComponent implements OnInit {
 
   readonly showAddForm = signal(false);
   readonly newCatName = signal('');
-  readonly newCatIcon = signal('🏷️');
+  readonly newCatIcon = signal('');
 
   readonly contextMenuCat = signal<FinancialCategoryDto | null>(null);
   readonly showRenameModal = signal(false);
@@ -42,7 +42,7 @@ export class CategoriesPageComponent implements OnInit {
 
   openAddForm(): void {
     this.newCatName.set('');
-    this.newCatIcon.set('🏷️');
+    this.newCatIcon.set('');
     this.showAddForm.set(true);
   }
 

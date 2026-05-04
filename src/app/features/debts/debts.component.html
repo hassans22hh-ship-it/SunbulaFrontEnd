@@ -33,7 +33,7 @@
     <!-- ═══ DEBT LIST ═══ -->
     @let list = tab() === 'active' ? store.activeDebts() : store.settledDebts();
     @if (list.length === 0) { 
-      <sb-empty-state icon="📋" heading="No debts found" message="Looking debt-free! 🎉" /> 
+      <sb-empty-state icon="" heading="No debts found" message="Looking debt-free!" /> 
     } @else {
       <div class="debt-list">
         @for (debt of list; track debt.id) {
@@ -85,9 +85,9 @@
               </div>
               <div class="tx-detail-actions">
                 @if (!debt.isPaid) { 
-                  <button class="detail-action-btn detail-action-btn--edit" (click)="openPayment(debt); $event.stopPropagation()">💰 Record Payment</button> 
+                  <button class="detail-action-btn detail-action-btn--edit" (click)="openPayment(debt); $event.stopPropagation()"><i class="fa-solid fa-coins"></i> Record Payment</button> 
                 }
-                <button class="detail-action-btn detail-action-btn--delete" (click)="confirmDelete(debt); $event.stopPropagation()">🗑️ Delete</button>
+                <button class="detail-action-btn detail-action-btn--delete" (click)="confirmDelete(debt); $event.stopPropagation()"><i class="fa-solid fa-trash"></i> Delete</button>
               </div>
             </div>
           }

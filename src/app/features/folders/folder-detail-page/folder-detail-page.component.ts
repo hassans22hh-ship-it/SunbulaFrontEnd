@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, Input, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { firstValueFrom } from 'rxjs';
 
@@ -24,7 +24,6 @@ import { TaskCardComponent } from '../../tasks/components/task-card/task-card.co
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
     DurationPipe,
     SbButtonComponent,
     SbSpinnerComponent,

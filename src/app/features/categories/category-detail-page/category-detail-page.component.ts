@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, computed, inject, Input, signal } from '@angular/core';
 
 import { CommonModule } from '@angular/common';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 
 import { CategoriesStore } from '../../tasks/store/categories.store';
 import { TasksApiService } from '../../tasks/services/tasks.api.service';
@@ -28,7 +28,6 @@ import { SbEmptyStateComponent } from '@shared/ui/empty-state/sb-empty-state.com
   standalone: true,
   imports: [
     CommonModule,
-    RouterLink,
     DurationPipe,
     SbButtonComponent,
     SbSpinnerComponent,

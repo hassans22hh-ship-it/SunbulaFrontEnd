@@ -18,9 +18,7 @@ import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { CategoriesStore } from './store/categories.store';
 import { TaskFilterService } from './services/task-filter.service';
 import { EmojiPickerComponent } from '@shared/ui/emoji-picker/emoji-picker.component';
-import { SbBehaviorBadgeComponent } from '@shared/ui/behavior-badge/sb-behavior-badge.component';
-import { RelativeDatePipe } from '@shared/pipes/relative-date.pipe';
-import { DurationPipe } from '@shared/pipes/duration.pipe';
+
 
 import { TaskCardComponent } from './components/task-card/task-card.component';
 import { firstValueFrom } from 'rxjs';
@@ -34,8 +32,7 @@ import { TasksApiService } from './services/tasks.api.service';
     SbButtonComponent, SbModalComponent, SbEmptyStateComponent,
     SbSpinnerComponent, SbConfirmDialogComponent,
     ReactiveFormsModule, PageTransitionDirective, CoinsPipe,
-    RouterLink, EmojiPickerComponent, SbBehaviorBadgeComponent,
-    RelativeDatePipe, DurationPipe, TaskCardComponent
+    RouterLink, EmojiPickerComponent, TaskCardComponent
   ],
   templateUrl: './tasks.component.html',
   styleUrl: './tasks.component.scss',

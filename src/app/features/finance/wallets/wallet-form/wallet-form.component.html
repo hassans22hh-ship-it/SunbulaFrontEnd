@@ -17,19 +17,19 @@
         @for (t of typeOptions; track t.value) {
         <button type="button" class="type-btn" [class.type-btn--selected]="form.value.type === t.value"
           (click)="form.patchValue({ type: t.value })">
-          {{ t.meta.icon }} {{ t.meta.label }}
+          <i [class]="t.meta.icon"></i> {{ t.meta.label }}
         </button>
         }
       </div>
     </div>
 
-    <!-- Initial Balance & Currency (Create only) -->
-    @if (!wallet()) {
+    <!-- Balance & Currency -->
     <div class="form-row">
       <div class="form-group">
-        <label class="form-lbl">Initial Balance</label>
-        <input class="input-field" type="number" formControlName="initialBalance" placeholder="0.00" />
+        <label class="form-lbl">{{ wallet() ? 'Balance' : 'Initial Balance' }}</label>
+        <input class="input-field" type="number" formControlName="balance" placeholder="0.00" />
       </div>
+      @if (!wallet()) {
       <div class="form-group">
         <label class="form-lbl">Currency</label>
         <select class="input-field" formControlName="currency">
@@ -40,8 +40,8 @@
           <option value="GBP">GBP (£)</option>
         </select>
       </div>
+      }
     </div>
-    }
 
     <!-- Actions -->
     <div class="form-bottom">

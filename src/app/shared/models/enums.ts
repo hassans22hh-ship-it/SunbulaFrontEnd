@@ -32,9 +32,9 @@ export enum TaskStatus {
 }
 
 export const TASK_STATUS_META: Record<TaskStatus, { label: string; icon: string }> = {
-  [TaskStatus.Active]:    { label: 'Active',    icon: '📋' },
-  [TaskStatus.Completed]: { label: 'Completed', icon: '✅' },
-  [TaskStatus.Archived]:  { label: 'Archived',  icon: '📦' },
+  [TaskStatus.Active]:    { label: 'Active',    icon: 'fa-solid fa-clipboard-list' },
+  [TaskStatus.Completed]: { label: 'Completed', icon: 'fa-solid fa-circle-check' },
+  [TaskStatus.Archived]:  { label: 'Archived',  icon: 'fa-solid fa-box-archive' },
 };
 
 // ─── Wallet Type ──────────────────────────────────────────────────────────────
@@ -45,9 +45,9 @@ export enum WalletType {
 }
 
 export const WALLET_TYPE_META: Record<WalletType, { label: string; icon: string }> = {
-  [WalletType.Cash]: { label: 'Cash',         icon: '💵' },
-  [WalletType.Bank]: { label: 'Bank Account', icon: '🏦' },
-  [WalletType.Card]: { label: 'Card',         icon: '💳' },
+  [WalletType.Cash]: { label: 'Cash',         icon: 'fa-solid fa-money-bill-wave' },
+  [WalletType.Bank]: { label: 'Bank Account', icon: 'fa-solid fa-building-columns' },
+  [WalletType.Card]: { label: 'Card',         icon: 'fa-solid fa-credit-card' },
 };
 
 // ─── Transaction Type ─────────────────────────────────────────────────────────
@@ -101,7 +101,7 @@ export const PLANT_LEVEL_META: Record<PlantLevel, {
   [PlantLevel.Beginner]:     { label: 'Beginner',     emoji: '🌱', priceRange: '20–50',     variant: 'default' },
   [PlantLevel.Intermediate]: { label: 'Intermediate', emoji: '🌿', priceRange: '50–300',    variant: 'info'    },
   [PlantLevel.Advanced]:     { label: 'Advanced',     emoji: '🌳', priceRange: '1000–2000', variant: 'warning' },
-  [PlantLevel.Rare]:         { label: 'Rare',         emoji: '🏆', priceRange: '5000+',     variant: 'danger'  },
+  [PlantLevel.Rare]:         { label: 'Rare',         emoji: '🏆', priceRange: '5000+',     variant: 'danger' },
 };
 
 // ─── Debt Type ────────────────────────────────────────────────────────────────

@@ -1,0 +1,171 @@
+<!-- ══════════════════════════════════════════════════════════
+     SUNBULA LANDING PAGE
+     ══════════════════════════════════════════════════════════ -->
+<div class="landing-page">
+
+  <!-- ─── NAVBAR ─────────────────────────────────────────── -->
+  <nav class="landing-nav">
+    <div class="nav-inner">
+      <div class="nav-brand">
+        <img src="logo.png" alt="Sunbula" class="nav-logo-img" />
+        <span class="nav-logo-text">Sunbula</span>
+      </div>
+      <div class="nav-links">
+        <a routerLink="/auth/login" class="nav-link">Sign In</a>
+        <a routerLink="/auth/register" class="nav-cta">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ─── SECTION 1: HERO ────────────────────────────────── -->
+  <section class="hero-section" id="hero">
+    <!-- Animated SVG Tree -->
+    <div class="hero-tree-container">
+      <svg class="hero-tree" viewBox="0 0 400 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Trunk -->
+        <path class="tree-trunk" d="M195 500 L195 280 Q195 270 200 265 Q205 270 205 280 L205 500" fill="#5C3D2E"/>
+        <path class="tree-trunk" d="M190 500 L190 310 Q190 300 195 295" fill="none" stroke="#4A3021" stroke-width="2" opacity="0.5"/>
+
+        <!-- Roots -->
+        <path class="tree-roots" d="M195 500 Q170 490 155 500" stroke="#5C3D2E" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <path class="tree-roots" d="M205 500 Q230 490 245 500" stroke="#5C3D2E" stroke-width="3" fill="none" stroke-linecap="round"/>
+
+        <!-- Main canopy layers -->
+        <ellipse class="tree-canopy canopy-1" cx="200" cy="210" rx="90" ry="75" fill="#2D6A4F" opacity="0.9"/>
+        <ellipse class="tree-canopy canopy-2" cx="170" cy="190" rx="70" ry="60" fill="#40916C" opacity="0.85"/>
+        <ellipse class="tree-canopy canopy-3" cx="230" cy="195" rx="65" ry="55" fill="#52B788" opacity="0.8"/>
+        <ellipse class="tree-canopy canopy-4" cx="200" cy="170" rx="55" ry="48" fill="#74C69D" opacity="0.75"/>
+        <ellipse class="tree-canopy canopy-5" cx="185" cy="155" rx="40" ry="35" fill="#95D5B2" opacity="0.7"/>
+        <ellipse class="tree-canopy canopy-6" cx="215" cy="150" rx="35" ry="30" fill="#B7E4C7" opacity="0.65"/>
+
+        <!-- Leaves / details -->
+        <circle class="tree-leaf leaf-1" cx="140" cy="200" r="8" fill="#95D5B2" opacity="0.6"/>
+        <circle class="tree-leaf leaf-2" cx="260" cy="205" r="6" fill="#B7E4C7" opacity="0.5"/>
+        <circle class="tree-leaf leaf-3" cx="175" cy="140" r="5" fill="#D8F3DC" opacity="0.6"/>
+        <circle class="tree-leaf leaf-4" cx="230" cy="135" r="7" fill="#95D5B2" opacity="0.5"/>
+        <circle class="tree-leaf leaf-5" cx="155" cy="170" r="4" fill="#D8F3DC" opacity="0.7"/>
+
+        <!-- Falling leaves -->
+        <circle class="falling-leaf fl-1" cx="120" cy="250" r="3" fill="#95D5B2"/>
+        <circle class="falling-leaf fl-2" cx="280" cy="230" r="2.5" fill="#B7E4C7"/>
+        <circle class="falling-leaf fl-3" cx="150" cy="270" r="2" fill="#D8F3DC"/>
+        <circle class="falling-leaf fl-4" cx="250" cy="260" r="3.5" fill="#74C69D"/>
+
+        <!-- Glow effect -->
+        <ellipse class="tree-glow" cx="200" cy="190" rx="110" ry="95" fill="url(#treeGlow)" opacity="0.3"/>
+        <defs>
+          <radialGradient id="treeGlow" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#52B788" stop-opacity="0.4"/>
+            <stop offset="100%" stop-color="#52B788" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+      </svg>
+    </div>
+
+    <!-- Hero Content -->
+    <div class="hero-content">
+      <h1 class="hero-title animate-fadeInUp">
+        Bring Your Life Back to <span class="hero-green">Green.</span>
+      </h1>
+      <p class="hero-subtitle animate-fadeInUp stagger-2">
+        <strong>Sunbula</strong> helps you understand<br />
+        where your <em>time</em> goes,<br />
+        where your <em>money</em> goes,<br />
+        and how to make <em>better decisions</em> every day.
+      </p>
+      <div class="hero-actions animate-fadeInUp stagger-4">
+        <a routerLink="/auth/register" class="hero-btn hero-btn-primary">
+          <span>Get Started Free</span>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a routerLink="/auth/login" class="hero-btn hero-btn-outline">
+          Sign In
+        </a>
+      </div>
+    </div>
+
+    <!-- Decorative particles -->
+    <div class="hero-particles">
+      <span class="particle p1"></span>
+      <span class="particle p2"></span>
+      <span class="particle p3"></span>
+      <span class="particle p4"></span>
+      <span class="particle p5"></span>
+      <span class="particle p6"></span>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 2: FEATURES CAROUSEL ───────────────────── -->
+  <section class="features-section scroll-reveal" id="features">
+    <div class="features-inner">
+      <div class="features-header">
+        <span class="section-label">What We Offer</span>
+        <h2 class="features-title">
+          Your all-in-one
+          <span class="typewriter-wrapper">
+            <span class="typewriter-text">{{ currentWord() }}</span>
+            <span class="typewriter-cursor">|</span>
+          </span>
+        </h2>
+        <p class="features-desc">
+          One platform to track your habits, time, finances, and debts — all connected to paint the full picture of your daily life.
+        </p>
+      </div>
+
+      <div class="carousel-container">
+        <owl-carousel-o [options]="carouselOptions">
+          @for (card of features; track card.title) {
+            <ng-template carouselSlide>
+              <div class="feature-card">
+                <div class="feature-card-image">
+                  <img [src]="card.image" [alt]="card.title" loading="lazy"/>
+                </div>
+                <div class="feature-card-body">
+                  <span class="feature-card-label">{{ card.title }}</span>
+                  <h3 class="feature-card-title">{{ card.subtitle }}</h3>
+                  <p class="feature-card-desc">{{ card.description }}</p>
+                </div>
+              </div>
+            </ng-template>
+          }
+        </owl-carousel-o>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── SECTION 3: TEAM ────────────────────────────────── -->
+  <section class="team-section scroll-reveal" id="team">
+    <div class="team-inner">
+      <h2 class="team-heading">The team<br/><span class="team-heading-accent">behind Sunbula</span></h2>
+
+      <div class="team-grid">
+        @for (member of team; track member.name) {
+          <a [href]="member.linkedin" target="_blank" rel="noopener noreferrer" class="team-card">
+            <!-- Name bubble (appears on hover) -->
+            <div class="team-bubble">
+              <span class="team-bubble-text">{{ member.name }}</span>
+            </div>
+            <!-- Full-body illustration -->
+            <div class="team-card-img-wrapper">
+              <img [src]="member.image" [alt]="member.name" class="team-card-img" loading="lazy"/>
+            </div>
+            <!-- Role label (appears on hover) -->
+            <span class="team-role-label">{{ member.role }}</span>
+          </a>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ─────────────────────────────────────────── -->
+  <footer class="landing-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <img src="logo.png" alt="Sunbula" class="footer-logo-img" />
+        <span class="footer-logo-text">Sunbula</span>
+      </div>
+      <p class="footer-copy">© 2025 Sunbula. All rights reserved.</p>
+    </div>
+  </footer>
+
+</div>

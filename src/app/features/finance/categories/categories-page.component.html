@@ -11,7 +11,7 @@
     </div>
   } @else {
     @if (store.categories().length === 0) {
-      <sb-empty-state icon="🏷️" heading="No categories" message="Click + to add a new category" />
+      <sb-empty-state icon="" heading="No categories" message="Click + to add a new category" />
     } @else {
       <div class="cat-grid">
         @for (cat of store.categories(); track cat.id) {
@@ -28,9 +28,9 @@
           @if (contextMenuCat()?.id === cat.id) {
             <div class="context-overlay" (click)="closeContextMenu()">
               <div class="context-menu" (click)="$event.stopPropagation()">
-                <button class="context-item" (click)="openRename()">✏️ Rename</button>
-                <button class="context-item" (click)="openChangeIcon()">🎨 Change Icon</button>
-                <button class="context-item context-item--danger" (click)="openDelete()">🗑️ Delete</button>
+                <button class="context-item" (click)="openRename()"><i class="fa-solid fa-pen"></i> Rename</button>
+                <button class="context-item" (click)="openChangeIcon()"><i class="fa-solid fa-palette"></i> Change Icon</button>
+                <button class="context-item context-item--danger" (click)="openDelete()"><i class="fa-solid fa-trash"></i> Delete</button>
               </div>
             </div>
           }

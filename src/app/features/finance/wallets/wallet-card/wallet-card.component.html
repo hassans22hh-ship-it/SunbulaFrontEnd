@@ -7,12 +7,12 @@
 >
   <div class="wallet-card-top">
     <div class="wallet-type-info">
-      <span class="wallet-type-icon">{{ meta.icon }}</span>
+      <span class="wallet-type-icon"><i [class]="meta.icon"></i></span>
       <span class="wallet-type-label">{{ meta.label }}</span>
     </div>
     <div class="wallet-actions">
-      <button class="icon-btn" (click)="editClicked.emit(wallet()); $event.stopPropagation()" aria-label="Edit">✏️</button>
-      <button class="icon-btn icon-btn--danger" (click)="deleteClicked.emit(wallet()); $event.stopPropagation()" aria-label="Delete">🗑️</button>
+      <button class="icon-btn" (click)="editClicked.emit(wallet()); $event.stopPropagation()" aria-label="Edit"><i class="fa-solid fa-pen"></i></button>
+      <button class="icon-btn icon-btn--danger" (click)="deleteClicked.emit(wallet()); $event.stopPropagation()" aria-label="Delete"><i class="fa-solid fa-trash"></i></button>
     </div>
   </div>
   <h3 class="wallet-name">{{ wallet().name }}</h3>

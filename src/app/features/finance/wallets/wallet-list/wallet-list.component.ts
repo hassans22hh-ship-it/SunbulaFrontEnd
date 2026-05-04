@@ -40,7 +40,7 @@ export class WalletListComponent implements OnInit {
   deletingWallet = signal<WalletDto | null>(null);
 
   ngOnInit(): void {
-    this.titleService.setTitle('Wallets | Sunbula');
+    this.titleService.setTitle('Sunbula');
     this.store.loadAll();
   }
 

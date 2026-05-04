@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '@core/auth/auth.service';
 import { AuthApiService } from '../services/auth.api.service';
 import { SbButtonComponent } from '@shared/ui/button/sb-button.component';
@@ -8,7 +8,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'sb-verify-email',
   standalone: true,
-  imports: [CommonModule, SbButtonComponent, RouterLink],
+  imports: [CommonModule, SbButtonComponent],
   templateUrl: './verify-email.component.html',
   styleUrl: './verify-email.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

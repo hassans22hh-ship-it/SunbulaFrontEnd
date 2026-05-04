@@ -32,7 +32,7 @@ export class TransactionFormComponent implements OnInit {
   readonly selectedCategoryId = signal<string | null>(null);
   readonly showAddCategory = signal(false);
   readonly newCatName = signal('');
-  readonly newCatIcon = signal('🏷️');
+  readonly newCatIcon = signal('');
 
   readonly isTransfer = computed(() => this.activeType() === TransactionType.Transfer);
 
@@ -83,7 +83,7 @@ export class TransactionFormComponent implements OnInit {
     await this.store.createCategory({ name, icon } as CreateFinancialCategoryDto);
     this.showAddCategory.set(false);
     this.newCatName.set('');
-    this.newCatIcon.set('🏷️');
+    this.newCatIcon.set('');
   }
 
   onSubmit(): void {
