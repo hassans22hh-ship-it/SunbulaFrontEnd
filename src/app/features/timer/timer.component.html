@@ -1,6 +1,6 @@
 <div class="page" sbPageTransition>
   <div class="timer-header">
-    <h1 class="section-title">⏱️ Timer</h1>
+    <h1 class="section-title"><i class="fa-solid fa-stopwatch"></i> Timer</h1>
     <div class="daily-total" title="Total time tracked today">
       <span class="total-label">Today:</span>
       <span class="total-value">{{ timer.dailyTotalSeconds() | duration:'words' }}</span>
@@ -40,7 +40,7 @@
     </div>
     @if (timer.activeSessions().length > 1) {
     <div class="stop-all-container">
-      <button class="stop-all-btn" (click)="stopAllTimers()">⏹️ Stop All Tasks</button>
+      <button class="stop-all-btn" (click)="stopAllTimers()"><i class="fa-solid fa-stop"></i> Stop All Tasks</button>
     </div>
     }
     } @else {
@@ -54,21 +54,21 @@
   <!-- Quick Task Select -->
   <section class="task-select-section">
     <div class="section-header-row">
-      <h2 class="subsection-title">✨ Start Timer</h2>
+      <h2 class="subsection-title"><i class="fa-solid fa-wand-magic-sparkles"></i> Start Timer</h2>
       <sb-button variant="ghost" size="sm" (click)="openAddModal()">
-        <span class="mr-2">➕</span> Add Manual Session
+        <span class="mr-1 sm:mr-2"><i class="fa-solid fa-plus"></i></span> <span class="hidden sm:inline">Add Manual Session</span><span
+          class="sm:hidden">Add Manual</span>
       </sb-button>
     </div>
 
     @if (tasks.activeTasks().length === 0) {
     <sb-empty-state icon="" heading="No active tasks" message="Create a task first to start tracking time" />
-    } @else {✅
+    } @else {
     <div class="task-grid">
       @for (task of tasks.activeTasks(); track task.id) {
       @let isTracking = timer.activeSessions().find(s => s.taskId === task.id);
-      <sb-card [hoverable]="true" class="task-select-card" 
-               [style.--task-color]="task.color"
-               (click)="startTimer(task.id)">
+      <sb-card [hoverable]="true" class="task-select-card" [style.--task-color]="task.color"
+        (click)="startTimer(task.id)">
         <div class="quick-task">
           <span class="quick-task-color" [style.background]="task.color"></span>
           <div class="quick-task-info">
@@ -77,15 +77,15 @@
           </div>
           <sb-behavior-badge [behavior]="task.behaviorType" />
           @if (isTracking) {
-            @if (isTracking.isPaused) {
-              <div class="tracking-indicator" title="Paused">
-                <div class="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
-              </div>
-            } @else {
-              <div class="tracking-indicator" title="Already tracking">
-                <span class="pulse-dot"></span>
-              </div>
-            }
+          @if (isTracking.isPaused) {
+          <div class="tracking-indicator" title="Paused">
+            <div class="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
+          </div>
+          } @else {
+          <div class="tracking-indicator" title="Already tracking">
+            <span class="pulse-dot"></span>
+          </div>
+          }
           }
         </div>
       </sb-card>
@@ -108,7 +108,7 @@
       <button class="date-nav-btn" (click)="timer['prevDay']()" title="Previous day">
         <i class="fa-solid fa-chevron-left"></i>
       </button>
-      <h2 class="subsection-title date-nav-label">📊 {{ timer.dateLabel() }}</h2>
+      <h2 class="subsection-title date-nav-label"><i class="fa-solid fa-chart-bar"></i> {{ timer.dateLabel() }}</h2>
       <button class="date-nav-btn" (click)="timer['nextDay']()" [disabled]="!timer.canGoNext()" title="Next day">
         <i class="fa-solid fa-chevron-right"></i>
       </button>
@@ -119,7 +119,7 @@
       <sb-spinner size="md" />
     </div>
     } @else if (timer.sessions().length === 0) {
-    <sb-empty-state icon="📊" heading="No sessions" message="No tracked sessions for this day" />
+    <sb-empty-state icon="" heading="No sessions" message="No tracked sessions for this day" />
     } @else {
     <div class="session-list">
       @for (session of timer.sessions(); track session.id) {
@@ -145,10 +145,10 @@
 
           <div class="session-actions">
             <button class="action-btn action-btn--start" (click)="startTimer(session.taskId)"
-              title="Start Timer">▶️</button>
-            <button class="action-btn action-btn--edit" (click)="editSession(session)" title="Edit Session">✏️</button>
+              title="Start Timer"><i class="fa-solid fa-play"></i></button>
+            <button class="action-btn action-btn--edit" (click)="editSession(session)" title="Edit Session"><i class="fa-solid fa-pen"></i></button>
             <button class="action-btn action-btn--delete" (click)="deleteSession(session.id)"
-              title="Delete Session">🗑️</button>
+              title="Delete Session"><i class="fa-solid fa-trash"></i></button>
           </div>
         </div>
       </sb-card>
@@ -282,10 +282,10 @@
         <div class="form-group mb-4">
           <label>Behavior</label>
           <select class="input-field" [ngModel]="addBehaviorType()" (ngModelChange)="addBehaviorType.set($event)">
-            <option [value]="0">🟢 Positive Focus</option>
-            <option [value]="1">🔵 Neutral / Routine</option>
-            <option [value]="3">🟡 Productive Rest</option>
-            <option [value]="2">🔴 Negative / Distraction</option>
+            <option [value]="1">Positive </option>
+            <option [value]="2">Neutral </option>
+            <option [value]="3">Productive </option>
+            <option [value]="4">Negative </option>
           </select>
         </div>
 
@@ -306,20 +306,20 @@
 
   <!-- Confirm Delete Modal -->
   @if (isConfirmDeleteOpen()) {
-    <sb-modal (onClose)="closeConfirmDelete()">
-      <div modal-header class="flex items-center gap-3 text-danger">
-        <i class="fa-solid fa-triangle-exclamation text-xl"></i>
-        <h3 class="text-lg font-bold">Confirm Deletion</h3>
-      </div>
+  <sb-modal (onClose)="closeConfirmDelete()">
+    <div modal-header class="flex items-center gap-3 text-danger">
+      <i class="fa-solid fa-triangle-exclamation text-xl"></i>
+      <h3 class="text-lg font-bold">Confirm Deletion</h3>
+    </div>
 
-      <div modal-body class="py-4">
-        <p class="text-text-muted">Are you sure you want to delete this session? This action cannot be undone.</p>
-      </div>
+    <div modal-body class="py-4">
+      <p class="text-text-muted">Are you sure you want to delete this session? This action cannot be undone.</p>
+    </div>
 
-      <div modal-footer class="flex justify-end gap-3 pt-4 border-t border-border">
-        <sb-button variant="ghost" (click)="closeConfirmDelete()">Cancel</sb-button>
-        <sb-button variant="danger" (click)="confirmDelete()">Delete Session</sb-button>
-      </div>
-    </sb-modal>
+    <div modal-footer class="flex justify-end gap-3 pt-4 border-t border-border">
+      <sb-button variant="ghost" (click)="closeConfirmDelete()">Cancel</sb-button>
+      <sb-button variant="danger" (click)="confirmDelete()">Delete Session</sb-button>
+    </div>
+  </sb-modal>
   }
 </div>

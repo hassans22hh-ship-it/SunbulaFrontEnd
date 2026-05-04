@@ -29,7 +29,7 @@ export class WalletFormComponent implements OnInit {
   form = this.fb.group({
     name: ['', Validators.required],
     type: [WalletType.Cash, Validators.required],
-    initialBalance: [0],
+    balance: [0],
     currency: ['EGP'],
   });
 
@@ -39,6 +39,7 @@ export class WalletFormComponent implements OnInit {
       this.form.patchValue({
         name: w.name,
         type: w.type as unknown as WalletType,
+        balance: w.balance,
       });
     }
   }
@@ -53,11 +54,11 @@ export class WalletFormComponent implements OnInit {
     const isEdit = !!this.wallet();
 
     const dto = isEdit
-      ? { name: v.name!, type: v.type! } as UpdateWalletDto
+      ? { name: v.name!, type: v.type!, balance: v.balance ?? 0 } as UpdateWalletDto
       : {
         name: v.name!,
         type: v.type!,
-        openingBalance: v.initialBalance,
+        openingBalance: v.balance ?? 0,
         currency: v.currency,
       } as CreateWalletDto;
 

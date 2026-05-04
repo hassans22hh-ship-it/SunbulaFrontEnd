@@ -20,7 +20,7 @@ export class MyGardenComponent implements OnInit {
   private readonly titleService = inject(Title);
 
   ngOnInit(): void {
-    this.titleService.setTitle('My Garden | Sunbula');
+    this.titleService.setTitle('Sunbula');
     if (this.store.allMyPlants().length === 0) {
       this.store.loadAll();
     }

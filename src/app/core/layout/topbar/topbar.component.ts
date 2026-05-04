@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { AuthService } from '@core/auth/auth.service';
 import { ThemeService } from '@core/theme/theme.service';
+import { SidebarService } from '../sidebar/sidebar.service';
 import { CoinsPipe } from '@shared/pipes/coins.pipe';
 import { SbIconCoinComponent } from '@shared/ui/icons/coin-icon.component';
 import { effect } from '@angular/core';
@@ -23,6 +24,7 @@ import { effect } from '@angular/core';
 export class TopbarComponent implements OnInit, OnDestroy {
   protected readonly auth  = inject(AuthService);
   protected readonly theme = inject(ThemeService);
+  protected readonly sidebarService = inject(SidebarService);
 
   protected coinAnimating = false;
   private prevCoinBalance = 0;

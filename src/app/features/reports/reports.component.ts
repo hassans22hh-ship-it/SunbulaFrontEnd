@@ -1,4 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal, computed, DestroyRef } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal, computed, DestroyRef, AfterViewInit, ElementRef, ViewChild, effect, afterNextRender } from '@angular/core';
+
+
+import { Chart } from 'chart.js/auto';
+
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DailyTransactionApiService } from '../timer/services/daily-transaction.api.service';
 import { TimeSessionApiService } from '../timer/services/time-session.api.service';
@@ -14,7 +18,9 @@ import { DatePipe, DecimalPipe } from '@angular/common';
 import { PageTransitionDirective } from '@core/animation/page-transition.directive';
 import { AuthService } from '@core/auth/auth.service';
 import { TasksStore } from '../tasks/store/tasks.store';
+import { CategoriesStore } from '../tasks/store/categories.store';
 import { getSessionBehavior, getSessionCoins, getSessionDuration } from '@shared/utils/session.util';
+
 
 import { SbHeatmapComponent } from '@shared/ui/heatmap/sb-heatmap.component';
 import { SbBehaviorDonutComponent } from '../timer/components/behavior-donut/behavior-donut.component';
@@ -27,13 +33,26 @@ import { SbBehaviorDonutComponent } from '../timer/components/behavior-donut/beh
   styleUrl: './reports.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ReportsComponent implements OnInit {
+export class ReportsComponent implements OnInit, AfterViewInit {
+
+
+
   private readonly dailyApi   = inject(DailyTransactionApiService);
   private readonly sessionApi = inject(TimeSessionApiService);
   private readonly reportsApi = inject(ReportsApiService);
   private readonly auth       = inject(AuthService);
   private readonly tasksStore = inject(TasksStore);
+  private readonly categoriesStore = inject(CategoriesStore);
   private readonly destroyRef = inject(DestroyRef);
+  @ViewChild('dailyFocusCanvas') dailyFocusCanvas!: ElementRef<HTMLCanvasElement>;
+  private dailyChart: Chart | null = null;
+  private chartInitialized = false;
+
+  constructor() {}
+
+
+
+
 
   readonly loading  = signal(true);
   readonly summary  = signal<DailySummaryDto | null>(null);
@@ -78,10 +97,12 @@ export class ReportsComponent implements OnInit {
   });
 
    ngOnInit(): void {
-     // Ensure tasks are loaded for name mapping
+     // Ensure tasks and categories are loaded for name mapping
      if (this.tasksStore.tasks().length === 0) {
        this.tasksStore.load();
      }
+     this.categoriesStore.load();
+
 
      this.dailyApi.getStreak().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({ next: (s: any) => {
          if (typeof s === 'number') {
@@ -213,9 +234,107 @@ export class ReportsComponent implements OnInit {
     }));
   });
 
+  readonly dailyFocusTime = computed(() => {
+    const map = new Map<string, number>();
+    for (const s of this.sessions()) {
+      if (!s.startTime) continue;
+      const date = new Date(s.startTime).toISOString().split('T')[0];
+      map.set(date, (map.get(date) ?? 0) + getSessionDuration(s));
+    }
+    return Array.from(map.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .slice(-14)
+      .map(([date, seconds]) => ({
+        label: new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        hours: Math.round((seconds / 3600) * 10) / 10
+      }));
+  });
+
+
   readonly peakDay = computed<string | null>(() => {
     const trend = this.yearlyTrend();
     if (!trend.length) return null;
     return trend.reduce((prev, current) => (prev.totalSeconds > current.totalSeconds) ? prev : current).date;
   });
+
+  readonly coinsPerDay = computed(() => {
+    const map = new Map<string, number>();
+    for (const s of this.sessions()) {
+      if (!s.startTime) continue;
+      const date = new Date(s.startTime).toISOString().split('T')[0];
+      map.set(date, (map.get(date) ?? 0) + getSessionCoins(s));
+    }
+    return Array.from(map.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .slice(-14); // last 14 days
+  });
+
+  readonly maxCoins = computed(() => Math.max(...this.coinsPerDay().map(d => d[1]), 1));
+
+  readonly timePerCategory = computed(() => {
+    const allTasks = this.tasksStore.tasks();
+    const categories = this.categoriesStore.categories();
+    const map = new Map<string, number>();
+    for (const s of this.sessions()) {
+      if (!s.taskId) continue;
+      const task = allTasks.find(t => t.id === s.taskId);
+      if (!task?.categories?.length) continue;
+      for (const cat of task.categories) {
+        map.set(cat.id, (map.get(cat.id) ?? 0) + getSessionDuration(s));
+      }
+    }
+    return Array.from(map.entries()).map(([id, seconds]) => ({
+      id,
+      name: categories.find(c => c.id === id)?.name ?? 'Unknown',
+      seconds,
+      color: categories.find(c => c.id === id)?.color ?? '#52B788',
+    })).sort((a, b) => b.seconds - a.seconds).slice(0, 6);
+
+  });
+
+  readonly maxCategorySeconds = computed(() => Math.max(...this.timePerCategory().map(c => c.seconds), 1));
+
+  ngAfterViewInit(): void {
+    // Watch for sessions data with interval
+    const checkAndRender = () => {
+      const data = this.dailyFocusTime();
+      if (data.length > 0 && this.dailyFocusCanvas?.nativeElement && !this.chartInitialized) {
+        this.chartInitialized = true;
+        if (this.dailyChart) this.dailyChart.destroy();
+        this.dailyChart = new Chart(this.dailyFocusCanvas.nativeElement, {
+          type: 'line',
+          data: {
+            labels: data.map(d => d.label),
+            datasets: [{
+              label: 'Hours',
+              data: data.map(d => d.hours),
+              borderColor: '#52B788',
+              backgroundColor: 'rgba(82,183,136,0.1)',
+              borderWidth: 2,
+              pointBackgroundColor: '#52B788',
+              pointRadius: 4,
+              fill: true,
+              tension: 0.4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 11 } } },
+              y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 11 } } }
+            }
+          }
+        });
+      } else if (!this.chartInitialized) {
+        setTimeout(checkAndRender, 500);
+      }
+    };
+    setTimeout(checkAndRender, 500);
+  }
+
 }
+
+
+

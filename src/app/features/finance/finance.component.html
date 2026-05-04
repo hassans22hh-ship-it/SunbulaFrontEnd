@@ -37,7 +37,7 @@
       <h2 class="tx-section-title">Recent Transactions</h2>
 
       @if (sortedTransactions().length === 0) {
-        <sb-empty-state icon="💸" heading="No transactions" message="Click + to add a new transaction" />
+        <sb-empty-state icon="" heading="No transactions" message="Click + to add a new transaction" />
       } @else {
         <div class="tx-list">
           @for (tx of sortedTransactions(); track tx.id) {
@@ -58,7 +58,7 @@
             @if (store.selectedTransaction()?.id === tx.id) {
               <div class="tx-detail">
                 <div class="tx-detail-header">
-                  <span class="tx-detail-icon">{{ tx.categoryIcon || '💰' }}</span>
+                  <span class="tx-detail-icon">{{ tx.categoryIcon || '' }}</span>
                   <div class="tx-detail-title-wrap">
                     <span class="tx-detail-category">{{ tx.categoryName || txMeta[tx.type].label }}</span>
                     <span class="tx-detail-badge" [class]="'badge-' + txMeta[tx.type].colorClass">{{ txMeta[tx.type].label }}</span>
@@ -91,8 +91,8 @@
                   }
                 </div>
                 <div class="tx-detail-actions">
-                  <button class="detail-action-btn detail-action-btn--edit" (click)="openEditTx(tx); $event.stopPropagation()">✏️ Edit</button>
-                  <button class="detail-action-btn detail-action-btn--delete" (click)="confirmDeleteTx(tx.id); $event.stopPropagation()">🗑️ Delete</button>
+                  <button class="detail-action-btn detail-action-btn--edit" (click)="openEditTx(tx); $event.stopPropagation()"><i class="fa-solid fa-pen"></i> Edit</button>
+                  <button class="detail-action-btn detail-action-btn--delete" (click)="confirmDeleteTx(tx.id); $event.stopPropagation()"><i class="fa-solid fa-trash"></i> Delete</button>
                 </div>
               </div>
             }

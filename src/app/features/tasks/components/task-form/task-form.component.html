@@ -43,7 +43,7 @@
             [class.behavior-chip--active]="form.value.behaviorType === opt.value"
             [style.--chip-color]="'var(' + opt.meta.colorVar + ')'"
             (click)="form.patchValue({ behaviorType: opt.value })">
-            <span class="chip-emoji">{{ opt.meta.emoji }}</span>
+            <span class="chip-icon"><i [class]="opt.meta.icon"></i></span>
             {{ opt.meta.label }}
           </button>
         }

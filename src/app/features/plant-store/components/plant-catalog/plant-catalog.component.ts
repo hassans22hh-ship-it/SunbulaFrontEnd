@@ -34,7 +34,7 @@ export class PlantCatalogComponent implements OnInit {
   isPurchasing = signal<boolean>(false);
 
   ngOnInit(): void {
-    this.titleService.setTitle('Store | Sunbula');
+    this.titleService.setTitle('Sunbula');
     if (this.store.available().length === 0) {
       this.store.loadAll();
     }

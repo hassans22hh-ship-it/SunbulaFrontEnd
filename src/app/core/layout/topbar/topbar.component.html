@@ -1,5 +1,12 @@
 <header class="sb-topbar">
   <div class="sb-topbar__left">
+    <button class="sb-topbar__icon-btn sb-topbar__menu-btn" (click)="sidebarService.toggleMobile()" title="Menu">
+      <svg viewBox="0 0 24 24" fill="none" class="w-5 h-5" stroke="currentColor" stroke-width="2.5">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
     <div class="sb-topbar__greeting-wrap">
       <h1 class="sb-topbar__greeting">
         <span class="greeting-time-emoji">

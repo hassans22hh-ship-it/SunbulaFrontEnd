@@ -1,0 +1,146 @@
+<div class="folders-container p-6 lg:p-10" sbPageTransition>
+  <button routerLink="/tasks" class="flex items-center gap-2 text-text-muted hover:text-primary transition-colors text-xs font-medium mb-4">
+    <i class="fa-solid fa-arrow-left"></i>
+    <span>Back to Tasks</span>
+  </button>
+
+  <header class="flex items-center justify-between mb-10">
+
+    <div>
+      <h1 class="text-3xl font-display font-bold text-text mb-1">Folders</h1>
+      <p class="text-text-muted text-sm font-medium uppercase tracking-wider">Organize your botanical archives</p>
+    </div>
+    <sb-button (click)="openCreate()">
+      <i class="fa-solid fa-plus mr-2"></i>
+      New Folder
+    </sb-button>
+  </header>
+
+  @if (store.isLoading()) {
+    <div class="flex justify-center py-20">
+      <sb-spinner size="lg" />
+    </div>
+  } @else if (store.folders().length === 0) {
+    <sb-empty-state 
+      icon="📁" 
+      heading="No Folders Yet" 
+      message="Create your first folder to start organizing your focus sessions.">
+      <sb-button (click)="openCreate()" variant="outline">Create Folder</sb-button>
+    </sb-empty-state>
+  } @else {
+    <div class="folders-grid">
+      @for (folder of store.folders(); track folder.id) {
+        <div class="folder-card group relative" (click)="navigateToFolderTasks(folder.id)">
+          <!-- Top Accent Bar -->
+          <div class="h-1.5 w-full shrink-0" [style.backgroundColor]="folder.color"></div>
+          
+          <div class="p-6 flex flex-col h-full">
+            <div class="flex justify-between items-start mb-6">
+              <div class="flex items-center gap-4">
+                <!-- Folder Icon -->
+                <div class="w-12 h-12 rounded-2xl flex items-center justify-center bg-surface-2 transition-transform group-hover:scale-110 shadow-inner"
+                     [style.color]="folder.color">
+                  <svg viewBox="0 0 24 24" fill="none" class="w-7 h-7" stroke="currentColor" stroke-width="2.5">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+                  </svg>
+                </div>
+                
+                <div>
+                  <h3 class="text-xl font-bold text-text leading-tight truncate max-w-[140px]">{{ folder.name }}</h3>
+                  <p class="text-[10px] font-bold text-text-muted uppercase tracking-widest mt-1">
+                    {{ getStats(folder.id).total }} Total Tasks
+                  </p>
+                </div>
+              </div>
+
+              <!-- Context Menu -->
+              <div class="relative">
+                <button (click)="toggleMenu($event, folder.id)" 
+                        class="w-10 h-10 rounded-xl flex items-center justify-center text-text-subtle hover:bg-surface-2 hover:text-text transition-colors">
+                  <i class="fa-solid fa-ellipsis-vertical"></i>
+                </button>
+
+                @if (activeMenu() === folder.id) {
+                  <div class="absolute right-0 top-12 w-48 bg-surface border border-border/40 rounded-2xl shadow-2xl z-50 py-2 overflow-hidden animate-in fade-in zoom-in duration-200">
+                    <button (click)="openEdit($event, folder)" class="w-full px-4 py-2.5 text-left text-sm font-semibold text-text hover:bg-surface-2 flex items-center gap-3 transition-colors">
+                      <i class="fa-solid fa-pen-to-square text-primary/70"></i>
+                      Edit Folder
+                    </button>
+                    <div class="h-px bg-border/20 mx-2 my-1"></div>
+                    <button (click)="confirmDelete($event, folder)" class="w-full px-4 py-2.5 text-left text-sm font-semibold text-danger hover:bg-danger/5 flex items-center gap-3 transition-colors">
+                      <i class="fa-solid fa-trash-can opacity-70"></i>
+                      Delete Folder
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Stat Pills -->
+            <div class="mt-auto flex flex-wrap gap-2 pt-4">
+              <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-positive/10 border border-positive/20">
+                <div class="w-1.5 h-1.5 rounded-full bg-positive animate-pulse"></div>
+                <span class="text-[10px] font-black text-positive uppercase tracking-tighter">Active: {{ getStats(folder.id).active }}</span>
+              </div>
+              
+              <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-primary/10 border border-primary/20">
+                <i class="fa-solid fa-check text-[10px] text-primary"></i>
+                <span class="text-[10px] font-black text-primary uppercase tracking-tighter">Done: {{ getStats(folder.id).completed }}</span>
+              </div>
+
+              <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-surface-2 border border-border/30">
+                <i class="fa-solid fa-box-archive text-[10px] text-text-muted"></i>
+                <span class="text-[10px] font-black text-text-muted uppercase tracking-tighter">Box: {{ getStats(folder.id).archived }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+
+    </div>
+
+  }
+</div>
+
+<!-- Folder Modal -->
+@if (showForm()) {
+  <sb-modal [title]="editing() ? 'Edit Folder' : 'Create Folder'" (close)="showForm.set(false)">
+    <form [formGroup]="folderForm" (ngSubmit)="onSave()" class="space-y-6 py-4">
+      <div class="space-y-2">
+        <label class="text-[10px] font-bold text-text-muted uppercase tracking-widest">Folder Name</label>
+        <input 
+          formControlName="name" 
+          type="text" 
+          placeholder="e.g. Work, Personal, Research"
+          class="w-full bg-surface-2 border border-border/50 rounded-xl px-4 py-3 text-text placeholder:text-text-subtle focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+      </div>
+
+      <div class="space-y-2">
+        <label class="text-[10px] font-bold text-text-muted uppercase tracking-widest">Accent Color</label>
+        <div class="flex items-center gap-4">
+          <input 
+            formControlName="color" 
+            type="color" 
+            class="w-12 h-12 rounded-lg border border-border/50 bg-surface-2 p-1 cursor-pointer">
+          <span class="text-xs font-medium text-text-subtle">Choose a color for better organization</span>
+        </div>
+      </div>
+
+      <div modal-footer class="flex gap-3">
+        <sb-button variant="ghost" (click)="showForm.set(false)">Cancel</sb-button>
+        <sb-button type="submit" [disabled]="folderForm.invalid">
+          {{ editing() ? 'Save Changes' : 'Create Folder' }}
+        </sb-button>
+      </div>
+    </form>
+  </sb-modal>
+}
+
+<!-- Delete Confirmation -->
+@if (showDelete()) {
+  <sb-confirm-dialog
+    title="Delete Folder"
+    [message]="'Are you sure you want to delete \'' + deleting()?.name + '\'? Tasks in this folder will remain but won\'t be organized anymore.'"
+    (confirmed)="onDelete()"
+    (cancelled)="showDelete.set(false)" />
+}

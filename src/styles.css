@@ -1,2 +1,3 @@
 @import "./styles/global.css";
 @import "./styles/animations.css";
+@import "@ctrl/ngx-emoji-mart/picker";

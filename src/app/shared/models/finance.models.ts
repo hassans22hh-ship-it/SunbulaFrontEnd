@@ -19,6 +19,7 @@ export interface CreateWalletDto {
 export interface UpdateWalletDto {
   name: string;
   type: WalletType;
+  balance?: number;
 }
 
 export interface FinanceSummaryDto {

@@ -6,6 +6,7 @@ import {
 } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '@core/auth/auth.service';
+import { SidebarService } from './sidebar.service';
 
 interface NavItem {
   path: string;
@@ -36,6 +37,11 @@ export class SidebarComponent {
   private readonly router = inject(Router);
   protected readonly navItems = NAV_ITEMS;
   readonly collapsed = signal(false);
+
+  private readonly sidebarService = inject(SidebarService);
+  readonly mobileOpen = this.sidebarService.mobileOpen;
+
+  closeMobile(): void { this.sidebarService.closeMobile(); }
 
   protected toggleCollapse(): void {
     this.collapsed.update(v => !v);

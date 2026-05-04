@@ -1,25 +1,27 @@
 // ─── Behavior Category ────────────────────────────────────────────────────────
+// Values match backend BehaviorType enum exactly:
+// Positive=1, Neutral=2, Rest=3, Negative=4
 export enum BehaviorCategory {
-  Positive = 0,
-  Neutral  = 1,
-  Negative = 2,
+  Positive = 1,
+  Neutral  = 2,
   Rest     = 3,
+  Negative = 4,
 }
 
 export const BEHAVIOR_COIN_RATES: Record<BehaviorCategory, number> = {
   [BehaviorCategory.Positive]:  2,
   [BehaviorCategory.Neutral]:   1,
-  [BehaviorCategory.Negative]: -1,
   [BehaviorCategory.Rest]:      1,
+  [BehaviorCategory.Negative]: -1,
 };
 
 export const BEHAVIOR_META: Record<BehaviorCategory, {
-  label: string; emoji: string; colorVar: string; cssClass: string;
+  label: string; icon: string; colorVar: string; cssClass: string;
 }> = {
-  [BehaviorCategory.Positive]: { label: 'Positive', emoji: '🟢', colorVar: '--color-positive', cssClass: 'behavior-positive' },
-  [BehaviorCategory.Neutral]:  { label: 'Neutral',  emoji: '🔵', colorVar: '--color-neutral',  cssClass: 'behavior-neutral'  },
-  [BehaviorCategory.Negative]: { label: 'Negative', emoji: '🔴', colorVar: '--color-negative', cssClass: 'behavior-negative' },
-  [BehaviorCategory.Rest]:     { label: 'Rest',     emoji: '🟡', colorVar: '--color-rest',     cssClass: 'behavior-rest'     },
+  [BehaviorCategory.Positive]: { label: 'Positive', icon: 'fa-solid fa-circle-check', colorVar: '--color-positive', cssClass: 'behavior-positive' },
+  [BehaviorCategory.Neutral]:  { label: 'Neutral',  icon: 'fa-solid fa-circle-minus', colorVar: '--color-neutral',  cssClass: 'behavior-neutral'  },
+  [BehaviorCategory.Rest]:     { label: 'Rest',     icon: 'fa-solid fa-mug-hot',      colorVar: '--color-rest',     cssClass: 'behavior-rest'     },
+  [BehaviorCategory.Negative]: { label: 'Negative', icon: 'fa-solid fa-circle-xmark', colorVar: '--color-negative', cssClass: 'behavior-negative' },
 };
 
 // ─── Task Status ──────────────────────────────────────────────────────────────
@@ -30,9 +32,9 @@ export enum TaskStatus {
 }
 
 export const TASK_STATUS_META: Record<TaskStatus, { label: string; icon: string }> = {
-  [TaskStatus.Active]:    { label: 'Active',    icon: '📋' },
-  [TaskStatus.Completed]: { label: 'Completed', icon: '✅' },
-  [TaskStatus.Archived]:  { label: 'Archived',  icon: '📦' },
+  [TaskStatus.Active]:    { label: 'Active',    icon: 'fa-solid fa-clipboard-list' },
+  [TaskStatus.Completed]: { label: 'Completed', icon: 'fa-solid fa-circle-check' },
+  [TaskStatus.Archived]:  { label: 'Archived',  icon: 'fa-solid fa-box-archive' },
 };
 
 // ─── Wallet Type ──────────────────────────────────────────────────────────────
@@ -43,9 +45,9 @@ export enum WalletType {
 }
 
 export const WALLET_TYPE_META: Record<WalletType, { label: string; icon: string }> = {
-  [WalletType.Cash]: { label: 'Cash',         icon: '💵' },
-  [WalletType.Bank]: { label: 'Bank Account', icon: '🏦' },
-  [WalletType.Card]: { label: 'Card',         icon: '💳' },
+  [WalletType.Cash]: { label: 'Cash',         icon: 'fa-solid fa-money-bill-wave' },
+  [WalletType.Bank]: { label: 'Bank Account', icon: 'fa-solid fa-building-columns' },
+  [WalletType.Card]: { label: 'Card',         icon: 'fa-solid fa-credit-card' },
 };
 
 // ─── Transaction Type ─────────────────────────────────────────────────────────
@@ -99,7 +101,7 @@ export const PLANT_LEVEL_META: Record<PlantLevel, {
   [PlantLevel.Beginner]:     { label: 'Beginner',     emoji: '🌱', priceRange: '20–50',     variant: 'default' },
   [PlantLevel.Intermediate]: { label: 'Intermediate', emoji: '🌿', priceRange: '50–300',    variant: 'info'    },
   [PlantLevel.Advanced]:     { label: 'Advanced',     emoji: '🌳', priceRange: '1000–2000', variant: 'warning' },
-  [PlantLevel.Rare]:         { label: 'Rare',         emoji: '🏆', priceRange: '5000+',     variant: 'danger'  },
+  [PlantLevel.Rare]:         { label: 'Rare',         emoji: '🏆', priceRange: '5000+',     variant: 'danger' },
 };
 
 // ─── Debt Type ────────────────────────────────────────────────────────────────
