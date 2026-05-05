@@ -6,6 +6,11 @@ import { guestGuard } from '@core/auth/guest.guard';
 export const APP_ROUTES: Routes = [
   {
     path: '',
+    redirectTo: 'Home',
+    pathMatch: 'full'
+  },
+  {
+    path: '',
     component: ShellComponent,
     canActivate: [authGuard],
     children: [
@@ -25,7 +30,7 @@ export const APP_ROUTES: Routes = [
     ],
   },
   {
-    path: 'auth',
+    path: 'Home',
     loadChildren: () => import('@features/auth/auth.routes').then(m => m.AUTH_ROUTES),
     canActivate: [guestGuard],
   },

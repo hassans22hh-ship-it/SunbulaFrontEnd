@@ -16,6 +16,8 @@ export interface TimeSessionDto {
   coinsEarned: number | null;
   isActive: boolean;
   isPaused?: boolean;
+  pausedAt?: string | null;
+  totalPausedDurationSeconds?: number;
   taskEmoji?: string;
   // Fallbacks for backend variations
   title?: string;

@@ -49,7 +49,7 @@ export class SidebarComponent {
 
   protected onLogout(): void {
     this.auth.logout();
-    this.router.navigate(['/auth/login']);
+    this.router.navigate(['/Home/login']);
   }
 
   protected userInitials(): string {

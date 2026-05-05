@@ -72,15 +72,18 @@ export const TimerStore = signalStore(
         return state.rawActiveSessions().map(s => {
           const e = enrichSession(s);
           const isPaused = e.isPaused === true;
+          const pausedSecs = e.totalPausedDurationSeconds || 0;
           
-          let elapsed = getSessionDuration(e);
-          
-          if (!isPaused && e.startTime) {
-            const start = new Date(e.startTime).getTime();
-            elapsed = Math.max(0, Math.floor((now - start) / 1000) + (e.durationSeconds || 0));
+          let elapsed = 0;
+          const start = new Date(e.startTime).getTime();
+
+          if (isPaused && e.pausedAt) {
+             const pausedTime = new Date(e.pausedAt).getTime();
+             elapsed = Math.max(0, Math.floor((pausedTime - start) / 1000) - pausedSecs);
+          } else if (!isPaused && e.startTime) {
+             elapsed = Math.max(0, Math.floor((now - start) / 1000) - pausedSecs);
           } else {
-            // If paused, we just keep the base duration
-            elapsed = e.durationSeconds || getSessionDuration(e);
+             elapsed = getSessionDuration(e);
           }
 
           return { ...e, isPaused, durationSeconds: elapsed };

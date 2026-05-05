@@ -8,8 +8,9 @@ import {
   inject,
   AfterViewInit,
 } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
 import { CarouselModule, OwlOptions } from 'ngx-owl-carousel-o';
+import { AuthService } from '@core/auth/auth.service';
 
 interface TeamMember {
   name: string;
@@ -35,6 +36,8 @@ interface FeatureCard {
 })
 export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly el = inject(ElementRef);
+  private readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
   private typewriterInterval: ReturnType<typeof setInterval> | null = null;
   private observer: IntersectionObserver | null = null;
 
@@ -142,6 +145,10 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
   ];
 
   ngOnInit(): void {
+    if (this.auth.isAuthenticated()) {
+      this.router.navigate(['/tasks']);
+      return;
+    }
     this.startTypewriter();
   }
 

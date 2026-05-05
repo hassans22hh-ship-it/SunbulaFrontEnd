@@ -16,10 +16,10 @@
         <svg class="timer-progress-svg" viewBox="0 0 200 200">
           <circle class="timer-progress-bg" cx="100" cy="100" r="90" />
           <circle class="timer-progress-fill" cx="100" cy="100" r="90"
-            [style.stroke-dashoffset]="calculateOffset(getElapsed(session))" />
+            [style.stroke-dashoffset]="calculateOffset(session.durationSeconds ?? 0)" />
         </svg>
 
-        <div class="timer-display">{{ formatElapsed(getElapsed(session)) }}</div>
+        <div class="timer-display">{{ formatElapsed(session.durationSeconds ?? 0) }}</div>
 
         <div class="timer-task">
           @if (session.taskEmoji) {
@@ -67,6 +67,7 @@
     <div class="task-grid">
       @for (task of tasks.activeTasks(); track task.id) {
       @let isTracking = timer.activeSessions().find(s => s.taskId === task.id);
+      @let folder = folders.folders().find(f => f.id === task.folderId);
       <sb-card [hoverable]="true" class="task-select-card" [style.--task-color]="task.color"
         (click)="startTimer(task.id)">
         <div class="quick-task">
@@ -74,6 +75,20 @@
           <div class="quick-task-info">
             @if (task.emoji) { <span class="text-xl">{{ task.emoji }}</span> }
             <span class="quick-task-title">{{ task.title }}</span>
+          </div>
+          <div class="quick-task-badges">
+            @if (folder) {
+            <span class="quick-task-badge">
+              <span class="badge-dot" [style.backgroundColor]="folder.color"></span>
+              {{ folder.name }}
+            </span>
+            }
+            @for (cat of task.categories; track cat.id) {
+            <span class="quick-task-badge category-badge">
+              <span class="badge-dot" [style.backgroundColor]="cat.color"></span>
+              {{ cat.name }}
+            </span>
+            }
           </div>
           <sb-behavior-badge [behavior]="task.behaviorType" />
           @if (isTracking) {
@@ -131,8 +146,8 @@
               @if (session.taskEmoji) { <span class="mr-1">{{ session.taskEmoji }}</span> }
               {{ session.taskTitle }}
             </span>
-            <span class="session-date session-time-range">{{ session.startTime | date:'HH:mm' }} &rarr; {{
-              (session.endTime ? (session.endTime | date:'HH:mm') : 'Now') }}</span>
+            <span class="session-date session-time-range">{{ session.startTime | date:'h:mm a' }} &rarr; {{
+              (session.endTime ? (session.endTime | date:'h:mm a') : 'Now') }}</span>
           </div>
           <sb-behavior-badge [behavior]="session.taskBehavior" />
           <span class="session-duration">{{ session.durationSeconds | duration:'words' }}</span>
