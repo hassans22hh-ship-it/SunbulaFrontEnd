@@ -4,6 +4,8 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal, computed } 
 import { firstValueFrom } from 'rxjs';
 import { TimerStore } from './store/timer.store';
 import { TasksStore } from '../tasks/store/tasks.store';
+import { FoldersStore } from '../folders/store/folders.store';
+import { CategoriesStore } from '../tasks/store/categories.store';
 import { SbCardComponent } from '@shared/ui/card/sb-card.component';
 import { SbEmptyStateComponent } from '@shared/ui/empty-state/sb-empty-state.component';
 import { SbSpinnerComponent } from '@shared/ui/spinner/sb-spinner.component';
@@ -37,6 +39,8 @@ import { getSessionBehavior, getSessionCoins, getSessionDuration } from '@shared
 export class TimerComponent implements OnInit {
   protected readonly timer = inject(TimerStore);
   protected readonly tasks = inject(TasksStore);
+  protected readonly folders = inject(FoldersStore);
+  protected readonly categories = inject(CategoriesStore);
   private readonly statsApi = inject(DailyTransactionApiService);
 
   readonly history7Days = signal<DailySummaryDto[]>([]);
@@ -281,14 +285,8 @@ export class TimerComponent implements OnInit {
     this.closeAddModal();
   }
 
-  getElapsed(session: TimeSessionDto): number {
-    if (!session?.startTime) return 0;
-    const start = new Date(session.startTime).getTime();
-    const now = Date.now();
-    // Use store ticker to trigger recomputations
-    const tick = this.timer.ticker();
-    return Math.max(0, Math.floor((now - start) / 1000));
-  }
+  // getElapsed() removed — store's activeSessions computed already sets
+  // session.durationSeconds correctly, accounting for isPaused/pausedAt/totalPausedDurationSeconds
 
   calculateOffset(seconds: number): number {
     const circumference = 565.48;

@@ -163,7 +163,7 @@ export class AuthService {
       // Ignore errors — always clear local state
     } finally {
       this.clearTokens();
-      this.router.navigate(['/auth/login']);
+      this.router.navigate(['/Home/login']);
     }
   }
 

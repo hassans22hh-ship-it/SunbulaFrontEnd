@@ -189,7 +189,7 @@ export class TasksComponent implements OnInit {
 
   protected onLogout(): void {
     this.auth.logout();
-    this.router.navigate(['/auth/login']);
+    this.router.navigate(['/Home/login']);
   }
 
   viewTaskDetails(taskId: string): void {
