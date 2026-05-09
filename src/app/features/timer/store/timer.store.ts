@@ -185,6 +185,7 @@ export const TimerStore = signalStore(
       resumeTimer,
 
       async initialize(): Promise<void> {
+        if (!auth.isAuthenticated()) return;
         try {
           const active: any = await firstValueFrom(api.getActive());
           let activeList = Array.isArray(active) ? active : active?.data ?? active;

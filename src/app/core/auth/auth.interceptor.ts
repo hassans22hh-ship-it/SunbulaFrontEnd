@@ -26,7 +26,10 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
         !req.url.includes('/register')
       ) {
         return auth.refreshTokens().pipe(
-          switchMap(res => next(withToken(req, res.accessToken))),
+          switchMap(res => {
+            if (!res) return throwError(() => err);
+            return next(withToken(req, res.accessToken));
+          }),
           catchError(() => {
             auth.logout();
             return throwError(() => err);
