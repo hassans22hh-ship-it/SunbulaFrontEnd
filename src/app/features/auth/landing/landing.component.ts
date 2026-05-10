@@ -133,13 +133,13 @@ export class LandingComponent implements OnInit, OnDestroy, AfterViewInit {
     {
       name: 'Yara',
       role: 'SWE',
-      image: 'assets/p3.png',
+      image: 'assets/p5.jpeg',
       linkedin: 'https://www.linkedin.com/in/yara-khatab-796379275/',
     },
     {
       name: 'Farida',
       role: 'SWE',
-      image: 'assets/p3.png',
+      image: 'assets/p4.png',
       linkedin: 'https://www.linkedin.com/in/farida-sherief187/',
     },
   ];
