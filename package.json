@@ -6,7 +6,8 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "test": "ng test"
+    "test": "ng test",
+    "deploy": "npx vercel --prod --yes"
   },
   "private": true,
   "packageManager": "npm@11.9.0",
@@ -41,6 +42,7 @@
     "@angular/compiler-cli": "^21.0.0",
     "@tailwindcss/vite": "^4.0.0",
     "tailwindcss": "^4.0.0",
-    "typescript": "~5.9.2"
+    "typescript": "~5.9.2",
+    "vercel": "^53.3.2"
   }
 }
