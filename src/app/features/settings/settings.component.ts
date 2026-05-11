@@ -30,7 +30,7 @@ export class SettingsComponent implements OnInit {
   readonly profileForm = this.fb.nonNullable.group({
     firstName: [this.auth.user()?.firstName ?? '', Validators.required],
     lastName:  [this.auth.user()?.lastName ?? '', Validators.required],
-    phone:     [this.auth.user()?.phone ?? ''],
+    phone:     [this.auth.user()?.phone ?? '', [Validators.required, Validators.pattern(/^01[0125][0-9]{8}$/)]],
   });
 
   readonly userSettingsForm = this.fb.nonNullable.group({

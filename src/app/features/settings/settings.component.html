@@ -15,7 +15,18 @@
       </div>
       <div class="form-group"><label class="form-label">Email</label><input class="input-field"
           [value]="auth.user()?.email" disabled></div>
-      <div class="form-group"><label class="form-label">Phone</label><input formControlName="phone" class="input-field">
+      <div class="form-group">
+        <label class="form-label">Phone</label>
+        <input formControlName="phone" class="input-field">
+        @if (profileForm.controls.phone.touched && profileForm.controls.phone.invalid) {
+          <div class="text-xs text-red-500 mt-1">
+            @if (profileForm.controls.phone.errors?.['required']) {
+              Phone number is required
+            } @else if (profileForm.controls.phone.errors?.['pattern']) {
+              Please enter a valid Egypt phone number (e.g., 01012345678)
+            }
+          </div>
+        }
       </div>
       <sb-button type="submit" [loading]="saving()" [disabled]="profileForm.invalid">Save Changes</sb-button>
     </form>
