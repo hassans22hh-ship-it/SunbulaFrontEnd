@@ -75,6 +75,7 @@ export class TasksApiService {
   archive(id: string): Observable<void> { return this.http.patch<void>(`${this.BASE}/${id}/archive`, null); }
   unarchive(id: string): Observable<void> { return this.http.patch<void>(`${this.BASE}/${id}/unarchive`, null); }
   complete(id: string): Observable<void> { return this.http.patch<void>(`${this.BASE}/${id}/complete`, null); }
+  activate(id: string): Observable<void> { return this.http.patch<void>(`${this.BASE}/${id}/activate`, null); }
 
   delete(id: string): Observable<void> { return this.http.delete<void>(`${this.BASE}/${id}`); }
 

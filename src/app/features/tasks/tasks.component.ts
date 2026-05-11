@@ -218,15 +218,7 @@ export class TasksComponent implements OnInit {
   }
 
   markActive(task: TaskDto): void {
-    this.store.update(task.id, {
-      title: task.title,
-      emoji: task.emoji ?? '',
-      color: task.color,
-      behaviorType: task.behaviorType,
-      folderId: task.folderId ?? undefined,
-      categoryIds: task.categories?.map(c => c.id) ?? [],
-      status: 0 // TaskStatus.Active
-    } as any);
+    this.store.activate(task.id);
   }
 
   selectFolder(folderId: string | undefined): void {

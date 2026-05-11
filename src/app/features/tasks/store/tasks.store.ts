@@ -256,6 +256,17 @@ export const TasksStore = signalStore(
         toast.error((e as { message: string }).message);
       }
     },
+    async activate(id: string): Promise<void> {
+      try {
+        await firstValueFrom(api.activate(id));
+        // Re-fetch task to get updated state
+        const updated = await firstValueFrom(api.getById(id));
+        patchState(store, { tasks: store.tasks().map(t => t.id === id ? updated : t) });
+        toast.success('Task reactivated ✅');
+      } catch (e: unknown) {
+        toast.error((e as { message: string }).message);
+      }
+    },
     async restore(id: string): Promise<void> {
       try {
         await firstValueFrom(api.unarchive(id));
