@@ -282,10 +282,12 @@
 }
 
 .quick-task {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 1rem;
-  padding: 0.25rem;
+  padding: 0.75rem 1rem;
+  min-width: 0;
   
   &-color { 
     width: 4px; 
@@ -296,24 +298,39 @@
   }
   
   &-info { 
-    flex: 1; 
     display: flex; 
-    align-items: center; 
-    gap: 0.5rem; 
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+  }
+
+  &-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
   }
   
   &-title { 
     font-weight: 700; 
     font-size: 0.9375rem; 
     color: var(--color-text); 
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  sb-behavior-badge {
+    flex-shrink: 0;
   }
 }
 
 .quick-task-badges {
   display: flex;
   flex-wrap: wrap;
+  justify-content: flex-start;
   gap: 0.375rem;
-  margin-left: auto;
+  min-width: 0;
 }
 
 .quick-task-badge {

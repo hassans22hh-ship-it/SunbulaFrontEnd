@@ -23,6 +23,7 @@
   flex: 1;
   overflow-y: auto;
   padding: 1.5rem;
+  position: relative; // Establish stacking context
 }
 
 @media (max-width: 768px) {

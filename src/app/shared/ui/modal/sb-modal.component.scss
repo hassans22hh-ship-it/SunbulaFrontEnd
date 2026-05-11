@@ -6,13 +6,14 @@
 .sb-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0) !important;
+  background: rgba(0, 0, 0, 0);
   display: flex;
-  align-items: center;
+  align-items: flex-start; // Start from top
   justify-content: center;
-  z-index: 1000;
-  padding: 1rem;
-  isolation: isolate;
+  z-index: 10000; // I must insist on a higher z-index to be above topbar (40)
+  padding: 80px 1rem 2rem; // 80px offset for the 64px header
+  overflow-y: auto; // Allow backdrop itself to scroll if content is too tall
+  backdrop-filter: blur(4px);
 }
 
 .sb-modal-content {

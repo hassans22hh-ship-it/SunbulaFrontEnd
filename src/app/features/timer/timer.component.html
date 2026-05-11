@@ -73,22 +73,24 @@
         <div class="quick-task">
           <span class="quick-task-color" [style.background]="task.color"></span>
           <div class="quick-task-info">
-            @if (task.emoji) { <span class="text-xl">{{ task.emoji }}</span> }
-            <span class="quick-task-title">{{ task.title }}</span>
-          </div>
-          <div class="quick-task-badges">
-            @if (folder) {
-            <span class="quick-task-badge">
-              <span class="badge-dot" [style.backgroundColor]="folder.color"></span>
-              {{ folder.name }}
-            </span>
-            }
-            @for (cat of task.categories; track cat.id) {
-            <span class="quick-task-badge category-badge">
-              <span class="badge-dot" [style.backgroundColor]="cat.color"></span>
-              {{ cat.name }}
-            </span>
-            }
+            <div class="quick-task-header">
+              @if (task.emoji) { <span class="text-xl">{{ task.emoji }}</span> }
+              <span class="quick-task-title">{{ task.title }}</span>
+            </div>
+            <div class="quick-task-badges">
+              @if (folder) {
+              <span class="quick-task-badge">
+                <span class="badge-dot" [style.backgroundColor]="folder.color"></span>
+                {{ folder.name }}
+              </span>
+              }
+              @for (cat of task.categories; track cat.id) {
+              <span class="quick-task-badge category-badge">
+                <span class="badge-dot" [style.backgroundColor]="cat.color"></span>
+                {{ cat.name }}
+              </span>
+              }
+            </div>
           </div>
           <sb-behavior-badge [behavior]="task.behaviorType" />
           @if (isTracking) {
