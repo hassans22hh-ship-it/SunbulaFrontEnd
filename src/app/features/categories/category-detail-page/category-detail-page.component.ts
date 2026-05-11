@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
 import { CategoriesStore } from '../../tasks/store/categories.store';
+import { TasksStore } from '../../tasks/store/tasks.store';
 import { TasksApiService } from '../../tasks/services/tasks.api.service';
 import { TimeSessionApiService } from '../../timer/services/time-session.api.service';
 import { TaskDto, CategoryDto } from '@shared/models/task.models';
