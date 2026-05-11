@@ -315,6 +315,7 @@
         @if (!selectedCategoryId() || (task.categories && task.categories.some(c => c.id === selectedCategoryId()))) {
         <sb-task-card [task]="task" (cardClicked)="viewTaskDetails($event.id)" (editClicked)="openEdit(task)"
           (duplicateClicked)="store.duplicate(task.id)" (completeClicked)="store.complete(task.id)"
+          (activateClicked)="markActive(task)"
           (archiveClicked)="store.archive(task.id)" (unarchiveClicked)="store.restore(task.id)"
           (deleteClicked)="confirmDelete(task)">
           @if (folder) {

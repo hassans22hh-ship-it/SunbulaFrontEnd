@@ -46,6 +46,7 @@ import { SbEmptyStateComponent } from '@shared/ui/empty-state/sb-empty-state.com
 
 export class CategoryDetailPageComponent {
   protected readonly categoriesStore = inject(CategoriesStore);
+  protected readonly tasksStore = inject(TasksStore);
   private readonly tasksApi = inject(TasksApiService);
 
   private readonly timeSessionApi = inject(TimeSessionApiService);
@@ -154,6 +155,14 @@ export class CategoryDetailPageComponent {
     const id = this.categoryId();
     if (id) await this.categoriesStore.remove(id);
     this.router.navigate(['/tasks']);
+  }
+
+  openEditTask(task: TaskDto): void {
+    this.router.navigate(['/tasks', task.id]);
+  }
+
+  confirmDeleteTask(task: TaskDto): void {
+    this.tasksStore.remove(task.id);
   }
 }
 

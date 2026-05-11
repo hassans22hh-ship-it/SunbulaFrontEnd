@@ -82,6 +82,13 @@
               <sb-task-card 
                 [task]="task" 
                 (cardClicked)="viewTaskDetails($event.id)"
+                (editClicked)="openEditTask(task)"
+                (duplicateClicked)="tasksStore.duplicate(task.id)"
+                (completeClicked)="tasksStore.complete(task.id)"
+                (activateClicked)="tasksStore.activate(task.id)"
+                (archiveClicked)="tasksStore.archive(task.id)"
+                (unarchiveClicked)="tasksStore.restore(task.id)"
+                (deleteClicked)="confirmDeleteTask(task)"
               />
             }
           </div>

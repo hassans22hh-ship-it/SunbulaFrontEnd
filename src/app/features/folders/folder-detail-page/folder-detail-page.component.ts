@@ -39,7 +39,7 @@ import { TaskCardComponent } from '../../tasks/components/task-card/task-card.co
 })
 export class FolderDetailPageComponent {
   private readonly foldersStore = inject(FoldersStore);
-  private readonly tasksStore = inject(TasksStore);
+  protected readonly tasksStore = inject(TasksStore);
   private readonly foldersApi = inject(FoldersApiService);
   private readonly timeSessionApi = inject(TimeSessionApiService);
   private readonly router = inject(Router);
@@ -137,5 +137,15 @@ export class FolderDetailPageComponent {
 
   viewTaskDetails(taskId: string): void {
     this.router.navigate(['/tasks', taskId]);
+  }
+
+  openEditTask(task: TaskDto): void {
+    // Redirect to tasks page with editing state? 
+    // Or just go to details page where they can edit?
+    this.router.navigate(['/tasks', task.id]);
+  }
+
+  confirmDeleteTask(task: TaskDto): void {
+    this.tasksStore.remove(task.id);
   }
 }

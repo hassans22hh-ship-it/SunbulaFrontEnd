@@ -35,7 +35,7 @@
             <sb-task-card
               [task]="task"
               (cardClicked)="viewTask($event.id)"
-              (menuClicked)="onRestore(task.id)" />
+              (unarchiveClicked)="onRestore(task.id)" />
           }
         </div>
 
