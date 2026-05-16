@@ -1,5 +1,6 @@
 import { TimeSessionDto } from '@shared/models/timer.models';
 import { BehaviorCategory, BEHAVIOR_COIN_RATES } from '@shared/models/enums';
+import { roundAwayFromZero } from './coins.util';
 
 /**
  * Extracts the duration in seconds from a session DTO,
@@ -27,6 +28,9 @@ export function getSessionDuration(s: TimeSessionDto): number {
 /**
  * Extracts the coins earned from a session DTO,
  * with fallback calculation if the backend didn't populate it.
+ * Fallback mirrors backend Duration.CalculateCoins:
+ *   coins = (totalMinutes / 60.0) * coinFactor
+ *   return (int)Math.Round(coins, MidpointRounding.AwayFromZero)
  */
 export function getSessionCoins(s: TimeSessionDto): number {
   const coins = s.coinsEarned ?? s.coins ?? 0;
@@ -42,7 +46,7 @@ export function getSessionCoins(s: TimeSessionDto): number {
   if (behavior === undefined || behavior === null) return 0;
 
   const rate = BEHAVIOR_COIN_RATES[behavior as BehaviorCategory] ?? 0;
-  return (dur / 3600) * rate;
+  return roundAwayFromZero((dur / 3600) * rate);
 }
 
 /**

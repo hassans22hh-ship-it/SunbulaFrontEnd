@@ -23,6 +23,7 @@ import { DailyTransactionApiService } from './services/daily-transaction.api.ser
 import { AuthService } from '@core/auth/auth.service';
 import { DailySummaryDto, TimeSessionDto, CreateManualSessionDto } from '@shared/models/timer.models';
 import { getSessionBehavior, getSessionCoins, getSessionDuration } from '@shared/utils/session.util';
+import { roundAwayFromZero } from '@shared/utils/coins.util';
 @Component({
   selector: 'sb-timer',
   standalone: true,
@@ -115,7 +116,7 @@ export class TimerComponent implements OnInit {
   readonly addCoinPreview = computed(() => {
     const durationHours = this.addDuration() / 3600;
     const rate = this.getBehaviorCoinRate(this.addBehaviorType());
-    return durationHours * rate;
+    return roundAwayFromZero(durationHours * rate);
   });
 
   private getBehaviorCoinRate(type: number): number {

@@ -14,7 +14,7 @@
       <div class="seed-scroll">
         @for (seed of store.seedInventory(); track seed.id) {
           <div class="seed-card">
-            <div class="seed-icon">{{ getStageMeta(seed).emoji }}</div>
+            <div class="seed-icon"><i [class]="getStageMeta(seed).icon"></i></div>
             <div class="seed-info">
               <div class="seed-name" [title]="seed.plantName">{{ seed.plantName }}</div>
               <div class="seed-level">{{ getLevelMeta(seed).label }}</div>
@@ -35,7 +35,7 @@
       <sb-empty-state
         title="Empty Garden"
         message="You haven't planted anything yet. Buy seeds from the store or plant from your inventory."
-        icon="🪴" />
+        icon="fa-solid fa-seedling" />
     } @else {
       <div class="garden-grid">
         @for (plant of store.plantedPlants(); track plant.id) {
@@ -45,7 +45,7 @@
               @if (plant.plantImageUrl) {
                 <img [src]="plant.plantImageUrl" [alt]="plant.plantName" class="plot-img" />
               } @else {
-                <span class="plot-emoji">{{ getStageMeta(plant).emoji }}</span>
+                <span class="plot-emoji"><i [class]="getStageMeta(plant).icon"></i></span>
               }
             </div>
             <div class="plot-info">

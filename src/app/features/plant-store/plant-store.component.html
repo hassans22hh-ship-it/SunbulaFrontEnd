@@ -63,7 +63,7 @@
     <div class="store-card">
       <!-- Level Badge -->
       <div class="store-card__level">
-        <sb-badge [variant]="getLevelVariant(plant.level)">{{ levelMeta[plant.level]?.emoji }} {{
+        <sb-badge [variant]="getLevelVariant(plant.level)"><i [class]="levelMeta[plant.level]?.icon"></i> {{
           levelMeta[plant.level]?.label ?? 'Unknown' }}</sb-badge>
       </div>
 
@@ -72,7 +72,7 @@
         @if (plant.imageUrl) {
         <img [src]="plant.imageUrl" [alt]="plant.name" />
         } @else {
-        <div class="store-card__emoji">🪴</div>
+        <div class="store-card__emoji"><i class="fa-solid fa-seedling"></i></div>
         }
       </div>
 
@@ -102,14 +102,14 @@
   <!-- ═══════════ GARDEN TAB ═══════════ -->
   @if (tab() === 'garden') {
   @if (store.garden().length === 0) {
-  <sb-empty-state icon="🪴" heading="Empty garden" message="Buy a plant from the store to get started!" />
+  <sb-empty-state icon="fa-solid fa-seedling" heading="Empty garden" message="Buy a plant from the store to get started!" />
   } @else {
 
   <!-- Summary Dashboard -->
   @if (store.summary(); as summary) {
   <div class="summary-row">
     <div class="summary-card summary-card--plants">
-      <div class="summary-card__icon">🌿</div>
+      <div class="summary-card__icon"><i class="fa-solid fa-leaf"></i></div>
       <div class="summary-card__content">
         <span class="summary-card__label">Total Plants</span>
         <span class="summary-card__value">{{ summary.totalPlants }}</span>
@@ -126,7 +126,7 @@
 
     @if (summary.mostExpensive; as mvp) {
     <div class="summary-card summary-card--mvp">
-      <div class="summary-card__crown">👑</div>
+      <div class="summary-card__crown"><i class="fa-solid fa-crown"></i></div>
       <div class="summary-card__content">
         <span class="summary-card__label">Most Valuable</span>
         <span class="summary-card__value summary-card__value--name">{{ mvp.plantName }}</span>
@@ -146,14 +146,14 @@
         @if (plant.plantImageUrl) {
         <img [src]="plant.plantImageUrl" [alt]="plant.plantName" />
         } @else {
-        <div class="garden-card__emoji">{{ getStageEmoji(plant.currentStage) }}</div>
+        <div class="garden-card__emoji"><i [class]="getStageIcon(plant.currentStage)"></i></div>
         }
       </div>
 
       <!-- Info -->
       <h3 class="garden-card__name">{{ plant.plantName }}</h3>
       <div class="garden-card__stage">
-        <sb-badge [variant]="getStageVariant(plant.currentStage)">{{ getStageEmoji(plant.currentStage) }} {{
+        <sb-badge [variant]="getStageVariant(plant.currentStage)"><i [class]="getStageIcon(plant.currentStage)"></i> {{
           getStageLabel(plant.currentStage) }}</sb-badge>
       </div>
 

@@ -53,9 +53,9 @@ export class PlantStoreComponent implements OnInit {
     return this.stageMeta[s]?.label ?? stage.toString();
   }
 
-  getStageEmoji(stage: number | string): string {
+  getStageIcon(stage: number | string): string {
     const s = stage as GrowthStage;
-    return this.stageMeta[s]?.emoji ?? '🌱';
+    return this.stageMeta[s]?.icon ?? 'fa-solid fa-seedling';
   }
 
   onLevelChange(level: PlantLevel | null): void {

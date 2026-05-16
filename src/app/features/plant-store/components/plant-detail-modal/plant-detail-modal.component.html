@@ -8,7 +8,7 @@
           @if (plant()!.imageUrl) {
             <img [src]="plant()!.imageUrl" [alt]="plant()!.name" class="plant-hero__img" />
           } @else {
-            <span class="plant-hero__emoji">{{ stageMeta.emoji }}</span>
+            <span class="plant-hero__emoji"><i [class]="stageMeta.icon"></i></span>
           }
           <div class="plant-hero__level"
                [style.background]="'var(--color-' + levelMeta.variant + ')'"

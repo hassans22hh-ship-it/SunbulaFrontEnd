@@ -74,17 +74,17 @@ export enum GrowthStage {
 }
 
 export const GROWTH_STAGE_LABELS: Record<GrowthStage, string> = {
-  [GrowthStage.Seed]:     '🌱 Seed',
-  [GrowthStage.Seedling]: '🌿 Seedling',
-  [GrowthStage.Small]:    '🪴 Small Plant',
-  [GrowthStage.Large]:    '🌳 Full Grown',
+  [GrowthStage.Seed]:     'Seed',
+  [GrowthStage.Seedling]: 'Seedling',
+  [GrowthStage.Small]:    'Small Plant',
+  [GrowthStage.Large]:    'Full Grown',
 };
 
-export const GROWTH_STAGE_META: Record<GrowthStage, { label: string; emoji: string; variant: 'default' | 'success' | 'warning' | 'info' }> = {
-  [GrowthStage.Seed]:     { label: 'Seed',        emoji: '🌱', variant: 'default' },
-  [GrowthStage.Seedling]: { label: 'Seedling',    emoji: '🌿', variant: 'info'    },
-  [GrowthStage.Small]:    { label: 'Small Plant', emoji: '🪴', variant: 'warning' },
-  [GrowthStage.Large]:    { label: 'Full Grown',  emoji: '🌳', variant: 'success' },
+export const GROWTH_STAGE_META: Record<GrowthStage, { label: string; icon: string; variant: 'default' | 'success' | 'warning' | 'info' }> = {
+  [GrowthStage.Seed]:     { label: 'Seed',        icon: 'fa-solid fa-seedling', variant: 'default' },
+  [GrowthStage.Seedling]: { label: 'Seedling',    icon: 'fa-solid fa-leaf',     variant: 'info'    },
+  [GrowthStage.Small]:    { label: 'Small Plant', icon: 'fa-solid fa-spa',      variant: 'warning' },
+  [GrowthStage.Large]:    { label: 'Full Grown',  icon: 'fa-solid fa-tree',     variant: 'success' },
 };
 
 // ─── Plant Level ──────────────────────────────────────────────────────────────
@@ -96,12 +96,12 @@ export enum PlantLevel {
 }
 
 export const PLANT_LEVEL_META: Record<PlantLevel, {
-  label: string; emoji: string; priceRange: string; variant: 'default' | 'success' | 'warning' | 'info' | 'danger';
+  label: string; icon: string; priceRange: string; variant: 'default' | 'success' | 'warning' | 'info' | 'danger';
 }> = {
-  [PlantLevel.Beginner]:     { label: 'Beginner',     emoji: '🌱', priceRange: '20–50',     variant: 'default' },
-  [PlantLevel.Intermediate]: { label: 'Intermediate', emoji: '🌿', priceRange: '50–300',    variant: 'info'    },
-  [PlantLevel.Advanced]:     { label: 'Advanced',     emoji: '🌳', priceRange: '1000–2000', variant: 'warning' },
-  [PlantLevel.Rare]:         { label: 'Rare',         emoji: '🏆', priceRange: '5000+',     variant: 'danger' },
+  [PlantLevel.Beginner]:     { label: 'Beginner',     icon: 'fa-solid fa-seedling', priceRange: '20–50',     variant: 'default' },
+  [PlantLevel.Intermediate]: { label: 'Intermediate', icon: 'fa-solid fa-leaf',     priceRange: '50–300',    variant: 'info'    },
+  [PlantLevel.Advanced]:     { label: 'Advanced',     icon: 'fa-solid fa-tree',     priceRange: '1000–2000', variant: 'warning' },
+  [PlantLevel.Rare]:         { label: 'Rare',         icon: 'fa-solid fa-trophy',   priceRange: '5000+',     variant: 'danger' },
 };
 
 // ─── Debt Type ────────────────────────────────────────────────────────────────
