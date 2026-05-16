@@ -36,7 +36,7 @@ export function getSessionCoins(s: TimeSessionDto): number {
 
   // If the backend provided a non-zero value, use it. 
   // Otherwise, we calculate based on behavior.
-  if (coins > 0) return coins;
+  if (coins !== 0) return coins;
 
   const behavior = s.taskBehavior ?? s.task?.behaviorType ?? (s as any).behaviorType;
   if (behavior === undefined || behavior === null) return 0;

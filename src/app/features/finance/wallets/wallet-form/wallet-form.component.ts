@@ -30,7 +30,7 @@ export class WalletFormComponent implements OnInit {
     name: ['', Validators.required],
     type: [WalletType.Cash, Validators.required],
     balance: [0],
-    currency: ['EGP'],
+    currency: [{ value: 'EGP', disabled: true }],
   });
 
   ngOnInit(): void {

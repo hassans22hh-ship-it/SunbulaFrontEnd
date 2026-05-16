@@ -119,12 +119,12 @@ export class TimerComponent implements OnInit {
   });
 
   private getBehaviorCoinRate(type: number): number {
-    // Values match backend BehaviorType enum: Positive=1, Neutral=2, Rest=3, Negative=4
+    // Values match backend Duration.CalculateCoins coinFactor exactly
     switch (Number(type)) {
-      case 1: return 2;  // Positive
-      case 2: return 1;  // Neutral
-      case 3: return 1;  // Rest
-      case 4: return -1; // Negative
+      case 1: return 1.0;   // Positive  — 1 coin per hour
+      case 2: return 0.5;   // Neutral   — 0.5 coins per hour
+      case 3: return 0.25;  // Rest      — 0.25 coins per hour
+      case 4: return -1.0;  // Negative  — -1 coin per hour
       default: return 0;
     }
   }

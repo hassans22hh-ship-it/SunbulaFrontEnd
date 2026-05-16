@@ -9,10 +9,10 @@ export enum BehaviorCategory {
 }
 
 export const BEHAVIOR_COIN_RATES: Record<BehaviorCategory, number> = {
-  [BehaviorCategory.Positive]:  2,
-  [BehaviorCategory.Neutral]:   1,
-  [BehaviorCategory.Rest]:      1,
-  [BehaviorCategory.Negative]: -1,
+  [BehaviorCategory.Positive]:  1.0,
+  [BehaviorCategory.Neutral]:   0.5,
+  [BehaviorCategory.Rest]:      0.25,
+  [BehaviorCategory.Negative]: -1.0,
 };
 
 export const BEHAVIOR_META: Record<BehaviorCategory, {
