@@ -5,7 +5,10 @@
 
 /* ══ ASIDE FILTER SIDEBAR — light mode fix ══ */
 .aside-filters {
-  background: var(--color-surface);
+  backgroud: #ffffff;
+  [data-theme="dark"] & {
+    background: var(--color-surface-2);
+  }
 }
 
 .page-header {
