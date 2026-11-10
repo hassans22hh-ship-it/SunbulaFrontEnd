@@ -3,6 +3,11 @@
   margin: 0 auto;
 }
 
+/* ══ ASIDE FILTER SIDEBAR — light mode fix ══ */
+.aside-filters {
+  background: var(--color-surface);
+}
+
 .page-header {
   display: flex;
   align-items: center;
