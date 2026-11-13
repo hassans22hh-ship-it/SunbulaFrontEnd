@@ -10,7 +10,7 @@
     <button class="filter-chip"
             [class.filter-chip--active]="selected() === l.value"
             (click)="select(l.value)">
-      <span class="chip-emoji">{{ l.meta.emoji }}</span>
+      <span class="chip-emoji"><i [class]="l.meta.icon"></i></span>
       {{ l.meta.label }}
     </button>
   }

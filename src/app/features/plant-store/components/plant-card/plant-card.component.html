@@ -14,7 +14,7 @@
       @if (plant().imageUrl) {
         <img [src]="plant().imageUrl" [alt]="plant().name" class="plant-img" />
       } @else {
-        <span class="plant-emoji">{{ stageMeta.emoji }}</span>
+        <span class="plant-emoji"><i [class]="stageMeta.icon"></i></span>
       }
     </div>
 
