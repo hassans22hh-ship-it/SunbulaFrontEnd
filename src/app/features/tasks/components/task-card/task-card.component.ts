@@ -4,6 +4,7 @@ import { RelativeDatePipe } from '@shared/pipes/relative-date.pipe';
 import { DurationPipe } from '@shared/pipes/duration.pipe';
 import { TimerStore } from '@features/timer/store/timer.store';
 import { SbBehaviorBadgeComponent } from '@shared/ui/behavior-badge/sb-behavior-badge.component';
+import { getAccessibleCardTheme } from '@shared/utils/color.util';
 
 @Component({
   selector: 'sb-task-card',
@@ -27,6 +28,8 @@ export class TaskCardComponent {
   unarchiveClicked = output<void>();
 
   showMenu = signal(false);
+
+  readonly theme = computed(() => getAccessibleCardTheme(this.task().color));
 
   readonly isActive = computed(() => this.timer.activeSessions().some((s: any) => s.taskId === this.task().id));
   
