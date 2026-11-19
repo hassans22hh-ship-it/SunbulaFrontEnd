@@ -317,7 +317,7 @@
           (duplicateClicked)="store.duplicate(task.id)" (completeClicked)="store.complete(task.id)"
           (activateClicked)="markActive(task)"
           (archiveClicked)="store.archive(task.id)" (unarchiveClicked)="store.restore(task.id)"
-          (deleteClicked)="confirmDelete(task)">
+          (deleteClicked)="confirmDelete(task)" [style.background-color]="task.color">
           @if (folder) {
           <div badge
             class="flex items-center gap-1.5 px-2 py-0.5 bg-surface-2 rounded-md text-[9px] font-bold uppercase tracking-wider text-text-muted border border-border/20 shadow-sm">
