@@ -1,4 +1,5 @@
-<div class="group bg-surface rounded-2xl shadow-sm border border-border/50 overflow-hidden hover:shadow-md hover:border-primary-light/50 transition-all duration-300 flex flex-col h-full"
+<div class="group rounded-2xl shadow-sm border border-border/50 overflow-hidden hover:shadow-md hover:border-primary-light/50 transition-all duration-300 flex flex-col h-full"
+     [style.backgroundColor]="task().color || 'var(--color-surface)'"
      (click)="cardClicked.emit(task())">
   
   <!-- Colored accent bar based on behavior -->
